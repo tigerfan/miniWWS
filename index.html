@@ -8,6 +8,35 @@
 </head>
 <body>
     <div id="game-container">
+        <!-- 计分板 -->
+        <div id="scoreboard">
+            <div class="team-score player-team">
+                <span class="team-name">友军</span>
+                <span class="team-points" id="player-score">0</span>
+                <span class="team-caps" id="player-caps">0</span>
+            </div>
+            <div class="timer-container">
+                <div class="game-timer" id="game-timer">15:00</div>
+                <div class="points-to-win">先达到1000分获胜</div>
+            </div>
+            <div class="team-score enemy-team">
+                <span class="team-caps" id="enemy-caps">0</span>
+                <span class="team-points" id="enemy-score">0</span>
+                <span class="team-name">敌军</span>
+            </div>
+        </div>
+        <!-- 友军舰队面板 -->
+        <div id="ally-panel" class="fleet-panel ally-panel" style="display: none;">
+            <div class="panel-header">友军舰队</div>
+            <div id="ally-ships-list" class="ships-list"></div>
+        </div>
+
+        <!-- 敌军舰队面板 -->
+        <div id="enemy-panel" class="fleet-panel enemy-panel" style="display: none;">
+            <div class="panel-header">敌军舰队</div>
+            <div id="enemy-ships-list" class="ships-list"></div>
+        </div>
+
         <canvas id="gameCanvas"></canvas>
         <!-- HUD -->
         <div id="hud">
@@ -29,17 +58,35 @@
         <!-- 开始界面 -->
         <div id="start-screen">
             <h1>⚓ 海战模拟 WWS</h1>
-            <p>简化版战舰世界</p>
-            <div class="ship-select">
-                <h3>选择舰种</h3>
-                <button class="ship-btn selected" data-type="cruiser">巡洋舰</button>
-                <button class="ship-btn" data-type="battleship">战列舰</button>
-                <button class="ship-btn" data-type="destroyer">驱逐舰</button>
+            <p>还原战舰世界经典海战</p>
+            
+            <div class="selection-container">
+                <div class="ship-select">
+                    <h3>选择舰种</h3>
+                    <div class="btn-group">
+                        <button class="ship-btn selected" data-type="cruiser">巡洋舰</button>
+                        <button class="ship-btn" data-type="battleship">战列舰</button>
+                        <button class="ship-btn" data-type="destroyer">驱逐舰</button>
+                    </div>
+                </div>
+                
+                <div class="map-select">
+                    <h3>选择战场</h3>
+                    <div class="btn-group">
+                        <button class="map-btn selected" data-map="islands" title="岛屿密布的热带海域">海岛</button>
+                        <button class="map-btn" data-map="polar" title="冰川环绕的寒冷海域">北极光</button>
+                        <button class="map-btn" data-map="sleeping_giant" title="火山岛屿群">沉睡的巨人</button>
+                        <button class="map-btn" data-map="fire_archipelago" title="活跃的火山群岛">火焰群岛</button>
+                        <button class="map-btn" data-map="desert_oasis" title="沙漠中的绿洲海域">荒漠之泪</button>
+                    </div>
+                    <p class="map-desc">岛屿密布的热带海域，适合伏击和近战</p>
+                </div>
             </div>
+            
             <button id="start-btn">开始战斗</button>
             <div class="controls-hint">
                 <p>WASD - 移动 | 鼠标 - 瞄准 | 左键 - 主炮 | 右键 - 鱼雷</p>
-                <p>空格 - 紧急刹车 | R - 维修</p>
+                <p>空格 - 紧急刹车 | R - 维修 | M - 查看小地图</p>
             </div>
         </div>
         <!-- 结束界面 -->

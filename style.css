@@ -16,6 +16,80 @@ body {
     height: 100vh;
 }
 
+/* 计分板 */
+#scoreboard {
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none; /* 默认隐藏，游戏开始时显示 */
+    align-items: center;
+    gap: 30px;
+    background: rgba(0, 10, 30, 0.85);
+    border: 1px solid rgba(100, 180, 255, 0.4);
+    border-radius: 12px;
+    padding: 12px 30px;
+    z-index: 20;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.team-score {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: bold;
+}
+
+.player-team {
+    color: #44aaff;
+}
+
+.enemy-team {
+    color: #ff6666;
+}
+
+.team-name {
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.team-points {
+    font-size: 32px;
+    min-width: 60px;
+    text-align: center;
+    text-shadow: 0 0 10px currentColor;
+}
+
+.team-caps {
+    font-size: 14px;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: #fff;
+}
+
+.timer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.game-timer {
+    font-size: 24px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+    font-family: 'Courier New', monospace;
+}
+
+.points-to-win {
+    font-size: 11px;
+    color: #7ab0e0;
+}
+
 #gameCanvas {
     display: block;
     width: 100%;
@@ -95,14 +169,14 @@ body {
 /* Minimap */
 #minimap-container {
     position: absolute;
-    bottom: 70px;
+    bottom: 20px;
     right: 15px;
     width: 184px;
     height: 184px;
     border: 2px solid rgba(100, 180, 255, 0.4);
     border-radius: 6px;
     background: rgba(0, 15, 40, 0.8);
-    z-index: 10;
+    z-index: 25;
     pointer-events: none;
 }
 
@@ -169,15 +243,61 @@ body {
     color: #7ab0e0;
 }
 
-.ship-select {
+.selection-container {
+    display: flex;
+    gap: 40px;
     margin-bottom: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.ship-select, .map-select {
     text-align: center;
 }
 
-.ship-select h3 {
+.ship-select h3, .map-select h3 {
     margin-bottom: 12px;
     font-size: 16px;
     color: #7ab0e0;
+}
+
+.btn-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.map-btn {
+    padding: 10px 20px;
+    margin: 0 4px;
+    border: 2px solid rgba(100, 180, 255, 0.3);
+    background: rgba(20, 50, 90, 0.6);
+    color: #c0deff;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.map-btn:hover {
+    background: rgba(30, 70, 130, 0.8);
+    border-color: rgba(100, 180, 255, 0.6);
+}
+
+.map-btn.selected {
+    background: rgba(40, 100, 180, 0.7);
+    border-color: #4cacff;
+    color: #fff;
+    box-shadow: 0 0 12px rgba(76, 172, 255, 0.3);
+}
+
+.map-desc {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #7ab0e0;
+    font-style: italic;
+    min-height: 20px;
 }
 
 .ship-btn {
@@ -260,6 +380,184 @@ body {
 
 .hidden {
     display: none !important;
+}
+
+/* 舰队状态面板 */
+.fleet-panel {
+    position: absolute;
+    top: 80px;
+    width: 150px;
+    max-height: none;
+    height: auto;
+    background: rgba(0, 10, 30, 0.6);
+    border: 1px solid rgba(100, 180, 255, 0.2);
+    border-radius: 8px;
+    padding: 8px;
+    z-index: 15;
+    backdrop-filter: blur(4px);
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+}
+
+.ally-panel {
+    left: 10px;
+    border-color: rgba(68, 170, 255, 0.3);
+}
+
+.enemy-panel {
+    right: 10px;
+    border-color: rgba(255, 68, 68, 0.3);
+}
+
+.panel-header {
+    font-size: 14px;
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ally-panel .panel-header {
+    color: #44aaff;
+}
+
+.enemy-panel .panel-header {
+    color: #ff6666;
+}
+
+.ships-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: visible;
+    flex: none;
+}
+
+/* 自定义滚动条 */
+.ships-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.ships-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.ships-list::-webkit-scrollbar-thumb {
+    background: rgba(100, 180, 255, 0.3);
+    border-radius: 2px;
+}
+
+.ship-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.ship-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.ally-panel .ship-item.active {
+    border-color: #44aaff;
+    background: rgba(68, 170, 255, 0.15);
+}
+
+.enemy-panel .ship-item {
+    cursor: default;
+}
+
+.ship-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.ally-panel .ship-icon {
+    background: rgba(68, 170, 255, 0.2);
+    color: #44aaff;
+}
+
+.enemy-panel .ship-icon {
+    background: rgba(255, 68, 68, 0.2);
+    color: #ff6666;
+}
+
+.ship-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ship-name {
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ship-status {
+    font-size: 10px;
+    color: #7ab0e0;
+}
+
+.ship-hp-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 2px;
+    margin-top: 4px;
+    overflow: hidden;
+}
+
+.ship-hp-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s, background 0.3s;
+}
+
+.ally-panel .ship-hp-fill {
+    background: linear-gradient(90deg, #2ecc40, #4cff72);
+}
+
+.ally-panel .ship-hp-fill.low {
+    background: linear-gradient(90deg, #ffaa00, #ffcc44);
+}
+
+.ally-panel .ship-hp-fill.critical {
+    background: linear-gradient(90deg, #ff3333, #ff6644);
+}
+
+.enemy-panel .ship-hp-fill {
+    background: linear-gradient(90deg, #ff6666, #ff8888);
+}
+
+.ship-item.destroyed {
+    opacity: 0.4;
+}
+
+.ship-item.destroyed .ship-icon {
+    background: rgba(100, 100, 100, 0.2);
+    color: #888;
+}
+
+.ship-item.destroyed .ship-name {
+    color: #888;
+    text-decoration: line-through;
 }
 
 /* Damage flash */
