@@ -507,6 +507,44 @@ class Renderer3D {
                 );
                 group.add(tree);
             }
+
+            // 岩石装饰
+            const rockCount = Math.floor(r / 150);
+            for (let i = 0; i < rockCount; i++) {
+                const rockGeo = new THREE.DodecahedronGeometry(randRange(5, 12), 0);
+                const rockMat = new THREE.MeshLambertMaterial({ color: 0x666666 });
+                const rock = new THREE.Mesh(rockGeo, rockMat);
+                const angle = Math.random() * Math.PI * 2;
+                const rockDist = Math.random() * r * 0.7;
+                rock.position.set(
+                    island.x + Math.cos(angle) * rockDist,
+                    randRange(5, 10),
+                    island.y + Math.sin(angle) * rockDist
+                );
+                rock.rotation.set(
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI,
+                    Math.random() * Math.PI
+                );
+                group.add(rock);
+            }
+
+            // 花朵装饰
+            const flowerCount = Math.floor(r / 120);
+            for (let i = 0; i < flowerCount; i++) {
+                const flowerGeo = new THREE.SphereGeometry(randRange(1.5, 3), 8, 6);
+                const flowerColors = [0xff4444, 0xffff44, 0x44ff44, 0x4444ff, 0xff44ff];
+                const flowerMat = new THREE.MeshLambertMaterial({ color: flowerColors[Math.floor(Math.random() * flowerColors.length)] });
+                const flower = new THREE.Mesh(flowerGeo, flowerMat);
+                const angle = Math.random() * Math.PI * 2;
+                const flowerDist = Math.random() * r * 0.6;
+                flower.position.set(
+                    island.x + Math.cos(angle) * flowerDist,
+                    randRange(2, 5),
+                    island.y + Math.sin(angle) * flowerDist
+                );
+                group.add(flower);
+            }
         }
 
         // 海岸线浅滩
