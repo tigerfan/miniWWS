@@ -89,24 +89,24 @@ const SHIP_TYPES = {
     destroyer: {
         name: '驱逐舰', hp: 14500, maxSpeed: 36, acceleration: 0.02, turnSpeed: 0.022,
         length: 120, width: 12, color: '#5599dd', gunColor: '#88bbee',
-        mainGun: { damage: 1200, reload: 4, range: 8500, shells: 6, spread: 0.035, shellSpeed: 12 },
-        rearGun: { damage: 800, reload: 3, range: 7000, shells: 3, spread: 0.04, shellSpeed: 12 },
+        mainGun: { damage: 1200, reload: 4, range: 8500, shells: 6, spread: 0.035, shellSpeed: 12, splashRadius: 50 },
+        rearGun: { damage: 800, reload: 3, range: 7000, shells: 3, spread: 0.04, shellSpeed: 12, splashRadius: 50 },
         torpedo: { damage: 5500, reload: 12, range: 7500, count: 8, speed: 6, spread: 0.08 },
         concealment: 0.6, detectability: 5500
     },
     cruiser: {
         name: '巡洋舰', hp: 32000, maxSpeed: 30, acceleration: 0.012, turnSpeed: 0.015,
         length: 180, width: 18, color: '#4488cc', gunColor: '#77aadd',
-        mainGun: { damage: 2500, reload: 7, range: 12000, shells: 8, spread: 0.025, shellSpeed: 10 },
-        rearGun: { damage: 1500, reload: 5, range: 10000, shells: 4, spread: 0.03, shellSpeed: 10 },
+        mainGun: { damage: 2500, reload: 7, range: 12000, shells: 8, spread: 0.025, shellSpeed: 10, splashRadius: 70 },
+        rearGun: { damage: 1500, reload: 5, range: 10000, shells: 4, spread: 0.03, shellSpeed: 10, splashRadius: 70 },
         torpedo: { damage: 6500, reload: 18, range: 6000, count: 6, speed: 5, spread: 0.06 },
         concealment: 0.75, detectability: 8000
     },
     battleship: {
         name: '战列舰', hp: 68000, maxSpeed: 22, acceleration: 0.007, turnSpeed: 0.008,
         length: 250, width: 32, color: '#3366aa', gunColor: '#6699cc',
-        mainGun: { damage: 6500, reload: 15, range: 18000, shells: 12, spread: 0.018, shellSpeed: 8 },
-        rearGun: { damage: 4000, reload: 12, range: 15000, shells: 6, spread: 0.022, shellSpeed: 8 },
+        mainGun: { damage: 6500, reload: 15, range: 18000, shells: 12, spread: 0.018, shellSpeed: 8, splashRadius: 120 },
+        rearGun: { damage: 4000, reload: 12, range: 15000, shells: 6, spread: 0.022, shellSpeed: 8, splashRadius: 120 },
         torpedo: { damage: 5500, reload: 30, range: 4500, count: 4, speed: 4.5, spread: 0.05 },
         concealment: 1.0, detectability: 12000
     }
@@ -890,7 +890,7 @@ class Renderer3D {
         for (const mesh of this.projectilePool) {
             const proj = mesh.userData.proj;
             if (!proj) continue;
-            const h = proj.type === 'torpedo' ? 2 : 30;
+            const h = proj.z !== undefined ? proj.z : (proj.type === 'torpedo' ? 2 : 30);
             mesh.position.set(proj.x, h, proj.y);
         }
     }
@@ -988,19 +988,55 @@ class Particle {
 
 // ==================== 弹药类 ====================
 class Projectile {
-    constructor(x, y, angle, speed, range, damage, type, owner) {
+    constructor(x, y, angle, speed, range, damage, type, owner, targetDist) {
         this.x = x; this.y = y; this.angle = angle;
         this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed;
         this.speed = speed; this.range = range; this.damage = damage;
         this.type = type; this.owner = owner;
         this.traveled = 0; this.alive = true;
         this.trail = [];
+        this.landed = false;
+
+        // 抛物线弹道（炮弹）
+        if (type === 'shell' && targetDist > 0) {
+            this.z = 15; // 甲板高度
+            const hSpeed = speed * 60; // 水平速度 units/sec
+            const effectiveDist = Math.min(targetDist, range);
+            const flightTime = effectiveDist / hSpeed;
+            const peakHeight = clamp(flightTime * 18, 20, 350);
+            this.gravity = 8 * peakHeight / (flightTime * flightTime);
+            this.vz = 4 * peakHeight / flightTime;
+            this.flightTime = flightTime;
+        } else {
+            this.z = type === 'torpedo' ? 2 : 15;
+            this.vz = 0;
+            this.gravity = 0;
+        }
     }
     update(dt, game) {
         const dx = this.vx * dt * 60, dy = this.vy * dt * 60;
         this.x += dx; this.y += dy;
         this.traveled += Math.hypot(dx, dy);
-        if (this.traveled >= this.range) this.alive = false;
+
+        // 抛物线弹道更新
+        if (this.type === 'shell' && this.gravity > 0) {
+            this.vz -= this.gravity * dt;
+            this.z += this.vz * dt;
+            // 落地判定（下降阶段z<=0）
+            if (this.vz < 0 && this.z <= 0) {
+                this.z = 0;
+                this.alive = false;
+                this.landed = true;
+            }
+            // 安全上限：超出射程120%强制落地
+            if (this.traveled >= this.range * 1.2) {
+                this.alive = false;
+                this.landed = true;
+            }
+        } else {
+            if (this.traveled >= this.range) this.alive = false;
+        }
+
         // 使用游戏世界边界
         const worldSize = game?.currentMap?.size || 42000;
         if (this.x < 0 || this.x > worldSize || this.y < 0 || this.y > worldSize) this.alive = false;
@@ -1521,7 +1557,7 @@ class Ship {
                 this.rearTurretAngle = normalizeAngle(this.rearTurretAngle);
                 // 自动开火
                 if (this.rearGunTimer <= 0 && Math.abs(rDiff) < 0.15) {
-                    this.fireRearGun(this.rearTurretAngle, game);
+                    this.fireRearGun(this.rearTurretAngle, game, nearestDist);
                 }
             } else {
                 // 无目标时尾炮回归朝后
@@ -1533,16 +1569,18 @@ class Ship {
         }
     }
 
-    fireMainGun(targetAngle, game) {
+    fireMainGun(targetAngle, game, targetDist) {
         if (this.mainGunTimer > 0 || !this.alive) return false;
         this.mainGunTimer = this.cfg.mainGun.reload;
         const gun = this.cfg.mainGun;
+        const baseDist = targetDist || gun.range * 0.5;
         for (let i = 0; i < gun.shells; i++) {
             const spread = (Math.random() - 0.5) * gun.spread;
             const a = targetAngle + spread;
             const ox = this.x + Math.cos(this.angle) * this.cfg.length * 0.35;
             const oy = this.y + Math.sin(this.angle) * this.cfg.length * 0.35;
-            game.projectiles.push(new Projectile(ox, oy, a, gun.shellSpeed, gun.range, gun.damage, 'shell', this));
+            const dSpread = baseDist * (1 + (Math.random() - 0.5) * 0.12);
+            game.projectiles.push(new Projectile(ox, oy, a, gun.shellSpeed, gun.range, gun.damage, 'shell', this, dSpread));
         }
         // 炮口闪光
         for (let i = 0; i < 8; i++) {
@@ -1558,17 +1596,19 @@ class Ship {
         return true;
     }
 
-    fireRearGun(targetAngle, game) {
+    fireRearGun(targetAngle, game, targetDist) {
         const rearGun = this.cfg.rearGun;
         if (!rearGun || this.rearGunTimer > 0 || !this.alive) return false;
         this.rearGunTimer = rearGun.reload;
+        const baseDist = targetDist || rearGun.range * 0.5;
         for (let i = 0; i < rearGun.shells; i++) {
             const spread = (Math.random() - 0.5) * rearGun.spread;
             const a = targetAngle + spread;
             // 从船尾发射
             const ox = this.x - Math.cos(this.angle) * this.cfg.length * 0.3;
             const oy = this.y - Math.sin(this.angle) * this.cfg.length * 0.3;
-            game.projectiles.push(new Projectile(ox, oy, a, rearGun.shellSpeed, rearGun.range, rearGun.damage, 'shell', this));
+            const dSpread = baseDist * (1 + (Math.random() - 0.5) * 0.12);
+            game.projectiles.push(new Projectile(ox, oy, a, rearGun.shellSpeed, rearGun.range, rearGun.damage, 'shell', this, dSpread));
         }
         // 炮口闪光（较小）
         for (let i = 0; i < 5; i++) {
@@ -1965,7 +2005,8 @@ class Ship {
         // === 开火执行 ===
         if (shouldFire && this.aiTarget) {
             const leadAngle = this.predictLead(this.aiTarget, this.cfg.mainGun.shellSpeed);
-            this.fireMainGun(leadAngle, game);
+            const targetDist = dist(this, this.aiTarget);
+            this.fireMainGun(leadAngle, game, targetDist);
             this.aiFireDelay = randRange(0.3, 1.2); // 极快射击
         }
         if (shouldUseTorp && this.aiTarget) {
@@ -2159,7 +2200,8 @@ class Game {
             if (!this.running || !player || !player.alive || this.spectatorMode) return;
             e.preventDefault();
             if (e.button === 0) {
-                player.fireMainGun(player.turretAngle, this);
+                const targetDist = dist(player, this.mouseWorld);
+                player.fireMainGun(player.turretAngle, this, targetDist);
             } else if (e.button === 2) {
                 player.fireTorpedo(player.turretAngle, this);
             }
@@ -2411,7 +2453,6 @@ class Game {
         // 弹药
         for (const proj of this.projectiles) {
             proj.update(dt, this);
-            if (!proj.alive) continue;
 
             // 碰撞检测 - 根据团队判断目标
             let targets = [];
@@ -2420,6 +2461,73 @@ class Game {
             } else {
                 targets = [...this.allies.filter(a => a && a.alive), this.getPlayer()].filter(s => s && s.alive);
             }
+
+            // 炮弹落地 → 溅射伤害判定
+            if (proj.type === 'shell' && proj.landed) {
+                const splashRadius = proj.owner?.cfg?.mainGun?.splashRadius || 80;
+                // 落水水柱特效
+                for (let i = 0; i < 15; i++) {
+                    const a = Math.random() * Math.PI * 2;
+                    const spd = randRange(1, 4);
+                    this.particles.push(new Particle(
+                        proj.x + randRange(-8, 8), proj.y + randRange(-8, 8),
+                        Math.cos(a) * spd, Math.sin(a) * spd,
+                        randRange(0.4, 0.9), randRange(4, 10), '#aaddff'
+                    ));
+                }
+                // 范围内溅射伤害
+                for (const t of targets) {
+                    if (!t || !t.alive) continue;
+                    const d = dist(proj, t);
+                    if (d < splashRadius + t.cfg.width) {
+                        const falloff = 1 - Math.max(0, d - t.cfg.width * 0.5) / splashRadius;
+                        const dmg = proj.damage * clamp(falloff, 0.15, 1);
+                        t.takeDamage(dmg, this);
+                        if (proj.owner.team === 'player' && proj.owner.isPlayer) {
+                            this.totalDamage += dmg;
+                        }
+                        // 命中特效
+                        for (let i = 0; i < 8; i++) {
+                            const ea = Math.random() * Math.PI * 2;
+                            const espd = randRange(1, 3);
+                            this.particles.push(new Particle(
+                                t.x, t.y,
+                                Math.cos(ea) * espd, Math.sin(ea) * espd,
+                                randRange(0.3, 0.6), randRange(3, 7), '#ffaa44'
+                            ));
+                        }
+                        // 检查击杀并计分
+                        if (!t.alive) {
+                            const shipPoints = { destroyer: 40, cruiser: 60, battleship: 80 };
+                            const points = shipPoints[t.type] || 40;
+                            if (t.team === 'enemy') {
+                                this.kills++;
+                                if (!proj.owner.isPlayer) this.allyKills++;
+                                this.playerScore += points;
+                            } else {
+                                this.enemyKills++;
+                                this.enemyScore += points;
+                            }
+                            const label = t.team === 'enemy' ? '击沉敌军 ' : '友军 ';
+                            const kcolor = t.team === 'enemy' ? '#ffd700' : '#ff6666';
+                            this.floatingTexts.push({ x: t.x, y: t.y - 60, text: '+' + points + '分', color: '#ffffff', life: 1.5, vy: -1 });
+                            this.floatingTexts.push({ x: t.x, y: t.y - 40, text: label + t.cfg.name + '!', color: kcolor, life: 2.5, vy: -0.8 });
+                        }
+                    }
+                }
+                // 检查占领点范围内的战斗
+                for (const cp of this.capturePoints) {
+                    if (dist(proj, cp) < cp.radius) cp.onAttacked();
+                }
+                continue;
+            }
+
+            if (!proj.alive) continue;
+
+            // 抛物线炮弹飞行中 → 飞越目标上方，不做碰撞
+            if (proj.type === 'shell' && proj.gravity > 0) continue;
+
+            // 鱼雷及其他直射弹药 → 直接命中判定
             for (const t of targets) {
                 if (!t || !t.alive) continue;
                 if (dist(proj, t) < t.cfg.width + 8) {
@@ -2439,7 +2547,6 @@ class Game {
                             proj.type === 'torpedo' ? '#80ffb0' : '#ffaa44'
                         ));
                     }
-                    // 检查占领点范围内的战斗
                     for (const cp of this.capturePoints) {
                         if (dist(proj, cp) < cp.radius && t.team !== proj.owner.team) {
                             cp.onAttacked();
@@ -2447,41 +2554,26 @@ class Game {
                     }
                     // 检查击杀并计分
                     if (!t.alive) {
-                        // 根据舰种给予分数
-                        const shipPoints = {
-                            destroyer: 40,
-                            cruiser: 60,
-                            battleship: 80
-                        };
+                        const shipPoints = { destroyer: 40, cruiser: 60, battleship: 80 };
                         const points = shipPoints[t.type] || 40;
-                        
                         if (t.team === 'enemy') {
                             this.kills++;
                             if (!proj.owner.isPlayer) this.allyKills++;
-                            this.playerScore += points; // 友军得分
+                            this.playerScore += points;
                         } else {
                             this.enemyKills++;
-                            this.enemyScore += points; // 敌军得分
+                            this.enemyScore += points;
                         }
-                        
                         const label = t.team === 'enemy' ? '击沉敌军 ' : '友军 ';
-                        const color = t.team === 'enemy' ? '#ffd700' : '#ff6666';
-                        this.floatingTexts.push({
-                            x: t.x, y: t.y - 60,
-                            text: '+' + points + '分', color: '#ffffff',
-                            life: 1.5, vy: -1
-                        });
-                        this.floatingTexts.push({
-                            x: t.x, y: t.y - 40,
-                            text: label + t.cfg.name + '!', color: color,
-                            life: 2.5, vy: -0.8
-                        });
+                        const kcolor = t.team === 'enemy' ? '#ffd700' : '#ff6666';
+                        this.floatingTexts.push({ x: t.x, y: t.y - 60, text: '+' + points + '分', color: '#ffffff', life: 1.5, vy: -1 });
+                        this.floatingTexts.push({ x: t.x, y: t.y - 40, text: label + t.cfg.name + '!', color: kcolor, life: 2.5, vy: -0.8 });
                     }
                     break;
                 }
             }
 
-            // 岛屿碰撞
+            // 岛屿碰撞（仅鱼雷等低空弹药）
             for (const isl of this.islands) {
                 if (dist(proj, isl) < isl.radius) {
                     proj.alive = false;
