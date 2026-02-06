@@ -16,6 +16,10 @@ body {
     height: 100vh;
 }
 
+#game-container.playing {
+    cursor: none;
+}
+
 /* 计分板 */
 #scoreboard {
     position: absolute;
@@ -220,27 +224,7 @@ body {
     display: none;
 }
 
-#crosshair::before,
-#crosshair::after {
-    content: '';
-    position: absolute;
-    background: rgba(255, 255, 255, 0.7);
-    box-shadow: 0 0 4px rgba(100, 200, 255, 0.5);
-}
-
-#crosshair::before {
-    width: 2px;
-    height: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-#crosshair::after {
-    width: 40px;
-    height: 2px;
-    top: 50%;
-    transform: translateY(-50%);
-}
+/* CSS准心已由Canvas动态准心替代 */
 
 /* Start screen */
 #start-screen {

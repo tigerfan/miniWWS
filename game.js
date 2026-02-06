@@ -89,24 +89,30 @@ const SHIP_TYPES = {
     destroyer: {
         name: '驱逐舰', hp: 14500, maxSpeed: 36, acceleration: 0.02, turnSpeed: 0.022,
         length: 120, width: 12, color: '#5599dd', gunColor: '#88bbee',
-        mainGun: { damage: 1200, reload: 4, range: 8500, shells: 6, spread: 0.035, shellSpeed: 12, splashRadius: 50 },
-        rearGun: { damage: 800, reload: 3, range: 7000, shells: 3, spread: 0.04, shellSpeed: 12, splashRadius: 50 },
+        mainGun: { damage: 1200, reload: 4, range: 8500, shells: 6, spread: 0.035, shellSpeed: 12, splashRadius: 50,
+                   traverse: 0.35, arc: [-2.6, 2.6] },
+        rearGun: { damage: 800, reload: 3, range: 7000, shells: 3, spread: 0.04, shellSpeed: 12, splashRadius: 50,
+                   traverse: 0.35, arc: [-2.6, 2.6] },
         torpedo: { damage: 5500, reload: 12, range: 7500, count: 8, speed: 6, spread: 0.08 },
         concealment: 0.6, detectability: 5500
     },
     cruiser: {
         name: '巡洋舰', hp: 32000, maxSpeed: 30, acceleration: 0.012, turnSpeed: 0.015,
         length: 180, width: 18, color: '#4488cc', gunColor: '#77aadd',
-        mainGun: { damage: 2500, reload: 7, range: 12000, shells: 8, spread: 0.025, shellSpeed: 10, splashRadius: 70 },
-        rearGun: { damage: 1500, reload: 5, range: 10000, shells: 4, spread: 0.03, shellSpeed: 10, splashRadius: 70 },
+        mainGun: { damage: 2500, reload: 7, range: 12000, shells: 8, spread: 0.025, shellSpeed: 10, splashRadius: 70,
+                   traverse: 0.22, arc: [-2.6, 2.6] },
+        rearGun: { damage: 1500, reload: 5, range: 10000, shells: 4, spread: 0.03, shellSpeed: 10, splashRadius: 70,
+                   traverse: 0.22, arc: [-2.6, 2.6] },
         torpedo: { damage: 6500, reload: 18, range: 6000, count: 6, speed: 5, spread: 0.06 },
         concealment: 0.75, detectability: 8000
     },
     battleship: {
         name: '战列舰', hp: 68000, maxSpeed: 22, acceleration: 0.007, turnSpeed: 0.008,
         length: 250, width: 32, color: '#3366aa', gunColor: '#6699cc',
-        mainGun: { damage: 6500, reload: 15, range: 18000, shells: 12, spread: 0.018, shellSpeed: 8, splashRadius: 120 },
-        rearGun: { damage: 4000, reload: 12, range: 15000, shells: 6, spread: 0.022, shellSpeed: 8, splashRadius: 120 },
+        mainGun: { damage: 6500, reload: 15, range: 18000, shells: 12, spread: 0.018, shellSpeed: 8, splashRadius: 120,
+                   traverse: 0.08, arc: [-2.6, 2.6] },
+        rearGun: { damage: 4000, reload: 12, range: 15000, shells: 6, spread: 0.022, shellSpeed: 8, splashRadius: 120,
+                   traverse: 0.08, arc: [-2.6, 2.6] },
         torpedo: { damage: 5500, reload: 30, range: 4500, count: 4, speed: 4.5, spread: 0.05 },
         concealment: 1.0, detectability: 12000
     }
@@ -154,7 +160,78 @@ class Renderer3D {
         this.camTarget = new THREE.Vector3();
         this.camLook = new THREE.Vector3();
 
+        // 3D落点标记
+        this.setupAimMarker();
+
         window.addEventListener('resize', () => this.onResize());
+    }
+
+    setupAimMarker() {
+        const aimGroup = new THREE.Group();
+        // 外圈环
+        const ringGeo = new THREE.RingGeometry(28, 32, 32);
+        const ringMat = new THREE.MeshBasicMaterial({
+            color: 0x50ff78, transparent: true, opacity: 0.4, side: THREE.DoubleSide
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = -Math.PI / 2;
+        aimGroup.add(ring);
+
+        // 内圈脉冲环
+        const pulseGeo = new THREE.RingGeometry(12, 15, 24);
+        const pulseMat = new THREE.MeshBasicMaterial({
+            color: 0x50ff78, transparent: true, opacity: 0.6, side: THREE.DoubleSide
+        });
+        const pulse = new THREE.Mesh(pulseGeo, pulseMat);
+        pulse.rotation.x = -Math.PI / 2;
+        aimGroup.add(pulse);
+
+        // 十字线
+        const crossMat = new THREE.LineBasicMaterial({ color: 0x50ff78, transparent: true, opacity: 0.3 });
+        const crossPoints1 = [new THREE.Vector3(-40, 0, 0), new THREE.Vector3(40, 0, 0)];
+        const crossPoints2 = [new THREE.Vector3(0, 0, -40), new THREE.Vector3(0, 0, 40)];
+        const cross1 = new THREE.Line(new THREE.BufferGeometry().setFromPoints(crossPoints1), crossMat);
+        const cross2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints(crossPoints2), crossMat.clone());
+        aimGroup.add(cross1);
+        aimGroup.add(cross2);
+
+        aimGroup.position.y = 2;
+        aimGroup.visible = false;
+        this.scene.add(aimGroup);
+        this.aimMarker = aimGroup;
+        this.aimMarkerRingMat = ringMat;
+        this.aimMarkerPulseMat = pulseMat;
+        this.aimMarkerPulse = pulse;
+    }
+
+    updateAimMarker(player, mouseWorld, onTarget, inRange) {
+        if (!player || !player.alive || !inRange) {
+            this.aimMarker.visible = false;
+            return;
+        }
+        this.aimMarker.visible = true;
+
+        // 落点位置 = 炮塔朝向 x 目标距离
+        const targetDist = Math.hypot(mouseWorld.x - player.x, mouseWorld.y - player.y);
+        const aimX = player.x + Math.cos(player.turretAngle) * targetDist;
+        const aimZ = player.y + Math.sin(player.turretAngle) * targetDist;
+        this.aimMarker.position.set(aimX, 2, aimZ);
+
+        // 颜色：对准=绿，未对准=黄
+        const color = onTarget ? 0x50ff78 : 0xffdd50;
+        this.aimMarkerRingMat.color.setHex(color);
+        this.aimMarkerPulseMat.color.setHex(color);
+        this.aimMarkerRingMat.opacity = onTarget ? 0.5 : 0.3;
+
+        // 脉冲动画
+        const pulse = 0.8 + Math.sin(this.time * 4) * 0.2;
+        this.aimMarkerPulse.scale.set(pulse, pulse, pulse);
+        this.aimMarkerPulseMat.opacity = 0.3 + Math.sin(this.time * 3) * 0.2;
+
+        // 根据散布缩放外环
+        const spread = player.cfg.mainGun.spread;
+        const spreadScale = 1 + targetDist * spread * 0.008;
+        this.aimMarker.children[0].scale.set(spreadScale, spreadScale, spreadScale);
     }
 
     setupLighting() {
@@ -631,38 +708,55 @@ class Renderer3D {
         return mesh;
     }
 
-    updateCamera(player) {
+    updateCamera(player, zoomLevel) {
         if (!player || !player.alive) return;
-        const camDist = 600;
-        const camH = 200;
-        const ahead = 200;
+        const z = zoomLevel || 0;
 
-        // 相机在舰船后方跟随（基于船首方向）
-        const behindX = player.x - Math.cos(player.angle) * camDist;
-        const behindZ = player.y - Math.sin(player.angle) * camDist;
+        // 参数
+        const camDist = lerp(600, 180, z);
+        const camH = lerp(200, 60, z);
+        const ahead = lerp(200, 800, z);
+        const fov = lerp(55, 22, z);
 
+        // 目标角度：zoom时混入炮塔朝向
+        const targetAngle = z > 0.01
+            ? normalizeAngle(player.angle + normalizeAngle(player.turretAngle - player.angle) * z)
+            : player.angle;
+
+        // 平滑相机角度（关键防抖：角度经过二次平滑）
+        if (this._smoothCamAngle === undefined) this._smoothCamAngle = player.angle;
+        const angleLerp = lerp(0.035, 0.018, z); // zoom时角度跟随更慢
+        let angleDiff = normalizeAngle(targetAngle - this._smoothCamAngle);
+        this._smoothCamAngle = normalizeAngle(this._smoothCamAngle + angleDiff * angleLerp);
+
+        // 相机位置
+        const behindX = player.x - Math.cos(this._smoothCamAngle) * camDist;
+        const behindZ = player.y - Math.sin(this._smoothCamAngle) * camDist;
         this.camTarget.set(behindX, camH, behindZ);
-        this.camera.position.lerp(this.camTarget, 0.035);
+        const posLerp = lerp(0.035, 0.025, z); // zoom时位置跟随更慢
+        this.camera.position.lerp(this.camTarget, posLerp);
 
-        // 看向舰船前方
-        const lx = player.x + Math.cos(player.angle) * ahead;
-        const lz = player.y + Math.sin(player.angle) * ahead;
-        this.camLook.set(lx, 10, lz);
+        // 看向点（同样用平滑角度）
+        const lx = player.x + Math.cos(this._smoothCamAngle) * ahead;
+        const lz = player.y + Math.sin(this._smoothCamAngle) * ahead;
+        const lookH = lerp(10, 5, z);
 
-        const currentLook = new THREE.Vector3();
-        this.camera.getWorldDirection(currentLook);
-        this.camera.lookAt(
-            lerp(this.camera.position.x + currentLook.x * 500, this.camLook.x, 0.05),
-            lerp(10, this.camLook.y, 0.05),
-            lerp(this.camera.position.z + currentLook.z * 500, this.camLook.z, 0.05)
-        );
+        // 平滑看向点（去掉getWorldDirection反馈环，直接lerp目标）
+        if (!this._smoothLook) this._smoothLook = new THREE.Vector3(lx, lookH, lz);
+        const lookLerp = lerp(0.05, 0.03, z); // zoom时lookAt更平滑
+        this._smoothLook.x = lerp(this._smoothLook.x, lx, lookLerp);
+        this._smoothLook.y = lerp(this._smoothLook.y, lookH, lookLerp);
+        this._smoothLook.z = lerp(this._smoothLook.z, lz, lookLerp);
+        this.camera.lookAt(this._smoothLook);
 
-        // 更新阴影相机跟随
+        // FOV平滑过渡
+        this.camera.fov = lerp(this.camera.fov, fov, 0.06);
+        this.camera.updateProjectionMatrix();
+
+        // 阴影+天穹
         this.sunLight.position.set(player.x + 3000, 4000, player.y + 2000);
         this.sunLight.target.position.set(player.x, 0, player.y);
         this.sunLight.target.updateMatrixWorld();
-
-        // 天穹跟随
         this.sky.position.set(player.x, 0, player.y);
     }
 
@@ -1471,6 +1565,8 @@ class Ship {
         this.sinkTimer = 0;
         this.damageFlash = 0;
         this.wakeParticles = [];
+        this.turretOnTarget = false; // 主炮是否对准目标
+        this.turretDiffAbs = Math.PI; // 炮塔与目标的角度差（绝对值）
         // AI
         this.aiTarget = null;
         this.aiState = 'patrol';
@@ -1526,12 +1622,13 @@ class Ship {
                 randRange(0.8, 1.5), randRange(2, 5), 'rgba(180, 220, 255, 0.4)'
             ));
         }
-        // 炮塔跟随
+        // 主炮塔旋转（固定旋转速度 + 射界限制）
         if (this.isPlayer) {
             const targetAng = angleTo(this, game.mouseWorld);
-            let diff = normalizeAngle(targetAng - this.turretAngle);
-            this.turretAngle += diff * 0.1;
-            this.turretAngle = normalizeAngle(this.turretAngle);
+            const result = this.traverseTurret(this.turretAngle, targetAng, this.cfg.mainGun, dt, false);
+            this.turretAngle = result.angle;
+            this.turretOnTarget = result.onTarget;
+            this.turretDiffAbs = result.diffAbs;
         }
 
         // 尾炮自动瞄准射程内最近敌舰
@@ -1549,24 +1646,48 @@ class Ship {
                 }
             }
             if (nearestEnemy) {
-                // 计算预判角度
                 const predAngle = this.predictLead(nearestEnemy, rearGun.shellSpeed);
-                // 平滑旋转尾炮
-                let rDiff = normalizeAngle(predAngle - this.rearTurretAngle);
-                this.rearTurretAngle += rDiff * 0.08;
-                this.rearTurretAngle = normalizeAngle(this.rearTurretAngle);
+                const rResult = this.traverseTurret(this.rearTurretAngle, predAngle, rearGun, dt, true);
+                this.rearTurretAngle = rResult.angle;
                 // 自动开火
-                if (this.rearGunTimer <= 0 && Math.abs(rDiff) < 0.15) {
+                if (this.rearGunTimer <= 0 && rResult.onTarget) {
                     this.fireRearGun(this.rearTurretAngle, game, nearestDist);
                 }
             } else {
                 // 无目标时尾炮回归朝后
                 const backAngle = this.angle + Math.PI;
-                let rDiff = normalizeAngle(backAngle - this.rearTurretAngle);
-                this.rearTurretAngle += rDiff * 0.03;
-                this.rearTurretAngle = normalizeAngle(this.rearTurretAngle);
+                const rResult = this.traverseTurret(this.rearTurretAngle, backAngle, rearGun, dt, true);
+                this.rearTurretAngle = rResult.angle;
             }
         }
+    }
+
+    // 炮塔旋转引擎：固定速度旋转 + 射界钳位
+    traverseTurret(currentAngle, targetAngle, gunCfg, dt, isRear) {
+        const traverseSpeed = gunCfg.traverse || 0.15; // rad/s
+        const arc = gunCfg.arc || [-Math.PI, Math.PI];
+
+        // 将目标角度钳位到射界内（相对船体）
+        let relTarget = normalizeAngle(targetAngle - this.angle);
+        if (isRear) relTarget = normalizeAngle(relTarget - Math.PI); // 尾炮基准朝后
+        relTarget = clamp(relTarget, arc[0], arc[1]);
+        if (isRear) relTarget = normalizeAngle(relTarget + Math.PI);
+        const clampedTarget = normalizeAngle(this.angle + relTarget);
+
+        // 以固定速度旋转向目标
+        let diff = normalizeAngle(clampedTarget - currentAngle);
+        const maxStep = traverseSpeed * dt;
+        let newAngle;
+        if (Math.abs(diff) <= maxStep) {
+            newAngle = clampedTarget;
+        } else {
+            newAngle = normalizeAngle(currentAngle + Math.sign(diff) * maxStep);
+        }
+
+        const diffAbs = Math.abs(normalizeAngle(clampedTarget - newAngle));
+        const onTarget = diffAbs < 0.03; // ~1.7°阈值
+
+        return { angle: newAngle, onTarget, diffAbs };
     }
 
     fireMainGun(targetAngle, game, targetDist) {
@@ -1915,9 +2036,11 @@ class Ship {
                 if (!friendlyInPath) shouldUseTorp = true;
             }
 
-            // 炮塔始终跟踪目标
+            // 炮塔始终跟踪目标（固定旋转速度）
             const leadAngle = this.predictLead(bestTarget, this.cfg.mainGun.shellSpeed);
-            this.turretAngle = lerp(this.turretAngle, leadAngle, 0.12);
+            const aiTurretResult = this.traverseTurret(this.turretAngle, leadAngle, this.cfg.mainGun, dt, false);
+            this.turretAngle = aiTurretResult.angle;
+            this.turretOnTarget = aiTurretResult.onTarget;
         }
         // 3. 无敌人 → 主动巡逻寻敌/占点
         else {
@@ -1938,7 +2061,9 @@ class Ship {
                 targetY = worldSize / 2 + randRange(-3000, 3000);
                 targetSpeed = 0.2;
             }
-            this.turretAngle = lerp(this.turretAngle, this.angle, 0.05);
+            const patrolResult = this.traverseTurret(this.turretAngle, this.angle, this.cfg.mainGun, dt, false);
+            this.turretAngle = patrolResult.angle;
+            this.turretOnTarget = false;
         }
 
         // === 执行移动 + 岛屿避障 ===
@@ -1984,7 +2109,9 @@ class Ship {
             // 炮塔跟踪（如果有目标）
             if (this.aiTarget && this.aiTarget.alive) {
                 const leadAngle = this.predictLead(this.aiTarget, this.cfg.mainGun.shellSpeed);
-                this.turretAngle = lerp(this.turretAngle, leadAngle, 0.12);
+                const moveResult = this.traverseTurret(this.turretAngle, leadAngle, this.cfg.mainGun, dt, false);
+                this.turretAngle = moveResult.angle;
+                this.turretOnTarget = moveResult.onTarget;
             }
         }
 
@@ -2002,11 +2129,10 @@ class Ship {
             this._stuckTimer = 0;
         }
 
-        // === 开火执行 ===
-        if (shouldFire && this.aiTarget) {
-            const leadAngle = this.predictLead(this.aiTarget, this.cfg.mainGun.shellSpeed);
+        // === 开火执行（必须炮塔对准） ===
+        if (shouldFire && this.aiTarget && this.turretOnTarget) {
             const targetDist = dist(this, this.aiTarget);
-            this.fireMainGun(leadAngle, game, targetDist);
+            this.fireMainGun(this.turretAngle, game, targetDist);
             this.aiFireDelay = randRange(0.3, 1.2); // 极快射击
         }
         if (shouldUseTorp && this.aiTarget) {
@@ -2064,6 +2190,8 @@ class Game {
         this.keys = {};
         this.mouse = { x: 0, y: 0 };
         this.mouseWorld = { x: 0, y: 0 };
+        this.zoomMode = false;   // Shift瞄准镜模式
+        this.zoomLevel = 0;      // 0=正常 1=全放大（平滑过渡用）
 
         this.setupInput();
         this.setupUI();
@@ -2200,8 +2328,10 @@ class Game {
             if (!this.running || !player || !player.alive || this.spectatorMode) return;
             e.preventDefault();
             if (e.button === 0) {
-                const targetDist = dist(player, this.mouseWorld);
-                player.fireMainGun(player.turretAngle, this, targetDist);
+                if (player.turretOnTarget) {
+                    const targetDist = dist(player, this.mouseWorld);
+                    player.fireMainGun(player.turretAngle, this, targetDist);
+                }
             } else if (e.button === 2) {
                 player.fireTorpedo(player.turretAngle, this);
             }
@@ -2245,6 +2375,7 @@ class Game {
     startGame() {
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('crosshair').style.display = 'block';
+        document.getElementById('game-container').classList.add('playing');
         document.getElementById('scoreboard').style.display = 'flex';
         document.getElementById('ally-panel').style.display = 'flex';
         document.getElementById('enemy-panel').style.display = 'flex';
@@ -2420,6 +2551,8 @@ class Game {
                 if (this.keys[' ']) p.throttle *= 0.95;
                 // 维修
                 if (this.keys['r']) p.repair();
+                // Shift瞄准镜
+                this.zoomMode = !!this.keys['shift'];
 
                 p.update(dt, this);
 
@@ -2818,6 +2951,11 @@ class Game {
         // === 3D渲染 ===
         const currentPlayer = this.getPlayer();
 
+        // zoomLevel平滑过渡
+        const targetZoom = this.zoomMode ? 1 : 0;
+        this.zoomLevel = lerp(this.zoomLevel, targetZoom, 0.1);
+        if (Math.abs(this.zoomLevel - targetZoom) < 0.005) this.zoomLevel = targetZoom;
+
         // 更新3D舰船
         for (const ally of this.allies) this.renderer3D.updateShip(ally);
         for (const e of this.enemies) this.renderer3D.updateShip(e);
@@ -2828,9 +2966,18 @@ class Game {
         // 更新3D相机
         if (this.spectatorMode) {
             const specTarget = this.allies[this.spectatorTarget];
-            this.renderer3D.updateCamera(specTarget);
+            this.renderer3D.updateCamera(specTarget, 0);
+            this.renderer3D.aimMarker.visible = false;
         } else {
-            this.renderer3D.updateCamera(currentPlayer);
+            this.renderer3D.updateCamera(currentPlayer, this.zoomLevel);
+            // 更新3D落点标记
+            if (currentPlayer && currentPlayer.alive) {
+                const targetDist = dist(currentPlayer, this.mouseWorld);
+                const inRange = targetDist <= currentPlayer.cfg.mainGun.range;
+                this.renderer3D.updateAimMarker(currentPlayer, this.mouseWorld, currentPlayer.turretOnTarget, inRange);
+            } else {
+                this.renderer3D.aimMarker.visible = false;
+            }
         }
 
         // 渲染3D场景
@@ -2905,6 +3052,11 @@ class Game {
         // HUD更新
         this.updateHUD();
 
+        // === WoWS风格动态准心 ===
+        if (!this.spectatorMode && currentPlayer && currentPlayer.alive) {
+            this.drawWoWSCrosshair(ctx, currentPlayer, W, H);
+        }
+
         // 观战模式提示
         if (this.spectatorMode) {
             const specShip = this.allies[this.spectatorTarget];
@@ -2941,6 +3093,278 @@ class Game {
             this.mouseWorld.x = this._rayTarget.x;
             this.mouseWorld.y = this._rayTarget.z;
         }
+    }
+
+    // WoWS风格动态准心绘制
+    drawWoWSCrosshair(ctx, player, W, H) {
+        const mx = this.mouse.x;
+        const my = this.mouse.y;
+        const gun = player.cfg.mainGun;
+        const zl = this.zoomLevel; // 0=正常, 1=全放大
+
+        // 计算目标距离和飞行时间
+        const targetDist = dist(player, this.mouseWorld);
+        const hSpeed = gun.shellSpeed * 60;
+        const flightTime = targetDist / hSpeed;
+        const distKm = (targetDist / 1000).toFixed(1);
+        const inRange = targetDist <= gun.range;
+
+        // 炮塔对齐状态决定准心颜色
+        const onTarget = player.turretOnTarget;
+        const diffAbs = player.turretDiffAbs;
+        let crossColor, crossAlpha;
+        if (!inRange) {
+            crossColor = '255, 80, 80';
+            crossAlpha = 0.9;
+        } else if (onTarget) {
+            crossColor = '80, 255, 120';
+            crossAlpha = 0.95;
+        } else if (diffAbs < 0.3) {
+            crossColor = '255, 220, 80';
+            crossAlpha = 0.9;
+        } else {
+            crossColor = '255, 180, 80';
+            crossAlpha = 0.8;
+        }
+
+        ctx.save();
+
+        // === 瞄准镜暗角效果（zoom时） ===
+        if (zl > 0.05) {
+            const vigAlpha = zl * 0.6;
+            const vigR = Math.min(W, H) * lerp(1.2, 0.55, zl);
+            const gradient = ctx.createRadialGradient(W / 2, H / 2, vigR * 0.5, W / 2, H / 2, vigR);
+            gradient.addColorStop(0, `rgba(0, 0, 0, 0)`);
+            gradient.addColorStop(0.7, `rgba(0, 0, 0, ${vigAlpha * 0.3})`);
+            gradient.addColorStop(1, `rgba(0, 0, 0, ${vigAlpha})`);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, W, H);
+        }
+
+        // === 十字准心 ===
+        ctx.strokeStyle = `rgba(${crossColor}, ${crossAlpha})`;
+        const isZoomed = zl > 0.5;
+        const crossSize = isZoomed ? lerp(22, 80, zl) : (onTarget ? 18 : 22);
+        const gap = isZoomed ? lerp(7, 14, zl) : (onTarget ? 4 : 7);
+        const lineW = isZoomed ? 1.2 : 2;
+
+        ctx.lineWidth = lineW;
+        if (!isZoomed) {
+            ctx.shadowColor = `rgba(${crossColor}, 0.5)`;
+            ctx.shadowBlur = 6;
+        }
+
+        // 十字线四段
+        ctx.beginPath();
+        ctx.moveTo(mx - crossSize, my); ctx.lineTo(mx - gap, my);
+        ctx.moveTo(mx + gap, my); ctx.lineTo(mx + crossSize, my);
+        ctx.moveTo(mx, my - crossSize); ctx.lineTo(mx, my - gap);
+        ctx.moveTo(mx, my + gap); ctx.lineTo(mx, my + crossSize);
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // 中心点
+        if (onTarget) {
+            ctx.fillStyle = `rgba(${crossColor}, 0.9)`;
+            ctx.beginPath();
+            ctx.arc(mx, my, isZoomed ? 1.5 : 2, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            ctx.beginPath();
+            ctx.arc(mx, my, isZoomed ? 2 : 2.5, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        // === 瞄准镜刻度线（zoom模式独有） ===
+        if (zl > 0.3) {
+            const scaleAlpha = clamp((zl - 0.3) / 0.4, 0, 1);
+            ctx.strokeStyle = `rgba(200, 220, 255, ${0.4 * scaleAlpha})`;
+            ctx.lineWidth = 1;
+
+            // 水平距离刻度（左右各几个刻度，代表km）
+            const maxKm = gun.range / 1000;
+            const tickSpacing = lerp(30, 50, zl); // 每km的屏幕像素距离
+            for (let km = 2; km <= maxKm; km += 2) {
+                const tx = mx + km * tickSpacing;
+                const tx2 = mx - km * tickSpacing;
+                const tickH = km % 4 === 0 ? 12 : 6;
+
+                // 右侧
+                ctx.beginPath();
+                ctx.moveTo(tx, my - tickH); ctx.lineTo(tx, my + tickH);
+                ctx.stroke();
+                // 左侧
+                ctx.beginPath();
+                ctx.moveTo(tx2, my - tickH); ctx.lineTo(tx2, my + tickH);
+                ctx.stroke();
+
+                // 数字标注（每4km）
+                if (km % 4 === 0) {
+                    ctx.font = `${10 * scaleAlpha + 8}px "Consolas", monospace`;
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = `rgba(200, 220, 255, ${0.5 * scaleAlpha})`;
+                    ctx.fillText(km + '', tx, my + tickH + 14);
+                    ctx.fillText(km + '', tx2, my + tickH + 14);
+                }
+            }
+
+            // 垂直刻度（短的辅助线）
+            for (let i = 1; i <= 4; i++) {
+                const ty = my + i * tickSpacing;
+                const ty2 = my - i * tickSpacing;
+                const tickW = i % 2 === 0 ? 8 : 4;
+                ctx.beginPath();
+                ctx.moveTo(mx - tickW, ty); ctx.lineTo(mx + tickW, ty);
+                ctx.moveTo(mx - tickW, ty2); ctx.lineTo(mx + tickW, ty2);
+                ctx.stroke();
+            }
+        }
+
+        // === 炮塔实际朝向指示器 ===
+        const turretWorldX = player.x + Math.cos(player.turretAngle) * targetDist;
+        const turretWorldY = player.y + Math.sin(player.turretAngle) * targetDist;
+        const turretScreen = this.worldToScreen(turretWorldX, turretWorldY);
+
+        if (turretScreen && !onTarget) {
+            const tx = turretScreen.x;
+            const ty = turretScreen.y;
+            const markerSize = isZoomed ? 12 : 8;
+
+            ctx.strokeStyle = `rgba(200, 220, 255, 0.7)`;
+            ctx.lineWidth = isZoomed ? 1 : 1.5;
+            ctx.beginPath();
+            ctx.moveTo(tx, ty - markerSize);
+            ctx.lineTo(tx + markerSize * 0.6, ty);
+            ctx.lineTo(tx, ty + markerSize);
+            ctx.lineTo(tx - markerSize * 0.6, ty);
+            ctx.closePath();
+            ctx.stroke();
+
+            ctx.setLineDash([4, 4]);
+            ctx.strokeStyle = `rgba(200, 220, 255, ${isZoomed ? 0.15 : 0.25})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(tx, ty);
+            ctx.lineTo(mx, my);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // === 落点散布圈 ===
+        if (inRange) {
+            const spreadDist = targetDist * gun.spread * 3;
+            const aimAngle = player.turretAngle;
+            const aimX = player.x + Math.cos(aimAngle) * targetDist;
+            const aimY = player.y + Math.sin(aimAngle) * targetDist;
+
+            const spreadPoints = [];
+            for (let i = 0; i < 16; i++) {
+                const a = (i / 16) * Math.PI * 2;
+                const sp = this.worldToScreen(aimX + Math.cos(a) * spreadDist, aimY + Math.sin(a) * spreadDist);
+                if (sp) spreadPoints.push(sp);
+            }
+
+            if (spreadPoints.length >= 4) {
+                ctx.strokeStyle = onTarget ? `rgba(80, 255, 120, 0.5)` : `rgba(255, 220, 80, 0.3)`;
+                ctx.lineWidth = isZoomed ? 1 : 1.5;
+                ctx.setLineDash([3, 3]);
+                ctx.beginPath();
+                ctx.moveTo(spreadPoints[0].x, spreadPoints[0].y);
+                for (let i = 1; i < spreadPoints.length; i++) {
+                    ctx.lineTo(spreadPoints[i].x, spreadPoints[i].y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+
+        // === 距离和飞行时间文字 ===
+        const fontSize = isZoomed ? 14 : 12;
+        ctx.font = `bold ${fontSize}px "Consolas", monospace`;
+        ctx.textAlign = 'left';
+        ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+        ctx.lineWidth = 2;
+
+        const textX = mx + crossSize + 8;
+        const textY = my - 4;
+
+        const distColor = inRange ? `rgba(${crossColor}, 0.9)` : 'rgba(255, 80, 80, 0.9)';
+        ctx.fillStyle = distColor;
+        ctx.strokeText(distKm + ' km', textX, textY);
+        ctx.fillText(distKm + ' km', textX, textY);
+
+        if (inRange) {
+            ctx.fillStyle = `rgba(200, 220, 255, 0.8)`;
+            const ftText = flightTime.toFixed(1) + ' s';
+            ctx.strokeText(ftText, textX, textY + 18);
+            ctx.fillText(ftText, textX, textY + 18);
+        } else {
+            ctx.fillStyle = 'rgba(255, 80, 80, 0.8)';
+            ctx.strokeText('超出射程', textX, textY + 18);
+            ctx.fillText('超出射程', textX, textY + 18);
+        }
+
+        // === 装填状态弧线 ===
+        const reloadProgress = player.mainGunTimer > 0
+            ? 1 - player.mainGunTimer / gun.reload : 1;
+        const arcRadius = (isZoomed ? gap + 2 : crossSize + 4);
+
+        if (reloadProgress < 1) {
+            ctx.strokeStyle = 'rgba(255, 180, 80, 0.6)';
+            ctx.lineWidth = isZoomed ? 2 : 2.5;
+            ctx.beginPath();
+            ctx.arc(mx, my, arcRadius, -Math.PI / 2, -Math.PI / 2 + reloadProgress * Math.PI * 2);
+            ctx.stroke();
+
+            ctx.font = `bold ${isZoomed ? 11 : 10}px "Consolas", monospace`;
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'rgba(255, 180, 80, 0.8)';
+            const pctText = Math.floor(reloadProgress * 100) + '%';
+            ctx.strokeText(pctText, mx, my + (isZoomed ? gap + 18 : crossSize + 16));
+            ctx.fillText(pctText, mx, my + (isZoomed ? gap + 18 : crossSize + 16));
+        } else {
+            ctx.strokeStyle = `rgba(${crossColor}, 0.35)`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(mx, my, arcRadius, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        // === 炮塔旋转方向箭头 ===
+        if (diffAbs > 0.15) {
+            const arrowDir = normalizeAngle(angleTo(player, this.mouseWorld) - player.turretAngle) > 0 ? 1 : -1;
+            ctx.strokeStyle = `rgba(255, 220, 80, 0.6)`;
+            ctx.lineWidth = isZoomed ? 1.5 : 2;
+
+            const arrowR = (isZoomed ? gap + 8 : crossSize + 12);
+            const startA = arrowDir > 0 ? -Math.PI * 0.7 : Math.PI * 0.2;
+            const endA = startA + arrowDir * Math.PI * 0.5;
+            ctx.beginPath();
+            ctx.arc(mx, my, arrowR, startA, endA, arrowDir < 0);
+            ctx.stroke();
+
+            const tipX = mx + Math.cos(endA) * arrowR;
+            const tipY = my + Math.sin(endA) * arrowR;
+            const arrowAngle = endA + (arrowDir > 0 ? Math.PI / 2 : -Math.PI / 2);
+            ctx.beginPath();
+            ctx.moveTo(tipX, tipY);
+            ctx.lineTo(tipX + Math.cos(arrowAngle + 2.5) * 7, tipY + Math.sin(arrowAngle + 2.5) * 7);
+            ctx.moveTo(tipX, tipY);
+            ctx.lineTo(tipX + Math.cos(arrowAngle - 2.5) * 7, tipY + Math.sin(arrowAngle - 2.5) * 7);
+            ctx.stroke();
+        }
+
+        // === 瞄准镜模式标记 ===
+        if (zl > 0.3) {
+            const labelAlpha = clamp((zl - 0.3) / 0.3, 0, 0.6);
+            ctx.font = '11px "Consolas", monospace';
+            ctx.textAlign = 'right';
+            ctx.fillStyle = `rgba(180, 200, 220, ${labelAlpha})`;
+            ctx.fillText('SCOPE x' + lerp(1, 2.5, zl).toFixed(1), W - 20, H - 20);
+        }
+
+        ctx.restore();
     }
 
     // 世界坐标转屏幕坐标（通过Three.js相机投影）
@@ -3122,6 +3546,7 @@ class Game {
     endGame(victory, playerCaps = 0, enemyCaps = 0) {
         this.running = false;
         document.getElementById('crosshair').style.display = 'none';
+        document.getElementById('game-container').classList.remove('playing');
         document.getElementById('end-screen').classList.remove('hidden');
         const mins = Math.floor(this.gameTime / 60);
         const secs = Math.floor(this.gameTime % 60);
