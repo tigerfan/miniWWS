@@ -90,10 +90,28 @@ body {
     color: #7ab0e0;
 }
 
+#three-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+
+#three-container canvas {
+    display: block;
+}
+
 #gameCanvas {
     display: block;
     width: 100%;
     height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    pointer-events: none;
 }
 
 /* HUD */
@@ -104,26 +122,28 @@ body {
     transform: translateX(-50%);
     display: flex;
     align-items: center;
-    gap: 20px;
-    background: rgba(0, 10, 30, 0.75);
-    border: 1px solid rgba(100, 180, 255, 0.3);
-    border-radius: 8px;
-    padding: 10px 24px;
+    gap: 24px;
+    background: linear-gradient(180deg, rgba(0, 15, 40, 0.85) 0%, rgba(0, 10, 30, 0.92) 100%);
+    border: 1px solid rgba(100, 180, 255, 0.35);
+    border-radius: 12px;
+    padding: 12px 28px;
     color: #c0deff;
     font-size: 14px;
     pointer-events: none;
     z-index: 10;
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(100, 180, 255, 0.1);
 }
 
 #hp-bar-container {
     position: relative;
-    width: 200px;
-    height: 22px;
-    background: rgba(255, 0, 0, 0.2);
-    border-radius: 4px;
+    width: 220px;
+    height: 24px;
+    background: rgba(255, 0, 0, 0.15);
+    border-radius: 6px;
     overflow: hidden;
     border: 1px solid rgba(255, 80, 80, 0.4);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 #hp-bar {
@@ -131,7 +151,8 @@ body {
     width: 100%;
     background: linear-gradient(90deg, #2ecc40, #4cff72);
     transition: width 0.3s;
-    border-radius: 4px;
+    border-radius: 6px;
+    box-shadow: 0 0 8px rgba(46, 204, 64, 0.3);
 }
 
 #hp-text {
@@ -171,24 +192,28 @@ body {
     position: absolute;
     bottom: 20px;
     right: 15px;
-    width: 184px;
-    height: 184px;
+    width: 200px;
+    height: 200px;
     border: 2px solid rgba(100, 180, 255, 0.4);
-    border-radius: 6px;
-    background: rgba(0, 15, 40, 0.8);
+    border-radius: 10px;
+    background: rgba(0, 15, 40, 0.85);
     z-index: 25;
     pointer-events: none;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(100, 180, 255, 0.1);
+    backdrop-filter: blur(6px);
 }
 
 #minimapCanvas {
-    border-radius: 4px;
+    border-radius: 8px;
+    width: 100%;
+    height: 100%;
 }
 
 /* Crosshair */
 #crosshair {
     position: absolute;
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     pointer-events: none;
     z-index: 20;
     transform: translate(-50%, -50%);
@@ -199,18 +224,19 @@ body {
 #crosshair::after {
     content: '';
     position: absolute;
-    background: rgba(255, 255, 255, 0.8);
+    background: rgba(255, 255, 255, 0.7);
+    box-shadow: 0 0 4px rgba(100, 200, 255, 0.5);
 }
 
 #crosshair::before {
     width: 2px;
-    height: 30px;
+    height: 40px;
     left: 50%;
     transform: translateX(-50%);
 }
 
 #crosshair::after {
-    width: 30px;
+    width: 40px;
     height: 2px;
     top: 50%;
     transform: translateY(-50%);
@@ -224,17 +250,27 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(180deg, #0a1628 0%, #0d2847 50%, #132e4f 100%);
+    background: linear-gradient(180deg, #050d1a 0%, #0a1e3a 40%, #132e4f 70%, #0d2240 100%);
     z-index: 100;
     color: #c0deff;
     pointer-events: auto;
 }
 
+#start-screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 80%, rgba(20, 60, 120, 0.3) 0%, transparent 70%);
+    pointer-events: none;
+}
+
 #start-screen h1 {
-    font-size: 48px;
+    font-size: 56px;
     color: #fff;
-    text-shadow: 0 0 20px rgba(100, 180, 255, 0.5);
-    margin-bottom: 8px;
+    text-shadow: 0 0 30px rgba(100, 180, 255, 0.6), 0 0 60px rgba(50, 120, 200, 0.3);
+    margin-bottom: 10px;
+    letter-spacing: 4px;
+    position: relative;
 }
 
 #start-screen > p {
@@ -325,22 +361,26 @@ body {
 }
 
 #start-btn, #restart-btn {
-    padding: 14px 48px;
+    padding: 16px 56px;
     font-size: 20px;
     font-weight: bold;
     color: #fff;
     background: linear-gradient(135deg, #1a6dd4, #2589f5);
-    border: none;
-    border-radius: 8px;
+    border: 2px solid rgba(100, 180, 255, 0.3);
+    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: all 0.3s;
     text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    letter-spacing: 2px;
+    position: relative;
+    box-shadow: 0 4px 15px rgba(25, 100, 200, 0.3);
 }
 
 #start-btn:hover, #restart-btn:hover {
     background: linear-gradient(135deg, #2589f5, #4ca4ff);
-    transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(37, 137, 245, 0.4);
+    transform: scale(1.05) translateY(-2px);
+    box-shadow: 0 8px 30px rgba(37, 137, 245, 0.5);
+    border-color: rgba(100, 180, 255, 0.6);
 }
 
 .controls-hint {
@@ -359,16 +399,17 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: rgba(5, 10, 25, 0.9);
+    background: rgba(5, 10, 25, 0.92);
     z-index: 100;
     color: #c0deff;
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(12px);
 }
 
 #end-screen h1 {
-    font-size: 42px;
-    margin-bottom: 16px;
-    text-shadow: 0 0 20px rgba(100, 180, 255, 0.5);
+    font-size: 48px;
+    margin-bottom: 20px;
+    text-shadow: 0 0 30px rgba(100, 180, 255, 0.6);
+    letter-spacing: 3px;
 }
 
 #end-stats {

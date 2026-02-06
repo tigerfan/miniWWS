@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>海战模拟 - WWS</title>
+    <title>海战模拟 3D - WWS</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
     <div id="game-container">
@@ -37,6 +38,7 @@
             <div id="enemy-ships-list" class="ships-list"></div>
         </div>
 
+        <div id="three-container"></div>
         <canvas id="gameCanvas"></canvas>
         <!-- HUD -->
         <div id="hud">
@@ -52,13 +54,13 @@
             <div id="score-info">击沉: <span id="score-val">0</span></div>
         </div>
         <div id="minimap-container">
-            <canvas id="minimapCanvas" width="180" height="180"></canvas>
+            <canvas id="minimapCanvas" width="200" height="200"></canvas>
         </div>
         <div id="crosshair"></div>
         <!-- 开始界面 -->
         <div id="start-screen">
             <h1>⚓ 海战模拟 WWS</h1>
-            <p>还原战舰世界经典海战</p>
+            <p>3D 实时渲染 · 还原战舰世界经典海战</p>
             
             <div class="selection-container">
                 <div class="ship-select">
@@ -86,7 +88,7 @@
             <button id="start-btn">开始战斗</button>
             <div class="controls-hint">
                 <p>WASD - 移动 | 鼠标 - 瞄准 | 左键 - 主炮 | 右键 - 鱼雷</p>
-                <p>空格 - 紧急刹车 | R - 维修 | M - 查看小地图</p>
+                <p>空格 - 紧急刹车 | R - 维修 | 1-9 - 切换舰只 | 0 - 观战模式</p>
             </div>
         </div>
         <!-- 结束界面 -->

@@ -4,7 +4,7 @@ const MAPS = {
         name: '海岛',
         size: 36000,
         description: '岛屿密布的热带海域，适合伏击和近战',
-        teamSize: { allies: 10, enemies: 10 },
+        teamSize: { allies: 9, enemies: 9 },
         islands: 18,
         spawns: {
             allies: [{ x: 3000, y: 18000 }, { x: 5000, y: 15000 }, { x: 5000, y: 21000 }],
@@ -20,7 +20,7 @@ const MAPS = {
         name: '北极光',
         size: 42000,
         description: '冰川环绕的寒冷海域，长距离交战',
-        teamSize: { allies: 10, enemies: 10 },
+        teamSize: { allies: 9, enemies: 9 },
         islands: 12,
         spawns: {
             allies: [{ x: 4000, y: 21000 }, { x: 6000, y: 18000 }, { x: 6000, y: 24000 }],
@@ -37,7 +37,7 @@ const MAPS = {
         name: '沉睡的巨人',
         size: 39000,
         description: '火山岛屿群，控制中央水道是关键',
-        teamSize: { allies: 10, enemies: 10 },
+        teamSize: { allies: 9, enemies: 9 },
         islands: 15,
         spawns: {
             allies: [{ x: 3500, y: 19500 }, { x: 5500, y: 16500 }, { x: 5500, y: 22500 }],
@@ -53,7 +53,7 @@ const MAPS = {
         name: '火焰群岛',
         size: 36000,
         description: '活跃的火山群岛，地形复杂多变',
-        teamSize: { allies: 10, enemies: 10 },
+        teamSize: { allies: 9, enemies: 9 },
         islands: 20,
         spawns: {
             allies: [{ x: 3000, y: 18000 }, { x: 5000, y: 15000 }, { x: 5000, y: 21000 }],
@@ -70,7 +70,7 @@ const MAPS = {
         name: '荒漠之泪',
         size: 37500,
         description: '沙漠中的绿洲海域，视野开阔',
-        teamSize: { allies: 10, enemies: 10 },
+        teamSize: { allies: 9, enemies: 9 },
         islands: 8,
         spawns: {
             allies: [{ x: 3500, y: 18750 }, { x: 5500, y: 15750 }, { x: 5500, y: 21750 }],
@@ -87,24 +87,27 @@ const MAPS = {
 // 舰船参数调整 - 更接近战舰世界的手感 (1像素 = 1米 比例调整)
 const SHIP_TYPES = {
     destroyer: {
-        name: '驱逐舰', hp: 14500, maxSpeed: 36, acceleration: 0.08, turnSpeed: 0.045,
+        name: '驱逐舰', hp: 14500, maxSpeed: 36, acceleration: 0.02, turnSpeed: 0.022,
         length: 120, width: 12, color: '#5599dd', gunColor: '#88bbee',
-        mainGun: { damage: 1200, reload: 4, range: 8500, shells: 6, spread: 0.035, shellSpeed: 18 },
-        torpedo: { damage: 5500, reload: 12, range: 7500, count: 8, speed: 9, spread: 0.08 },
+        mainGun: { damage: 1200, reload: 4, range: 8500, shells: 6, spread: 0.035, shellSpeed: 12 },
+        rearGun: { damage: 800, reload: 3, range: 7000, shells: 3, spread: 0.04, shellSpeed: 12 },
+        torpedo: { damage: 5500, reload: 12, range: 7500, count: 8, speed: 6, spread: 0.08 },
         concealment: 0.6, detectability: 5500
     },
     cruiser: {
-        name: '巡洋舰', hp: 32000, maxSpeed: 30, acceleration: 0.05, turnSpeed: 0.03,
+        name: '巡洋舰', hp: 32000, maxSpeed: 30, acceleration: 0.012, turnSpeed: 0.015,
         length: 180, width: 18, color: '#4488cc', gunColor: '#77aadd',
-        mainGun: { damage: 2500, reload: 7, range: 12000, shells: 8, spread: 0.025, shellSpeed: 16 },
-        torpedo: { damage: 6500, reload: 18, range: 6000, count: 6, speed: 8, spread: 0.06 },
+        mainGun: { damage: 2500, reload: 7, range: 12000, shells: 8, spread: 0.025, shellSpeed: 10 },
+        rearGun: { damage: 1500, reload: 5, range: 10000, shells: 4, spread: 0.03, shellSpeed: 10 },
+        torpedo: { damage: 6500, reload: 18, range: 6000, count: 6, speed: 5, spread: 0.06 },
         concealment: 0.75, detectability: 8000
     },
     battleship: {
-        name: '战列舰', hp: 68000, maxSpeed: 22, acceleration: 0.035, turnSpeed: 0.018,
+        name: '战列舰', hp: 68000, maxSpeed: 22, acceleration: 0.007, turnSpeed: 0.008,
         length: 250, width: 32, color: '#3366aa', gunColor: '#6699cc',
-        mainGun: { damage: 6500, reload: 15, range: 18000, shells: 12, spread: 0.018, shellSpeed: 14 },
-        torpedo: { damage: 5500, reload: 30, range: 4500, count: 4, speed: 7, spread: 0.05 },
+        mainGun: { damage: 6500, reload: 15, range: 18000, shells: 12, spread: 0.018, shellSpeed: 8 },
+        rearGun: { damage: 4000, reload: 12, range: 15000, shells: 6, spread: 0.022, shellSpeed: 8 },
+        torpedo: { damage: 5500, reload: 30, range: 4500, count: 4, speed: 4.5, spread: 0.05 },
         concealment: 1.0, detectability: 12000
     }
 };
@@ -116,6 +119,806 @@ function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 function lerp(a, b, t) { return a + (b - a) * t; }
 function randRange(a, b) { return a + Math.random() * (b - a); }
 function normalizeAngle(a) { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; }
+
+// ==================== 3D渲染器 ====================
+class Renderer3D {
+    constructor() {
+        this.container = document.getElementById('three-container');
+        this.scene = new THREE.Scene();
+        this.scene.fog = new THREE.FogExp2(0x0a1830, 0.00006);
+        this.scene.background = new THREE.Color(0x0a1830);
+
+        this.camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 10, 60000);
+        this.camera.position.set(0, 500, 300);
+
+        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        this.renderer.shadowMap.enabled = true;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        this.renderer.toneMappingExposure = 1.2;
+        this.container.appendChild(this.renderer.domElement);
+
+        this.setupLighting();
+        this.setupSky();
+        this.setupOcean();
+
+        this.shipMeshes = new Map();
+        this.islandMeshes = [];
+        this.captureMeshes = [];
+        this.projectilePool = [];
+        this.particlePool = [];
+        this.wakeLines = new Map();
+        this.time = 0;
+        this.camTarget = new THREE.Vector3();
+        this.camLook = new THREE.Vector3();
+
+        window.addEventListener('resize', () => this.onResize());
+    }
+
+    setupLighting() {
+        const ambient = new THREE.AmbientLight(0x2a3a5a, 0.7);
+        this.scene.add(ambient);
+
+        this.sunLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+        this.sunLight.position.set(5000, 4000, 3000);
+        this.sunLight.castShadow = true;
+        this.sunLight.shadow.mapSize.width = 2048;
+        this.sunLight.shadow.mapSize.height = 2048;
+        this.sunLight.shadow.camera.near = 100;
+        this.sunLight.shadow.camera.far = 15000;
+        this.sunLight.shadow.camera.left = -3000;
+        this.sunLight.shadow.camera.right = 3000;
+        this.sunLight.shadow.camera.top = 3000;
+        this.sunLight.shadow.camera.bottom = -3000;
+        this.scene.add(this.sunLight);
+        this.scene.add(this.sunLight.target);
+
+        const hemi = new THREE.HemisphereLight(0x6699cc, 0x1a2a40, 0.5);
+        this.scene.add(hemi);
+
+        const rim = new THREE.DirectionalLight(0xff8844, 0.3);
+        rim.position.set(-3000, 1000, -2000);
+        this.scene.add(rim);
+    }
+
+    setupSky() {
+        const skyGeo = new THREE.SphereGeometry(30000, 32, 16);
+        const skyMat = new THREE.ShaderMaterial({
+            uniforms: {
+                topColor: { value: new THREE.Color(0x0a1830) },
+                bottomColor: { value: new THREE.Color(0x1a3a5a) },
+                horizonColor: { value: new THREE.Color(0x2a4a6a) },
+                offset: { value: 20 },
+                exponent: { value: 0.4 }
+            },
+            vertexShader: `
+                varying vec3 vWorldPosition;
+                void main() {
+                    vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+                    vWorldPosition = worldPosition.xyz;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 topColor;
+                uniform vec3 bottomColor;
+                uniform vec3 horizonColor;
+                uniform float offset;
+                uniform float exponent;
+                varying vec3 vWorldPosition;
+                void main() {
+                    float h = normalize(vWorldPosition + vec3(0.0, offset, 0.0)).y;
+                    float t = max(pow(max(h, 0.0), exponent), 0.0);
+                    vec3 sky = mix(horizonColor, topColor, t);
+                    float b = max(pow(max(-h, 0.0), 0.5), 0.0);
+                    sky = mix(sky, bottomColor, b);
+                    gl_FragColor = vec4(sky, 1.0);
+                }
+            `,
+            side: THREE.BackSide
+        });
+        this.sky = new THREE.Mesh(skyGeo, skyMat);
+        this.scene.add(this.sky);
+    }
+
+    setupOcean() {
+        const size = 60000;
+        const segments = 200;
+        const oceanGeo = new THREE.PlaneGeometry(size, size, segments, segments);
+        const oceanMat = new THREE.ShaderMaterial({
+            uniforms: {
+                uTime: { value: 0 },
+                uColor1: { value: new THREE.Color(0x0c2a4a) },
+                uColor2: { value: new THREE.Color(0x1a4a7a) },
+                uFoamColor: { value: new THREE.Color(0x4a7a9a) },
+                uSunDir: { value: new THREE.Vector3(0.5, 0.7, 0.3).normalize() },
+                uSunColor: { value: new THREE.Color(0xffeedd) },
+                uCamPos: { value: new THREE.Vector3() }
+            },
+            vertexShader: `
+                uniform float uTime;
+                varying vec2 vUv;
+                varying vec3 vWorldPos;
+                varying vec3 vNormal;
+                varying float vWaveHeight;
+                void main() {
+                    vUv = uv;
+                    vec3 pos = position;
+                    float wave1 = sin(pos.x * 0.008 + uTime * 0.7) * 12.0;
+                    float wave2 = sin(pos.y * 0.006 + uTime * 0.5) * 8.0;
+                    float wave3 = sin((pos.x + pos.y) * 0.004 + uTime * 1.1) * 6.0;
+                    float wave4 = sin(pos.x * 0.02 + pos.y * 0.015 + uTime * 1.5) * 3.0;
+                    pos.z += wave1 + wave2 + wave3 + wave4;
+                    vWaveHeight = pos.z;
+                    vec4 worldPos = modelMatrix * vec4(pos, 1.0);
+                    vWorldPos = worldPos.xyz;
+                    float dx = cos(pos.x * 0.008 + uTime * 0.7) * 0.008 * 12.0
+                             + cos((pos.x + pos.y) * 0.004 + uTime * 1.1) * 0.004 * 6.0;
+                    float dy = cos(pos.y * 0.006 + uTime * 0.5) * 0.006 * 8.0
+                             + cos((pos.x + pos.y) * 0.004 + uTime * 1.1) * 0.004 * 6.0;
+                    vNormal = normalize(mat3(modelMatrix) * vec3(-dx, 1.0, -dy));
+                    gl_Position = projectionMatrix * viewMatrix * worldPos;
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 uColor1;
+                uniform vec3 uColor2;
+                uniform vec3 uFoamColor;
+                uniform vec3 uSunDir;
+                uniform vec3 uSunColor;
+                uniform vec3 uCamPos;
+                uniform float uTime;
+                varying vec2 vUv;
+                varying vec3 vWorldPos;
+                varying vec3 vNormal;
+                varying float vWaveHeight;
+                void main() {
+                    vec3 baseColor = mix(uColor1, uColor2, vUv.y * 0.5 + 0.5);
+                    float foam = smoothstep(8.0, 16.0, vWaveHeight);
+                    baseColor = mix(baseColor, uFoamColor, foam * 0.3);
+                    float diffuse = max(dot(vNormal, uSunDir), 0.0) * 0.5 + 0.5;
+                    vec3 viewDir = normalize(uCamPos - vWorldPos);
+                    vec3 halfDir = normalize(uSunDir + viewDir);
+                    float spec = pow(max(dot(vNormal, halfDir), 0.0), 120.0);
+                    vec3 color = baseColor * diffuse + uSunColor * spec * 0.6;
+                    float fresnel = pow(1.0 - max(dot(vNormal, viewDir), 0.0), 3.0);
+                    color += vec3(0.1, 0.15, 0.2) * fresnel;
+                    float dist = length(vWorldPos - uCamPos);
+                    float fogFactor = 1.0 - exp(-dist * 0.00006);
+                    vec3 fogColor = vec3(0.04, 0.09, 0.19);
+                    color = mix(color, fogColor, fogFactor);
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `,
+            side: THREE.DoubleSide
+        });
+        this.ocean = new THREE.Mesh(oceanGeo, oceanMat);
+        this.ocean.rotation.x = -Math.PI / 2;
+        this.ocean.position.y = 0;
+        this.scene.add(this.ocean);
+    }
+
+    setMapColors(mapConfig) {
+        if (!mapConfig) return;
+        // 重置为默认值
+        this.scene.fog.color.set(0x0a1830);
+        this.scene.background.set(0x0a1830);
+        this.sky.material.uniforms.topColor.value.set(0x0a1830);
+        this.sky.material.uniforms.bottomColor.value.set(0x1a3a5a);
+        this.sky.material.uniforms.horizonColor.value.set(0x2a4a6a);
+        this.ocean.material.uniforms.uFoamColor.value.set(0x4a7a9a);
+        this.sunLight.color.set(0xffeedd);
+
+        const c = mapConfig.colors;
+        if (c && c.water) {
+            this.ocean.material.uniforms.uColor1.value.set(c.deepWater || c.water);
+            this.ocean.material.uniforms.uColor2.value.set(c.water);
+        }
+        if (mapConfig.iceMode) {
+            this.scene.fog.color.set(0x1a2d4a);
+            this.scene.background.set(0x1a2d4a);
+            this.sky.material.uniforms.topColor.value.set(0x1a2d4a);
+            this.sky.material.uniforms.horizonColor.value.set(0x3a5a7a);
+            this.ocean.material.uniforms.uFoamColor.value.set(0x8aaabb);
+        } else if (mapConfig.volcanic) {
+            this.scene.fog.color.set(0x1e0a0a);
+            this.scene.background.set(0x1e0a0a);
+            this.sky.material.uniforms.topColor.value.set(0x1e0a0a);
+            this.sky.material.uniforms.horizonColor.value.set(0x4a2020);
+            this.sky.material.uniforms.bottomColor.value.set(0x3a1a0a);
+            this.sunLight.color.set(0xff8844);
+        }
+    }
+
+    createShipMesh(ship) {
+        const group = new THREE.Group();
+        const L = ship.cfg.length;
+        const W = ship.cfg.width;
+        const H = W * 0.35;
+        const isAlly = ship.team === 'player';
+
+        // 舰体 - 使用Shape挤出
+        const hullShape = new THREE.Shape();
+        hullShape.moveTo(L * 0.5, 0);
+        hullShape.quadraticCurveTo(L * 0.3, W * 0.5, -L * 0.35, W * 0.45);
+        hullShape.lineTo(-L * 0.5, W * 0.25);
+        hullShape.lineTo(-L * 0.5, -W * 0.25);
+        hullShape.lineTo(-L * 0.35, -W * 0.45);
+        hullShape.quadraticCurveTo(L * 0.3, -W * 0.5, L * 0.5, 0);
+
+        const hullGeo = new THREE.ExtrudeGeometry(hullShape, {
+            depth: H, bevelEnabled: true, bevelThickness: 3,
+            bevelSize: 2, bevelSegments: 3
+        });
+        const hullColor = isAlly ? 0x3a6a8a : 0x8a3a3a;
+        const hullMat = new THREE.MeshPhongMaterial({
+            color: hullColor, specular: 0x333333, shininess: 40
+        });
+        const hull = new THREE.Mesh(hullGeo, hullMat);
+        hull.rotation.x = -Math.PI / 2;
+        hull.position.y = 2;
+        hull.castShadow = true;
+        hull.receiveShadow = true;
+        group.add(hull);
+
+        // 甲板
+        const deckGeo = new THREE.BoxGeometry(L * 0.7, 2, W * 0.6);
+        const deckMat = new THREE.MeshPhongMaterial({
+            color: isAlly ? 0x4a7a9a : 0x7a4a4a, specular: 0x222222
+        });
+        const deck = new THREE.Mesh(deckGeo, deckMat);
+        deck.position.set(0, H + 3, 0);
+        deck.castShadow = true;
+        group.add(deck);
+
+        // 上层建筑
+        const superH = H * (ship.type === 'battleship' ? 2.5 : ship.type === 'cruiser' ? 2.0 : 1.5);
+        const superGeo = new THREE.BoxGeometry(L * 0.18, superH, W * 0.35);
+        const superMat = new THREE.MeshPhongMaterial({
+            color: isAlly ? 0x5a8aaa : 0x8a5a5a
+        });
+        const superstructure = new THREE.Mesh(superGeo, superMat);
+        superstructure.position.set(-L * 0.02, H + superH / 2 + 3, 0);
+        superstructure.castShadow = true;
+        group.add(superstructure);
+
+        // 烟囱
+        const stackGeo = new THREE.CylinderGeometry(W * 0.08, W * 0.1, superH * 0.8, 8);
+        const stackMat = new THREE.MeshPhongMaterial({ color: 0x444444 });
+        const stack = new THREE.Mesh(stackGeo, stackMat);
+        stack.position.set(-L * 0.08, H + superH + 3, 0);
+        group.add(stack);
+
+        // 桅杆
+        const mastGeo = new THREE.CylinderGeometry(1, 2, superH * 1.5, 6);
+        const mastMat = new THREE.MeshPhongMaterial({ color: 0x666666 });
+        const mast = new THREE.Mesh(mastGeo, mastMat);
+        mast.position.set(L * 0.05, H + superH * 1.2 + 3, 0);
+        group.add(mast);
+
+        // 前主炮塔
+        const turretGroup = new THREE.Group();
+        const turretBaseGeo = new THREE.CylinderGeometry(W * 0.25, W * 0.28, H * 0.5, 10);
+        const turretMat = new THREE.MeshPhongMaterial({
+            color: isAlly ? 0x6a9abb : 0xaa6655
+        });
+        const turretBase = new THREE.Mesh(turretBaseGeo, turretMat);
+        turretGroup.add(turretBase);
+
+        const barrelCount = ship.type === 'battleship' ? 3 : ship.type === 'cruiser' ? 2 : 1;
+        for (let i = 0; i < barrelCount; i++) {
+            const barrelGeo = new THREE.CylinderGeometry(1.8, 2.2, L * 0.25, 6);
+            const barrelMat = new THREE.MeshPhongMaterial({ color: 0x555555 });
+            const barrel = new THREE.Mesh(barrelGeo, barrelMat);
+            barrel.rotation.z = Math.PI / 2;
+            barrel.position.set(L * 0.125, H * 0.15, (i - (barrelCount - 1) / 2) * 4);
+            turretGroup.add(barrel);
+        }
+        turretGroup.position.set(L * 0.22, H + 5, 0);
+        group.add(turretGroup);
+
+        // 后炮塔（更小）
+        const rearTurretGroup = new THREE.Group();
+        const rearBaseGeo = new THREE.CylinderGeometry(W * 0.18, W * 0.21, H * 0.4, 10);
+        const rearTurretBase = new THREE.Mesh(rearBaseGeo, turretMat.clone());
+        rearTurretGroup.add(rearTurretBase);
+        const rearBarrelCount = Math.max(1, barrelCount - 1);
+        for (let i = 0; i < rearBarrelCount; i++) {
+            const rBarrelGeo = new THREE.CylinderGeometry(1.3, 1.7, L * 0.18, 6);
+            const rBarrelMat = new THREE.MeshPhongMaterial({ color: 0x555555 });
+            const barrel = new THREE.Mesh(rBarrelGeo, rBarrelMat);
+            barrel.rotation.z = Math.PI / 2;
+            barrel.position.set(-L * 0.09, H * 0.12, (i - (rearBarrelCount - 1) / 2) * 3.5);
+            rearTurretGroup.add(barrel);
+        }
+        rearTurretGroup.position.set(-L * 0.25, H + 4, 0);
+        group.add(rearTurretGroup);
+
+        group.userData = { turretGroup, rearTurretGroup, ship, hullMat, originalColor: hullColor };
+
+        this.scene.add(group);
+        this.shipMeshes.set(ship, group);
+        return group;
+    }
+
+    createIslandMesh(island, mapConfig) {
+        const color = mapConfig?.colors?.island || '#4a6a2e';
+        const colorNum = parseInt(color.replace('#', ''), 16);
+        const group = new THREE.Group();
+
+        // 主体 - 随机化锥体
+        const r = island.radius;
+        const h = r * randRange(0.4, 0.8);
+        const geo = new THREE.ConeGeometry(r, h, 16, 4);
+        const positions = geo.attributes.position.array;
+        for (let i = 0; i < positions.length; i += 3) {
+            if (positions[i + 1] < h * 0.4) {
+                positions[i] += (Math.random() - 0.5) * r * 0.35;
+                positions[i + 2] += (Math.random() - 0.5) * r * 0.35;
+            }
+            positions[i + 1] *= (0.6 + Math.random() * 0.4);
+        }
+        geo.computeVertexNormals();
+
+        const mat = new THREE.MeshPhongMaterial({
+            color: colorNum, specular: 0x111111, shininess: 5, flatShading: true
+        });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set(island.x, h * 0.3, island.y);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        group.add(mesh);
+
+        // 植被/雪顶装饰
+        if (mapConfig?.iceMode) {
+            const snowGeo = new THREE.ConeGeometry(r * 0.4, h * 0.3, 8);
+            const snowMat = new THREE.MeshPhongMaterial({ color: 0xddeeff, flatShading: true });
+            const snow = new THREE.Mesh(snowGeo, snowMat);
+            snow.position.set(island.x, h * 0.7, island.y);
+            group.add(snow);
+        } else if (mapConfig?.volcanic) {
+            const lavaGeo = new THREE.ConeGeometry(r * 0.15, h * 0.15, 8);
+            const lavaMat = new THREE.MeshPhongMaterial({
+                color: 0xff4400, emissive: 0xff2200, emissiveIntensity: 0.5
+            });
+            const lava = new THREE.Mesh(lavaGeo, lavaMat);
+            lava.position.set(island.x, h * 0.75, island.y);
+            group.add(lava);
+        } else {
+            const treeCount = Math.floor(r / 80);
+            for (let i = 0; i < treeCount; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const treeDist = Math.random() * r * 0.5;
+                const treeGeo = new THREE.ConeGeometry(12, 30, 6);
+                const treeMat = new THREE.MeshPhongMaterial({
+                    color: 0x2a5a1a + Math.floor(Math.random() * 0x102010),
+                    flatShading: true
+                });
+                const tree = new THREE.Mesh(treeGeo, treeMat);
+                tree.position.set(
+                    island.x + Math.cos(angle) * treeDist,
+                    h * 0.5 + 15,
+                    island.y + Math.sin(angle) * treeDist
+                );
+                group.add(tree);
+            }
+        }
+
+        // 海岸线浅滩
+        const beachGeo = new THREE.RingGeometry(r * 0.9, r * 1.15, 24);
+        const beachMat = new THREE.MeshBasicMaterial({
+            color: 0x2a5a7a, transparent: true, opacity: 0.25, side: THREE.DoubleSide
+        });
+        const beach = new THREE.Mesh(beachGeo, beachMat);
+        beach.rotation.x = -Math.PI / 2;
+        beach.position.set(island.x, 1, island.y);
+        group.add(beach);
+
+        this.scene.add(group);
+        this.islandMeshes.push(group);
+        return group;
+    }
+
+    createCapturePointMesh(cp) {
+        const group = new THREE.Group();
+
+        // 外圈标记
+        const ringGeo = new THREE.RingGeometry(cp.radius * 0.97, cp.radius, 64);
+        const ringMat = new THREE.MeshBasicMaterial({
+            color: 0xaaaaaa, transparent: true, opacity: 0.2, side: THREE.DoubleSide
+        });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = -Math.PI / 2;
+        ring.position.set(cp.x, 3, cp.y);
+        group.add(ring);
+
+        // 中心旗标
+        const poleGeo = new THREE.CylinderGeometry(2, 2, 60, 6);
+        const poleMat = new THREE.MeshPhongMaterial({ color: 0xcccccc });
+        const pole = new THREE.Mesh(poleGeo, poleMat);
+        pole.position.set(cp.x, 30, cp.y);
+        group.add(pole);
+
+        const flagGeo = new THREE.PlaneGeometry(30, 18);
+        const flagMat = new THREE.MeshBasicMaterial({
+            color: 0xffffff, side: THREE.DoubleSide, transparent: true, opacity: 0.9
+        });
+        const flag = new THREE.Mesh(flagGeo, flagMat);
+        flag.position.set(cp.x + 15, 52, cp.y);
+        group.add(flag);
+
+        group.userData = { ringMat, poleMat, flagMat, cp, flag };
+        this.scene.add(group);
+        this.captureMeshes.push(group);
+        return group;
+    }
+
+    // 创建炮弹3D对象
+    createProjectileMesh(proj) {
+        let mesh;
+        if (proj.type === 'torpedo') {
+            const geo = new THREE.SphereGeometry(5, 6, 6);
+            const mat = new THREE.MeshBasicMaterial({ color: 0x80ffb0 });
+            mesh = new THREE.Mesh(geo, mat);
+            // 尾迹
+            const trailGeo = new THREE.BufferGeometry();
+            const trailPositions = new Float32Array(30 * 3);
+            trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+            const trailMat = new THREE.LineBasicMaterial({
+                color: 0x60dd90, transparent: true, opacity: 0.4
+            });
+            const trail = new THREE.Line(trailGeo, trailMat);
+            mesh.userData.trail = trail;
+            this.scene.add(trail);
+        } else {
+            const geo = new THREE.SphereGeometry(3, 6, 6);
+            const mat = new THREE.MeshBasicMaterial({ color: 0xffcc44 });
+            mesh = new THREE.Mesh(geo, mat);
+            // 光晕
+            const glowGeo = new THREE.SphereGeometry(6, 6, 6);
+            const glowMat = new THREE.MeshBasicMaterial({
+                color: 0xffaa22, transparent: true, opacity: 0.3
+            });
+            const glow = new THREE.Mesh(glowGeo, glowMat);
+            mesh.add(glow);
+        }
+        mesh.userData.proj = proj;
+        this.scene.add(mesh);
+        this.projectilePool.push(mesh);
+        return mesh;
+    }
+
+    updateCamera(player) {
+        if (!player || !player.alive) return;
+        const camDist = 450;
+        const camH = 350;
+        const ahead = 200;
+
+        // 相机在舰船后方跟随（基于船首方向）
+        const behindX = player.x - Math.cos(player.angle) * camDist;
+        const behindZ = player.y - Math.sin(player.angle) * camDist;
+
+        this.camTarget.set(behindX, camH, behindZ);
+        this.camera.position.lerp(this.camTarget, 0.035);
+
+        // 看向舰船前方
+        const lx = player.x + Math.cos(player.angle) * ahead;
+        const lz = player.y + Math.sin(player.angle) * ahead;
+        this.camLook.set(lx, 10, lz);
+
+        const currentLook = new THREE.Vector3();
+        this.camera.getWorldDirection(currentLook);
+        this.camera.lookAt(
+            lerp(this.camera.position.x + currentLook.x * 500, this.camLook.x, 0.05),
+            lerp(10, this.camLook.y, 0.05),
+            lerp(this.camera.position.z + currentLook.z * 500, this.camLook.z, 0.05)
+        );
+
+        // 更新阴影相机跟随
+        this.sunLight.position.set(player.x + 3000, 4000, player.y + 2000);
+        this.sunLight.target.position.set(player.x, 0, player.y);
+        this.sunLight.target.updateMatrixWorld();
+
+        // 天穹跟随
+        this.sky.position.set(player.x, 0, player.y);
+    }
+
+    updateShip(ship) {
+        let mesh = this.shipMeshes.get(ship);
+        if (!mesh) mesh = this.createShipMesh(ship);
+
+        if (!ship.alive) {
+            mesh.position.y = lerp(mesh.position.y, -80, 0.015);
+            mesh.rotation.z = Math.sin(ship.sinkTimer * 0.5) * 0.4;
+            mesh.rotation.x = ship.sinkTimer * 0.08;
+            mesh.visible = ship.sinkTimer < 3;
+
+            // 受伤发红
+            const ud = mesh.userData;
+            if (ud.hullMat) ud.hullMat.emissive.setHex(0x330000);
+
+            // 隐藏航迹
+            const wake = this.wakeLines.get(ship);
+            if (wake) {
+                wake.left.visible = false;
+                wake.right.visible = false;
+                wake.center.visible = false;
+            }
+            return;
+        }
+
+        mesh.visible = true;
+        const bobY = Math.sin(this.time * 1.2 + ship.x * 0.005) * 3;
+        const roll = Math.sin(this.time * 0.8 + ship.y * 0.003) * 0.02;
+        const pitch = Math.sin(this.time * 0.6 + ship.x * 0.004) * 0.015;
+
+        mesh.position.set(ship.x, 6 + bobY, ship.y);
+        mesh.rotation.y = -ship.angle;
+        mesh.rotation.z = roll + ship.rudder * ship.speed * 0.005;
+        mesh.rotation.x = pitch;
+
+        // 前主炮跟随玩家瞄准
+        const tg = mesh.userData.turretGroup;
+        if (tg) tg.rotation.y = -(ship.turretAngle - ship.angle);
+        // 尾炮独立自动瞄准
+        const rtg = mesh.userData.rearTurretGroup;
+        if (rtg) rtg.rotation.y = -(ship.rearTurretAngle - ship.angle);
+
+        // 受伤闪光
+        const ud = mesh.userData;
+        if (ship.damageFlash > 0 && ud.hullMat) {
+            ud.hullMat.emissive.setHex(0x661111);
+        } else if (ud.hullMat) {
+            ud.hullMat.emissive.setHex(0x000000);
+        }
+
+        // 航迹尾流
+        this.updateWake(ship);
+    }
+
+    updateWake(ship) {
+        const spd = Math.abs(ship.speed);
+        if (spd < 0.3) return;
+
+        let wake = this.wakeLines.get(ship);
+        if (!wake) {
+            const maxPts = 60;
+            // 左舷尾浪
+            const lGeo = new THREE.BufferGeometry();
+            const lPos = new Float32Array(maxPts * 3);
+            const lAlpha = new Float32Array(maxPts);
+            lGeo.setAttribute('position', new THREE.BufferAttribute(lPos, 3));
+            lGeo.setAttribute('alpha', new THREE.BufferAttribute(lAlpha, 1));
+            const lMat = new THREE.ShaderMaterial({
+                transparent: true, depthWrite: false,
+                vertexShader: `
+                    attribute float alpha;
+                    varying float vAlpha;
+                    void main() {
+                        vAlpha = alpha;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    varying float vAlpha;
+                    void main() {
+                        gl_FragColor = vec4(0.7, 0.85, 1.0, vAlpha * 0.5);
+                    }
+                `
+            });
+            const lLine = new THREE.Line(lGeo, lMat);
+            lLine.frustumCulled = false;
+            this.scene.add(lLine);
+
+            // 右舷尾浪
+            const rGeo = new THREE.BufferGeometry();
+            const rPos = new Float32Array(maxPts * 3);
+            const rAlpha = new Float32Array(maxPts);
+            rGeo.setAttribute('position', new THREE.BufferAttribute(rPos, 3));
+            rGeo.setAttribute('alpha', new THREE.BufferAttribute(rAlpha, 1));
+            const rLine = new THREE.Line(rGeo, lMat.clone());
+            rLine.frustumCulled = false;
+            this.scene.add(rLine);
+
+            // 中心泡沫带
+            const cGeo = new THREE.BufferGeometry();
+            const cPos = new Float32Array(maxPts * 3);
+            const cAlpha = new Float32Array(maxPts);
+            cGeo.setAttribute('position', new THREE.BufferAttribute(cPos, 3));
+            cGeo.setAttribute('alpha', new THREE.BufferAttribute(cAlpha, 1));
+            const cMat = new THREE.ShaderMaterial({
+                transparent: true, depthWrite: false,
+                vertexShader: `
+                    attribute float alpha;
+                    varying float vAlpha;
+                    void main() {
+                        vAlpha = alpha;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    varying float vAlpha;
+                    void main() {
+                        gl_FragColor = vec4(0.85, 0.95, 1.0, vAlpha * 0.7);
+                    }
+                `
+            });
+            const cLine = new THREE.Line(cGeo, cMat);
+            cLine.frustumCulled = false;
+            this.scene.add(cLine);
+
+            wake = { left: lLine, right: rLine, center: cLine, points: [], maxPts, timer: 0 };
+            this.wakeLines.set(ship, wake);
+        }
+
+        // 每隔一小段时间记录位置
+        wake.timer += 1 / 60;
+        if (wake.timer > 0.08) {
+            wake.timer = 0;
+            const W = ship.cfg.width;
+            const halfW = W * 0.5;
+            const sternX = ship.x - Math.cos(ship.angle) * ship.cfg.length * 0.45;
+            const sternZ = ship.y - Math.sin(ship.angle) * ship.cfg.length * 0.45;
+            const perpX = -Math.sin(ship.angle);
+            const perpZ = Math.cos(ship.angle);
+
+            wake.points.unshift({
+                cx: sternX, cz: sternZ,
+                lx: sternX + perpX * halfW, lz: sternZ + perpZ * halfW,
+                rx: sternX - perpX * halfW, rz: sternZ - perpZ * halfW,
+                spread: 0
+            });
+            if (wake.points.length > wake.maxPts) wake.points.pop();
+        }
+
+        // 更新几何体
+        const pts = wake.points;
+        const lPos = wake.left.geometry.attributes.position.array;
+        const lAlpha = wake.left.geometry.attributes.alpha.array;
+        const rPos = wake.right.geometry.attributes.position.array;
+        const rAlpha = wake.right.geometry.attributes.alpha.array;
+        const cPos = wake.center.geometry.attributes.position.array;
+        const cAlpha = wake.center.geometry.attributes.alpha.array;
+
+        for (let i = 0; i < wake.maxPts; i++) {
+            if (i < pts.length) {
+                const p = pts[i];
+                const fade = 1 - i / pts.length;
+                p.spread += 0.15; // 尾浪逐渐扩散
+                const spreadFactor = p.spread * 0.3;
+                const perpX = (p.lx - p.cx);
+                const perpZ = (p.lz - p.cz);
+                const normLen = Math.sqrt(perpX * perpX + perpZ * perpZ) || 1;
+
+                lPos[i * 3] = p.lx + (perpX / normLen) * spreadFactor;
+                lPos[i * 3 + 1] = 1.5;
+                lPos[i * 3 + 2] = p.lz + (perpZ / normLen) * spreadFactor;
+                lAlpha[i] = fade * Math.min(spd * 0.5, 1);
+
+                rPos[i * 3] = p.rx - (perpX / normLen) * spreadFactor;
+                rPos[i * 3 + 1] = 1.5;
+                rPos[i * 3 + 2] = p.rz - (perpZ / normLen) * spreadFactor;
+                rAlpha[i] = fade * Math.min(spd * 0.5, 1);
+
+                cPos[i * 3] = p.cx;
+                cPos[i * 3 + 1] = 1.8;
+                cPos[i * 3 + 2] = p.cz;
+                cAlpha[i] = fade * Math.min(spd * 0.6, 1) * 0.8;
+            } else {
+                lAlpha[i] = 0;
+                rAlpha[i] = 0;
+                cAlpha[i] = 0;
+            }
+        }
+
+        wake.left.geometry.attributes.position.needsUpdate = true;
+        wake.left.geometry.attributes.alpha.needsUpdate = true;
+        wake.right.geometry.attributes.position.needsUpdate = true;
+        wake.right.geometry.attributes.alpha.needsUpdate = true;
+        wake.center.geometry.attributes.position.needsUpdate = true;
+        wake.center.geometry.attributes.alpha.needsUpdate = true;
+        wake.left.geometry.setDrawRange(0, Math.min(pts.length, wake.maxPts));
+        wake.right.geometry.setDrawRange(0, Math.min(pts.length, wake.maxPts));
+        wake.center.geometry.setDrawRange(0, Math.min(pts.length, wake.maxPts));
+    }
+
+    updateProjectiles(projectiles) {
+        // 清理旧的
+        for (let i = this.projectilePool.length - 1; i >= 0; i--) {
+            const mesh = this.projectilePool[i];
+            const proj = mesh.userData.proj;
+            if (!proj || !proj.alive) {
+                this.scene.remove(mesh);
+                if (mesh.userData.trail) this.scene.remove(mesh.userData.trail);
+                this.projectilePool.splice(i, 1);
+            }
+        }
+
+        // 添加新的
+        const existingProjs = new Set(this.projectilePool.map(m => m.userData.proj));
+        for (const proj of projectiles) {
+            if (!proj.alive) continue;
+            if (!existingProjs.has(proj)) {
+                this.createProjectileMesh(proj);
+            }
+        }
+
+        // 更新位置
+        for (const mesh of this.projectilePool) {
+            const proj = mesh.userData.proj;
+            if (!proj) continue;
+            const h = proj.type === 'torpedo' ? 2 : 30 + Math.sin(proj.traveled * 0.01) * 20;
+            mesh.position.set(proj.x, h, proj.y);
+        }
+    }
+
+    updateCapturePoints() {
+        for (const group of this.captureMeshes) {
+            const { ringMat, flagMat, cp, flag } = group.userData;
+
+            let color = 0xaaaaaa;
+            if (cp.owner === 'player') color = 0x44aaff;
+            else if (cp.owner === 'enemy') color = 0xff4444;
+            else if (cp.capturer === 'player') color = 0x2277cc;
+            else if (cp.capturer === 'enemy') color = 0xcc2222;
+
+            if (cp.contested) {
+                const pulse = Math.sin(this.time * 5) * 0.3 + 0.7;
+                ringMat.opacity = 0.3 * pulse;
+                color = 0xffcc44;
+            } else {
+                ringMat.opacity = 0.2;
+            }
+
+            ringMat.color.setHex(color);
+            flagMat.color.setHex(color);
+
+            // 旗帜飘动
+            if (flag) {
+                flag.rotation.y = Math.sin(this.time * 2) * 0.15;
+            }
+        }
+    }
+
+    render(dt) {
+        this.time += dt;
+        this.ocean.material.uniforms.uTime.value = this.time;
+        this.ocean.material.uniforms.uCamPos.value.copy(this.camera.position);
+        this.updateCapturePoints();
+        this.renderer.render(this.scene, this.camera);
+    }
+
+    clearScene() {
+        for (const [, mesh] of this.shipMeshes) {
+            this.scene.remove(mesh);
+        }
+        this.shipMeshes.clear();
+        // 清理航迹
+        for (const [, wake] of this.wakeLines) {
+            this.scene.remove(wake.left);
+            this.scene.remove(wake.right);
+            this.scene.remove(wake.center);
+        }
+        this.wakeLines.clear();
+        for (const mesh of this.islandMeshes) this.scene.remove(mesh);
+        this.islandMeshes = [];
+        for (const mesh of this.captureMeshes) this.scene.remove(mesh);
+        this.captureMeshes = [];
+        for (const mesh of this.projectilePool) {
+            this.scene.remove(mesh);
+            if (mesh.userData.trail) this.scene.remove(mesh.userData.trail);
+        }
+        this.projectilePool = [];
+    }
+
+    onResize() {
+        this.camera.aspect = window.innerWidth / window.innerHeight;
+        this.camera.updateProjectionMatrix();
+        this.renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+}
 
 // ==================== 粒子系统 ====================
 class Particle {
@@ -577,11 +1380,13 @@ class Ship {
         this.maxHp = this.cfg.hp;
         this.angle = Math.random() * Math.PI * 2;
         this.turretAngle = this.angle;
+        this.rearTurretAngle = this.angle + Math.PI; // 尾炮初始朝后
         this.speed = 0;
         this.throttle = 0; // -1 to 1
         this.rudder = 0; // -1 to 1
         this.alive = true;
         this.mainGunTimer = 0;
+        this.rearGunTimer = 0; // 尾炮冷却
         this.torpedoTimer = 0;
         this.repairCooldown = 0;
         this.sinkTimer = 0;
@@ -603,11 +1408,12 @@ class Ship {
         }
         // 冷却
         if (this.mainGunTimer > 0) this.mainGunTimer -= dt;
+        if (this.rearGunTimer > 0) this.rearGunTimer -= dt;
         if (this.torpedoTimer > 0) this.torpedoTimer -= dt;
         if (this.repairCooldown > 0) this.repairCooldown -= dt;
         if (this.damageFlash > 0) this.damageFlash -= dt;
         // 物理
-        const maxSpd = this.cfg.maxSpeed * 0.3; // 像素/帧 尺度
+        const maxSpd = this.cfg.maxSpeed * 0.15; // 像素/帧 尺度 - 降速还原WWS手感
         const targetSpeed = this.throttle * maxSpd;
         this.speed = lerp(this.speed, targetSpeed, this.cfg.acceleration);
         if (Math.abs(this.speed) > 0.2) {
@@ -648,6 +1454,40 @@ class Ship {
             this.turretAngle += diff * 0.1;
             this.turretAngle = normalizeAngle(this.turretAngle);
         }
+
+        // 尾炮自动瞄准射程内最近敌舰
+        const rearGun = this.cfg.rearGun;
+        if (rearGun) {
+            const enemyTeam = this.team === 'player' ? game.enemies : game.allies;
+            let nearestEnemy = null;
+            let nearestDist = rearGun.range;
+            for (const enemy of enemyTeam) {
+                if (!enemy || !enemy.alive) continue;
+                const d = dist(this, enemy);
+                if (d < nearestDist) {
+                    nearestDist = d;
+                    nearestEnemy = enemy;
+                }
+            }
+            if (nearestEnemy) {
+                // 计算预判角度
+                const predAngle = this.predictLead(nearestEnemy, rearGun.shellSpeed);
+                // 平滑旋转尾炮
+                let rDiff = normalizeAngle(predAngle - this.rearTurretAngle);
+                this.rearTurretAngle += rDiff * 0.08;
+                this.rearTurretAngle = normalizeAngle(this.rearTurretAngle);
+                // 自动开火
+                if (this.rearGunTimer <= 0 && Math.abs(rDiff) < 0.15) {
+                    this.fireRearGun(this.rearTurretAngle, game);
+                }
+            } else {
+                // 无目标时尾炮回归朝后
+                const backAngle = this.angle + Math.PI;
+                let rDiff = normalizeAngle(backAngle - this.rearTurretAngle);
+                this.rearTurretAngle += rDiff * 0.03;
+                this.rearTurretAngle = normalizeAngle(this.rearTurretAngle);
+            }
+        }
     }
 
     fireMainGun(targetAngle, game) {
@@ -670,6 +1510,32 @@ class Ship {
                 this.y + Math.sin(this.angle) * this.cfg.length * 0.35,
                 Math.cos(a) * spd, Math.sin(a) * spd,
                 randRange(0.2, 0.5), randRange(3, 6), '#ffdd44'
+            ));
+        }
+        return true;
+    }
+
+    fireRearGun(targetAngle, game) {
+        const rearGun = this.cfg.rearGun;
+        if (!rearGun || this.rearGunTimer > 0 || !this.alive) return false;
+        this.rearGunTimer = rearGun.reload;
+        for (let i = 0; i < rearGun.shells; i++) {
+            const spread = (Math.random() - 0.5) * rearGun.spread;
+            const a = targetAngle + spread;
+            // 从船尾发射
+            const ox = this.x - Math.cos(this.angle) * this.cfg.length * 0.3;
+            const oy = this.y - Math.sin(this.angle) * this.cfg.length * 0.3;
+            game.projectiles.push(new Projectile(ox, oy, a, rearGun.shellSpeed, rearGun.range, rearGun.damage, 'shell', this));
+        }
+        // 炮口闪光（较小）
+        for (let i = 0; i < 5; i++) {
+            const a = targetAngle + randRange(-0.5, 0.5);
+            const spd = randRange(0.8, 2);
+            game.particles.push(new Particle(
+                this.x - Math.cos(this.angle) * this.cfg.length * 0.3,
+                this.y - Math.sin(this.angle) * this.cfg.length * 0.3,
+                Math.cos(a) * spd, Math.sin(a) * spd,
+                randRange(0.15, 0.35), randRange(2, 5), '#ffcc33'
             ));
         }
         return true;
@@ -847,252 +1713,222 @@ class Ship {
         }
     }
 
-    // AI - 强化版
+    // AI - 好战强化版 + 避障寻路
     updateAI(dt, game) {
         if (!this.alive || this.isPlayer) return;
 
         this.aiFireDelay -= dt;
         this.aiTorpDelay -= dt;
+        if (!this._stuckTimer) this._stuckTimer = 0;
+        if (!this._stuckAngle) this._stuckAngle = 0;
 
         const hpRatio = this.hp / this.maxHp;
-        const enemyTeam = this.team === 'player' ? game.enemies : [...game.allies, game.player].filter(s => s && s.alive);
-        const allyTeam = this.team === 'player' ? [...game.allies, game.player].filter(s => s && s.alive) : game.enemies;
+        const enemyTeam = this.team === 'player' ? game.enemies : [...game.allies].filter(s => s && s.alive);
+        const allyTeam = this.team === 'player' ? [...game.allies].filter(s => s && s.alive) : game.enemies;
+        const worldSize = game.currentMap?.size || 36000;
 
-        // 寻找最近的敌方目标
-        let closestEnemy = null;
-        let closestDist = Infinity;
+        // === 寻找目标（优先选择近距离/残血） ===
+        let bestTarget = null;
+        let bestScore = -Infinity;
         for (const enemy of enemyTeam) {
             if (!enemy || !enemy.alive) continue;
             const d = dist(this, enemy);
-            if (d < closestDist) {
-                closestDist = d;
-                closestEnemy = enemy;
-            }
+            const hpR = enemy.hp / enemy.maxHp;
+            // 评分：距离越近越好，血越少越好
+            let score = -d / 1000 + (1 - hpR) * 8;
+            if (d < this.cfg.mainGun.range) score += 15; // 射程内大加分
+            if (d < this.cfg.mainGun.range * 0.6) score += 10;
+            if (hpR < 0.3) score += 12; // 残血高优先
+            if (score > bestScore) { bestScore = score; bestTarget = enemy; }
         }
-        this.aiTarget = closestEnemy;
-
-        // 计算分数差距
-        const scoreDiff = this.team === 'player' ? 
-            (game.playerScore - game.enemyScore) : 
-            (game.enemyScore - game.playerScore);
-        const isLosing = scoreDiff < -100;
-        const isWinning = scoreDiff > 100;
-
-        // 获取占领点信息
-        const myTeamCaps = game.capturePoints.filter(cp => cp.owner === this.team).length;
-        const enemyCaps = game.capturePoints.filter(cp => cp.owner === (this.team === 'player' ? 'enemy' : 'player')).length;
-        const totalCaps = game.capturePoints.length;
-        const neutralCaps = game.capturePoints.filter(cp => !cp.owner && !cp.capturer);
-
-        // AI状态决策优先级：
-        // 1. 低血量撤退 (HP < 25%)
-        // 2. 争夺/防守控制点
-        // 3. 追击残血敌人
-        // 4. 常规战斗
-        // 5. 占领空闲点
+        this.aiTarget = bestTarget;
+        const targetDist = bestTarget ? dist(this, bestTarget) : Infinity;
 
         let targetX = null, targetY = null;
         let targetSpeed = 0.2;
         let shouldFire = false;
         let shouldUseTorp = false;
 
-        // 状态1：严重受损，撤退找队友
-        if (hpRatio < 0.25) {
+        // === 状态决策：战斗优先 ===
+
+        // 1. 极低血量撤退 (HP < 12%)
+        if (hpRatio < 0.12 && targetDist > 3000) {
             this.aiState = 'retreat';
-            // 寻找最近的队友方向撤退
-            let nearestAlly = null;
-            let nearestAllyDist = Infinity;
+            let nearestAlly = null, nearestAllyDist = Infinity;
             for (const ally of allyTeam) {
                 if (ally === this) continue;
                 const d = dist(this, ally);
-                if (d < nearestAllyDist) {
-                    nearestAllyDist = d;
-                    nearestAlly = ally;
-                }
+                if (d < nearestAllyDist) { nearestAllyDist = d; nearestAlly = ally; }
             }
-            if (nearestAlly) {
-                targetX = nearestAlly.x;
-                targetY = nearestAlly.y;
-                targetSpeed = 0.25;
-            } else {
-                // 没有队友，向出生点撤退
+            if (nearestAlly) { targetX = nearestAlly.x; targetY = nearestAlly.y; }
+            else {
                 const spawn = this.team === 'player' ? game.currentMap.spawns.allies[0] : game.currentMap.spawns.enemies[0];
-                targetX = spawn.x;
-                targetY = spawn.y;
-                targetSpeed = 0.25;
+                targetX = spawn.x; targetY = spawn.y;
+            }
+            targetSpeed = 0.3;
+            // 撤退时也射击追击者
+            if (bestTarget && targetDist < this.cfg.mainGun.range) {
+                shouldFire = this.aiFireDelay <= 0;
             }
         }
-        // 状态2：争夺控制点（如果落后或机会好）
-        else if (isLosing || (neutralCaps > 0 && !this.aiTarget) || (myTeamCaps < totalCaps * 0.5)) {
-            // 寻找最佳占领点
-            let bestPoint = null;
-            let bestScore = -Infinity;
-            
+        // 2. 有敌人 → 战斗为主
+        else if (bestTarget) {
+            const d = targetDist;
+            const aToTarget = angleTo(this, bestTarget);
+
+            // 追击残血目标
+            if (bestTarget.hp / bestTarget.maxHp < 0.35) {
+                this.aiState = 'chase';
+                targetX = bestTarget.x + Math.cos(bestTarget.angle) * bestTarget.speed * 30;
+                targetY = bestTarget.y + Math.sin(bestTarget.angle) * bestTarget.speed * 30;
+                targetSpeed = 0.35;
+            }
+            // 在主炮射程外，快速接近
+            else if (d > this.cfg.mainGun.range * 0.95) {
+                this.aiState = 'approach';
+                targetX = bestTarget.x;
+                targetY = bestTarget.y;
+                targetSpeed = 0.3;
+            }
+            // 在射程内，战斗机动
+            else {
+                this.aiState = 'combat';
+                const optimalRange = this.type === 'battleship' ? this.cfg.mainGun.range * 0.75 :
+                                    this.type === 'destroyer' ? this.cfg.torpedo.range * 0.6 :
+                                    this.cfg.mainGun.range * 0.6;
+
+                if (d < optimalRange * 0.4 && this.type !== 'destroyer') {
+                    // 太近，拉开
+                    const retreatAngle = aToTarget + Math.PI;
+                    targetX = this.x + Math.cos(retreatAngle) * 800;
+                    targetY = this.y + Math.sin(retreatAngle) * 800;
+                    targetSpeed = 0.2;
+                } else {
+                    // 侧舷机动 - 绕着敌人画弧
+                    const circleDir = ((this.x + this.y) % 2 < 1) ? 1 : -1;
+                    const desiredAngle = aToTarget + Math.PI * 0.35 * circleDir;
+                    const diff = normalizeAngle(desiredAngle - this.angle);
+                    this.rudder = clamp(diff * 3, -1, 1);
+                    this.throttle = 0.18;
+                    targetSpeed = null;
+                }
+            }
+
+            // 射程内积极开火
+            if (d < this.cfg.mainGun.range && this.aiFireDelay <= 0) shouldFire = true;
+            // 鱼雷距离判定
+            if (d < this.cfg.torpedo.range * 0.75 && this.aiTorpDelay <= 0) {
+                // 检查鱼雷方向没有友军
+                const torpAngle = this.predictLead(bestTarget, this.cfg.torpedo.speed);
+                let friendlyInPath = false;
+                for (const ally of allyTeam) {
+                    if (ally === this || !ally.alive) continue;
+                    const aToAlly = angleTo(this, ally);
+                    const allyDist = dist(this, ally);
+                    if (allyDist < d && Math.abs(normalizeAngle(torpAngle - aToAlly)) < 0.25) {
+                        friendlyInPath = true; break;
+                    }
+                }
+                if (!friendlyInPath) shouldUseTorp = true;
+            }
+
+            // 炮塔始终跟踪目标
+            const leadAngle = this.predictLead(bestTarget, this.cfg.mainGun.shellSpeed);
+            this.turretAngle = lerp(this.turretAngle, leadAngle, 0.12);
+        }
+        // 3. 无敌人 → 主动巡逻寻敌/占点
+        else {
+            // 优先去未占领的控制点
+            let bestCp = null, bestCpDist = Infinity;
             for (const cp of game.capturePoints) {
-                // 计算占领这个点的价值
-                let score = 0;
+                if (cp.owner === this.team) continue;
                 const d = dist(this, cp);
-                
-                if (!cp.owner && !cp.capturer) {
-                    // 空闲点，价值高
-                    score = 100 - d / 100;
-                } else if (cp.owner !== this.team && !cp.contested) {
-                    // 敌方点但未被争夺
-                    score = 80 - d / 100;
-                } else if (cp.capturer !== this.team && cp.progress > 50) {
-                    // 敌方正在占领，去打断
-                    score = 90 - d / 100;
-                } else if (cp.owner === this.team && cp.contested) {
-                    // 我方点被争夺，防守
-                    score = 70 - d / 100;
-                }
-                
-                // 考虑距离惩罚
-                score -= d / 200;
-                
-                if (score > bestScore) {
-                    bestScore = score;
-                    bestPoint = cp;
-                }
+                if (d < bestCpDist) { bestCpDist = d; bestCp = cp; }
             }
-            
-            if (bestPoint) {
-                this.aiState = 'capture';
-                targetX = bestPoint.x;
-                targetY = bestPoint.y;
-                targetSpeed = 0.22;
-                
-                // 如果在占领范围内且没有敌人，减速占领
-                if (dist(this, bestPoint) < bestPoint.radius * 0.8 && !bestPoint.contested) {
-                    targetSpeed = 0.05;
-                }
-            }
-        }
-
-        // 如果没有指定目标点，使用默认行为
-        if (targetX === null) {
-            // 友军AI跟随玩家或寻找目标
-            if (this.team === 'player' && !this.aiTarget) {
-                if (game.player && game.player.alive) {
-                    const targetPX = game.player.x + this.aiFormationOffset.x;
-                    const targetPY = game.player.y + this.aiFormationOffset.y;
-                    const d = Math.hypot(targetPX - this.x, targetPY - this.y);
-                    if (d > 500) {
-                        targetX = targetPX;
-                        targetY = targetPY;
-                        targetSpeed = 0.15;
-                    } else {
-                        this.throttle = 0.05;
-                        this.rudder *= 0.9;
-                    }
-                }
-                this.turretAngle = lerp(this.turretAngle, this.angle, 0.05);
-                return;
-            }
-
-            if (this.aiTarget && this.aiTarget.alive) {
-                const d = dist(this, this.aiTarget);
-                const aToTarget = angleTo(this, this.aiTarget);
-
-                // 追击残血敌人（血量低于30%）
-                if (this.aiTarget.hp / this.aiTarget.maxHp < 0.3) {
-                    this.aiState = 'chase';
-                    targetX = this.aiTarget.x;
-                    targetY = this.aiTarget.y;
-                    targetSpeed = 0.28; // 全速追击
-                }
-                // 敌人距离远，接近
-                else if (d > this.cfg.mainGun.range * 1.5) {
-                    this.aiState = 'approach';
-                    targetX = this.aiTarget.x;
-                    targetY = this.aiTarget.y;
-                    targetSpeed = 0.25;
-                }
-                // 进入战斗距离
-                else {
-                    this.aiState = 'combat';
-                    // 保持最佳战斗距离：战列舰远，驱逐舰近
-                    const optimalRange = this.type === 'battleship' ? this.cfg.mainGun.range * 0.9 :
-                                        this.type === 'destroyer' ? this.cfg.torpedo.range * 0.7 :
-                                        this.cfg.mainGun.range * 0.7;
-                    
-                    if (d > optimalRange * 1.2) {
-                        // 距离太远，接近
-                        targetX = this.aiTarget.x;
-                        targetY = this.aiTarget.y;
-                        targetSpeed = 0.18;
-                    } else if (d < optimalRange * 0.6 && this.type !== 'destroyer') {
-                        // 距离太近（非驱逐舰），后退保持距离
-                        const retreatAngle = aToTarget + Math.PI;
-                        targetX = this.x + Math.cos(retreatAngle) * 500;
-                        targetY = this.y + Math.sin(retreatAngle) * 500;
-                        targetSpeed = 0.15;
-                    } else {
-                        // 理想距离，保持侧舷
-                        const desiredAngle = aToTarget + Math.PI * 0.4;
-                        const diff = normalizeAngle(desiredAngle - this.angle);
-                        this.rudder = clamp(diff * 2, -1, 1);
-                        this.throttle = 0.12;
-                        targetSpeed = null; // 使用上面设置的值
-                        
-                        // 开火决策
-                        shouldFire = d < this.cfg.mainGun.range && this.aiFireDelay <= 0;
-                        shouldUseTorp = d < this.cfg.torpedo.range * 0.8 && this.aiTorpDelay <= 0;
-                        
-                        // 更新炮塔角度
-                        const leadAngle = this.predictLead(this.aiTarget, this.cfg.mainGun.shellSpeed);
-                        this.turretAngle = lerp(this.turretAngle, leadAngle, 0.08);
-                    }
-                }
+            if (bestCp) {
+                targetX = bestCp.x; targetY = bestCp.y;
+                targetSpeed = 0.25;
+                if (dist(this, bestCp) < bestCp.radius * 0.7) targetSpeed = 0.06;
             } else {
-                // 巡逻状态 - 寻找最近的中立或敌方控制点
-                let nearestTarget = this.aiPatrolTarget;
-                let nearestDist = dist(this, nearestTarget);
-                
-                for (const cp of game.capturePoints) {
-                    if (cp.owner !== this.team) {
-                        const d = dist(this, cp);
-                        if (d < nearestDist) {
-                            nearestDist = d;
-                            nearestTarget = { x: cp.x, y: cp.y };
-                        }
-                    }
-                }
-                
-                this.aiPatrolTarget = nearestTarget;
-                targetX = this.aiPatrolTarget.x;
-                targetY = this.aiPatrolTarget.y;
-                targetSpeed = 0.15;
+                // 所有点已占领，向地图中心巡逻
+                targetX = worldSize / 2 + randRange(-3000, 3000);
+                targetY = worldSize / 2 + randRange(-3000, 3000);
+                targetSpeed = 0.2;
             }
+            this.turretAngle = lerp(this.turretAngle, this.angle, 0.05);
         }
 
-        // 执行移动
+        // === 执行移动 + 岛屿避障 ===
         if (targetX !== null && targetY !== null) {
-            const aToTarget = angleTo(this, { x: targetX, y: targetY });
-            const diff = normalizeAngle(aToTarget - this.angle);
-            this.rudder = clamp(diff * 3, -1, 1);
-            this.throttle = targetSpeed;
-            
-            // 炮塔转向目标
+            let steerAngle = angleTo(this, { x: targetX, y: targetY });
+
+            // 岛屿避障：检测前方扇形区域内是否有障碍
+            let avoidAngle = 0;
+            let needAvoid = false;
+            const checkDist = this.cfg.length * 4 + Math.abs(this.speed) * 40;
+            for (const isl of game.islands) {
+                const d = dist(this, isl);
+                const clearance = isl.radius + this.cfg.width * 2;
+                if (d < clearance + checkDist && d > clearance * 0.3) {
+                    const aToIsland = angleTo(this, isl);
+                    const relAngle = normalizeAngle(aToIsland - this.angle);
+                    // 前方±60度内有岛
+                    if (Math.abs(relAngle) < Math.PI * 0.35) {
+                        needAvoid = true;
+                        // 选择绕行方向：偏离岛屿
+                        const avoidDir = relAngle > 0 ? -1 : 1;
+                        const urgency = 1 - (d - clearance) / checkDist;
+                        avoidAngle += avoidDir * Math.PI * 0.5 * Math.max(urgency, 0.3);
+                    }
+                }
+            }
+
+            if (needAvoid) {
+                steerAngle = this.angle + avoidAngle;
+            }
+
+            // 边界回避
+            const margin = 1500;
+            if (this.x < margin) steerAngle = 0;
+            else if (this.x > worldSize - margin) steerAngle = Math.PI;
+            if (this.y < margin) steerAngle = Math.PI * 0.5;
+            else if (this.y > worldSize - margin) steerAngle = -Math.PI * 0.5;
+
+            const diff = normalizeAngle(steerAngle - this.angle);
+            this.rudder = clamp(diff * 3.5, -1, 1);
+            if (targetSpeed !== null) this.throttle = targetSpeed;
+
+            // 炮塔跟踪（如果有目标）
             if (this.aiTarget && this.aiTarget.alive) {
                 const leadAngle = this.predictLead(this.aiTarget, this.cfg.mainGun.shellSpeed);
-                this.turretAngle = lerp(this.turretAngle, leadAngle, 0.08);
-            } else {
-                this.turretAngle = lerp(this.turretAngle, this.angle, 0.05);
+                this.turretAngle = lerp(this.turretAngle, leadAngle, 0.12);
             }
         }
 
-        // 执行开火
-        if (shouldFire) {
+        // === 卡死检测与脱困 ===
+        if (Math.abs(this.speed) < 0.15 && Math.abs(this.throttle) > 0.05) {
+            this._stuckTimer += dt;
+            if (this._stuckTimer > 1.5) {
+                // 卡住了，反向+随机转向脱困
+                this.throttle = -0.2;
+                this._stuckAngle = this.angle + (Math.random() > 0.5 ? 1 : -1) * Math.PI * 0.6;
+                this.rudder = normalizeAngle(this._stuckAngle - this.angle) > 0 ? 1 : -1;
+                if (this._stuckTimer > 3) this._stuckTimer = 0; // 重置
+            }
+        } else {
+            this._stuckTimer = 0;
+        }
+
+        // === 开火执行 ===
+        if (shouldFire && this.aiTarget) {
             const leadAngle = this.predictLead(this.aiTarget, this.cfg.mainGun.shellSpeed);
             this.fireMainGun(leadAngle, game);
-            this.aiFireDelay = randRange(1.0, 3.0); // 更快射击
+            this.aiFireDelay = randRange(0.3, 1.2); // 极快射击
         }
-        
-        if (shouldUseTorp) {
+        if (shouldUseTorp && this.aiTarget) {
             const leadAngle = this.predictLead(this.aiTarget, this.cfg.torpedo.speed);
             this.fireTorpedo(leadAngle, game);
-            this.aiTorpDelay = randRange(8, 20); // 更快发射鱼雷
+            this.aiTorpDelay = randRange(4, 10); // 更频繁鱼雷
         }
     }
 
@@ -1150,6 +1986,16 @@ class Game {
 
         // 海浪纹理偏移
         this.waveTime = 0;
+
+        // 3D渲染器
+        this.renderer3D = new Renderer3D();
+
+        // 缓存3D投影对象（避免每帧GC）
+        this._raycaster = new THREE.Raycaster();
+        this._ndcVec = new THREE.Vector2();
+        this._seaPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+        this._rayTarget = new THREE.Vector3();
+        this._projVec = new THREE.Vector3();
     }
 
     // 获取当前玩家控制的船
@@ -1158,9 +2004,13 @@ class Game {
         return this.allies[this.playerIndex] || this.allies[0];
     }
 
-    // 切换到指定舰船
+    // 切换到指定舰船（1-9对应index 0-8）
     switchToShip(index) {
         if (index < 0 || index >= this.allies.length) return false;
+        if (this.spectatorMode) return false;
+        const target = this.allies[index];
+        if (!target || !target.alive) return false;
+
         const oldPlayer = this.getPlayer();
         if (oldPlayer) {
             oldPlayer.isPlayer = false;
@@ -1168,12 +2018,53 @@ class Game {
             oldPlayer.rudder = 0;
         }
         this.playerIndex = index;
-        const newPlayer = this.getPlayer();
-        if (newPlayer && newPlayer.alive) {
-            newPlayer.isPlayer = true;
-            return true;
+        target.isPlayer = true;
+        return true;
+    }
+
+    // 进入/退出观战模式
+    toggleSpectator() {
+        if (this.spectatorMode) {
+            // 退出观战 - 找一个存活的舰船接管
+            let idx = this.spectatorTarget;
+            if (!this.allies[idx] || !this.allies[idx].alive) {
+                idx = this.allies.findIndex(a => a && a.alive);
+                if (idx < 0) return; // 全部沉没
+            }
+            this.exitSpectator(idx);
+        } else {
+            // 进入观战
+            const oldPlayer = this.getPlayer();
+            if (oldPlayer) {
+                oldPlayer.isPlayer = false;
+                oldPlayer.throttle = 0;
+                oldPlayer.rudder = 0;
+            }
+            this.spectatorMode = true;
+            this.spectatorTarget = this.playerIndex;
+            document.getElementById('crosshair').style.display = 'none';
         }
-        return false;
+    }
+
+    // 退出观战模式并接管指定舰船
+    exitSpectator(index) {
+        if (index < 0 || index >= this.allies.length) return;
+        const target = this.allies[index];
+        if (!target || !target.alive) return;
+        this.spectatorMode = false;
+        this.playerIndex = index;
+        target.isPlayer = true;
+        document.getElementById('crosshair').style.display = 'block';
+    }
+
+    // 观战模式下自动切换死亡目标
+    checkSpectatorTarget() {
+        if (!this.spectatorMode) return;
+        const target = this.allies[this.spectatorTarget];
+        if (!target || !target.alive) {
+            const next = this.allies.findIndex(a => a && a.alive);
+            if (next >= 0) this.spectatorTarget = next;
+        }
     }
 
     resize() {
@@ -1188,11 +2079,22 @@ class Game {
             this.keys[e.key.toLowerCase()] = true;
             if (e.key === ' ') e.preventDefault();
             
-            // 0-9切换舰船
-            if (e.key >= '0' && e.key <= '9') {
-                const index = e.key === '0' ? 9 : parseInt(e.key) - 1;
-                if (this.running) {
-                    this.switchToShip(index);
+            if (this.running) {
+                // 0键：进入/退出观战模式
+                if (e.key === '0') {
+                    this.toggleSpectator();
+                }
+                // 1-9键：切换舰只
+                if (e.key >= '1' && e.key <= '9') {
+                    const index = parseInt(e.key) - 1;
+                    if (this.spectatorMode) {
+                        // 观战模式下切换跟随目标
+                        if (index < this.allies.length && this.allies[index] && this.allies[index].alive) {
+                            this.spectatorTarget = index;
+                        }
+                    } else {
+                        this.switchToShip(index);
+                    }
                 }
             }
         });
@@ -1208,9 +2110,10 @@ class Game {
             ch.style.left = e.clientX + 'px';
             ch.style.top = e.clientY + 'px';
         });
-        this.canvas.addEventListener('mousedown', e => {
+        const clickTarget = document.getElementById('three-container');
+        clickTarget.addEventListener('mousedown', e => {
             const player = this.getPlayer();
-            if (!this.running || !player || !player.alive) return;
+            if (!this.running || !player || !player.alive || this.spectatorMode) return;
             e.preventDefault();
             if (e.button === 0) {
                 player.fireMainGun(player.turretAngle, this);
@@ -1218,7 +2121,7 @@ class Game {
                 player.fireTorpedo(player.turretAngle, this);
             }
         });
-        this.canvas.addEventListener('contextmenu', e => e.preventDefault());
+        clickTarget.addEventListener('contextmenu', e => e.preventDefault());
     }
 
     setupUI() {
@@ -1312,11 +2215,13 @@ class Game {
         playerShip.isPlayer = true;
         playerShip.angle = Math.PI / 2;
 
-        // 生成友军（包含玩家共10艘）
+        // 生成友军（包含玩家共9艘）
         this.allies = [playerShip];
         this.playerIndex = 0;
-        const allyCount = mapConfig.teamSize.allies - 1; // 剩余9艘
-        const allyTypes = ['destroyer', 'cruiser', 'destroyer', 'cruiser', 'battleship', 'destroyer', 'cruiser', 'battleship', 'destroyer'];
+        this.spectatorMode = false;
+        this.spectatorTarget = 0;
+        const allyCount = mapConfig.teamSize.allies - 1; // 剩余8艘
+        const allyTypes = ['destroyer', 'cruiser', 'destroyer', 'cruiser', 'battleship', 'destroyer', 'cruiser', 'battleship'];
         for (let i = 0; i < allyCount; i++) {
             const spawn = mapConfig.spawns.allies[(i + 1) % mapConfig.spawns.allies.length];
             const offsetX = randRange(-800, 800);
@@ -1340,6 +2245,29 @@ class Game {
             enemy.angle = -Math.PI / 2; // 朝向左侧（我方）
             this.enemies.push(enemy);
         }
+
+        // 初始化3D场景
+        this.renderer3D.clearScene();
+        this.renderer3D.setMapColors(mapConfig);
+        // 创建3D岛屿
+        for (const isl of this.islands) {
+            this.renderer3D.createIslandMesh(isl, mapConfig);
+        }
+        // 创建3D占领点
+        for (const cp of this.capturePoints) {
+            this.renderer3D.createCapturePointMesh(cp);
+        }
+        // 移动海洋到地图中心
+        this.renderer3D.ocean.position.set(worldSize / 2, 0, worldSize / 2);
+
+        // 初始化相机到玩家后方（玩家初始角度PI/2朝+Z）
+        const ps = playerSpawn;
+        this.renderer3D.camera.position.set(ps.x, 350, ps.y - 450);
+        this.renderer3D.camera.lookAt(ps.x, 0, ps.y + 200);
+
+        // 初始化2D相机
+        this.cam.x = ps.x - this.cam.w / 2;
+        this.cam.y = ps.y - this.cam.h / 2;
 
         this.running = true;
         if (!this._loopStarted) {
@@ -1377,41 +2305,57 @@ class Game {
     }
 
     update(dt) {
-        // 玩家输入
-        const currentPlayer = this.getPlayer();
-        if (currentPlayer && currentPlayer.alive) {
-            const p = currentPlayer;
-            // 油门
-            if (this.keys['w']) p.throttle = Math.min(p.throttle + dt * 1.5, 1);
-            else if (this.keys['s']) p.throttle = Math.max(p.throttle - dt * 1.5, -0.4);
-            else p.throttle *= 0.995;
-            // 方向
-            if (this.keys['a']) p.rudder = -1;
-            else if (this.keys['d']) p.rudder = 1;
-            else p.rudder *= 0.85;
-            // 急刹
-            if (this.keys[' ']) p.throttle *= 0.95;
-            // 维修
-            if (this.keys['r']) p.repair();
-
-            p.update(dt, this);
-
-            // 相机跟随
-            const targetCx = p.x - this.cam.w / 2;
-            const targetCy = p.y - this.cam.h / 2;
-            this.cam.x = lerp(this.cam.x, targetCx, 0.08);
-            this.cam.y = lerp(this.cam.y, targetCy, 0.08);
-
-            // 鼠标世界坐标
-            this.mouseWorld.x = this.mouse.x + this.cam.x;
-            this.mouseWorld.y = this.mouse.y + this.cam.y;
-        }
-
-        // 友军AI更新（跳过玩家控制的船）
-        for (const ally of this.allies) {
-            ally.update(dt, this);
-            if (!ally.isPlayer) {
+        if (this.spectatorMode) {
+            // === 观战模式：所有友军都走AI ===
+            for (const ally of this.allies) {
+                ally.update(dt, this);
                 ally.updateAI(dt, this);
+            }
+            this.checkSpectatorTarget();
+            // 2D相机跟随观战目标
+            const target = this.allies[this.spectatorTarget];
+            if (target && target.alive) {
+                this.cam.x = lerp(this.cam.x, target.x - this.cam.w / 2, 0.08);
+                this.cam.y = lerp(this.cam.y, target.y - this.cam.h / 2, 0.08);
+            }
+        } else {
+            // === 正常模式：玩家输入 ===
+            const currentPlayer = this.getPlayer();
+            if (currentPlayer && currentPlayer.alive) {
+                const p = currentPlayer;
+                // 油门
+                if (this.keys['w']) p.throttle = Math.min(p.throttle + dt * 1.5, 1);
+                else if (this.keys['s']) p.throttle = Math.max(p.throttle - dt * 1.5, -0.4);
+                else p.throttle *= 0.995;
+                // 方向
+                if (this.keys['a']) p.rudder = -1;
+                else if (this.keys['d']) p.rudder = 1;
+                else p.rudder *= 0.85;
+                // 急刹
+                if (this.keys[' ']) p.throttle *= 0.95;
+                // 维修
+                if (this.keys['r']) p.repair();
+
+                p.update(dt, this);
+
+                // 相机跟随
+                const targetCx = p.x - this.cam.w / 2;
+                const targetCy = p.y - this.cam.h / 2;
+                this.cam.x = lerp(this.cam.x, targetCx, 0.08);
+                this.cam.y = lerp(this.cam.y, targetCy, 0.08);
+
+                // 鼠标世界坐标 - 通过3D射线投射到海平面
+                this.updateMouseWorld();
+            }
+
+            // 友军AI更新（跳过已在上方更新的存活玩家船）
+            for (const ally of this.allies) {
+                if (ally.isPlayer) {
+                    if (!ally.alive) ally.update(dt, this);
+                } else {
+                    ally.update(dt, this);
+                    ally.updateAI(dt, this);
+                }
             }
         }
 
@@ -1585,9 +2529,13 @@ class Game {
     }
 
     updateHUD() {
-        const player = this.getPlayer();
-        if (!player) return;
-        const p = player;
+        let p;
+        if (this.spectatorMode) {
+            p = this.allies[this.spectatorTarget];
+        } else {
+            p = this.getPlayer();
+        }
+        if (!p) return;
         const hpRatio = p.hp / p.maxHp;
         const hpBar = document.getElementById('hp-bar');
         hpBar.style.width = (hpRatio * 100) + '%';
@@ -1597,13 +2545,14 @@ class Game {
         document.getElementById('hp-text').textContent = Math.round(p.hp) + ' / ' + p.maxHp;
 
         const gunReload = p.mainGunTimer > 0 ? p.mainGunTimer.toFixed(1) + 's' : '就绪';
+        const rearReload = p.rearGunTimer > 0 ? p.rearGunTimer.toFixed(1) + 's' : '自动';
         const torpReload = p.torpedoTimer > 0 ? p.torpedoTimer.toFixed(1) + 's' : '就绪';
-        document.getElementById('weapon-name').textContent = '主炮 | 鱼雷';
-        document.getElementById('reload-status').textContent = gunReload + ' | ' + torpReload;
+        document.getElementById('weapon-name').textContent = '主炮 | 尾炮 | 鱼雷';
+        document.getElementById('reload-status').textContent = gunReload + ' | ' + rearReload + ' | ' + torpReload;
         const reloadEl = document.getElementById('reload-status');
         reloadEl.style.color = (p.mainGunTimer <= 0) ? '#4cff72' : '#ffaa44';
 
-        document.getElementById('speed-val').textContent = Math.abs(Math.round(p.speed / (p.cfg.maxSpeed * 0.3) * p.cfg.maxSpeed));
+        document.getElementById('speed-val').textContent = Math.abs(Math.round(p.speed / (p.cfg.maxSpeed * 0.15) * p.cfg.maxSpeed));
         document.getElementById('score-val').textContent = this.kills;
     }
 
@@ -1726,72 +2675,149 @@ class Game {
     render() {
         const ctx = this.ctx;
         const W = this.canvas.width, H = this.canvas.height;
+        const dt = 1 / 60;
 
-        // 清空
-        ctx.fillStyle = '#0a1830';
-        ctx.fillRect(0, 0, W, H);
+        // 清空2D叠加层（透明背景）
+        ctx.clearRect(0, 0, W, H);
 
-        // 海洋
-        this.drawOcean(ctx);
+        // === 3D渲染 ===
+        const currentPlayer = this.getPlayer();
 
-        // 网格
-        this.drawGrid(ctx);
+        // 更新3D舰船
+        for (const ally of this.allies) this.renderer3D.updateShip(ally);
+        for (const e of this.enemies) this.renderer3D.updateShip(e);
 
-        // 岛屿
-        for (const isl of this.islands) isl.draw(ctx, this.cam, this.currentMap);
+        // 更新3D弹药
+        this.renderer3D.updateProjectiles(this.projectiles);
 
-        // 占领点
-        for (const cp of this.capturePoints) cp.draw(ctx, this.cam);
+        // 更新3D相机
+        if (this.spectatorMode) {
+            const specTarget = this.allies[this.spectatorTarget];
+            this.renderer3D.updateCamera(specTarget);
+        } else {
+            this.renderer3D.updateCamera(currentPlayer);
+        }
 
-        // 粒子（底层）
-        this.particles.forEach(p => p.draw(ctx, this.cam));
+        // 渲染3D场景
+        this.renderer3D.render(dt);
 
-        // 弹药
-        for (const proj of this.projectiles) proj.draw(ctx, this.cam);
-
-        // 友军（在敌人之前绘制，敌人会显示在上方）
-        for (const ally of this.allies) ally.draw(ctx, this.cam);
-
-        // 敌军
-        for (const e of this.enemies) e.draw(ctx, this.cam);
-
-        // 玩家（始终在最上层）
-        const renderPlayer = this.getPlayer();
-        if (renderPlayer) renderPlayer.draw(ctx, this.cam);
-
-        // 浮动文字
+        // === 2D HUD叠加层 ===
+        // 浮动文字 - 投影到屏幕坐标
         for (const ft of this.floatingTexts) {
-            const sx = ft.x - this.cam.x, sy = ft.y - this.cam.y;
+            const screenPos = this.worldToScreen(ft.x, ft.y);
+            if (!screenPos) continue;
             ctx.globalAlpha = clamp(ft.life, 0, 1);
-            ctx.font = 'bold 14px sans-serif';
+            ctx.font = 'bold 16px sans-serif';
             ctx.textAlign = 'center';
+            ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+            ctx.lineWidth = 3;
+            ctx.strokeText(ft.text, screenPos.x, screenPos.y);
             ctx.fillStyle = ft.color;
-            ctx.fillText(ft.text, sx, sy);
+            ctx.fillText(ft.text, screenPos.x, screenPos.y);
             ctx.globalAlpha = 1;
         }
 
-        // 射程圈和受伤红框
-        const rangePlayer = this.getPlayer();
-        if (rangePlayer && rangePlayer.alive) {
-            const sx = rangePlayer.x - this.cam.x;
-            const sy = rangePlayer.y - this.cam.y;
-            ctx.strokeStyle = 'rgba(100, 180, 255, 0.1)';
-            ctx.lineWidth = 1;
-            ctx.setLineDash([8, 8]);
-            ctx.beginPath();
-            ctx.arc(sx, sy, rangePlayer.cfg.mainGun.range, 0, Math.PI * 2);
-            ctx.stroke();
-            ctx.setLineDash([]);
+        // 舰船名称和血条 - 在2D叠加层上绘制
+        const allShips = [...this.allies, ...this.enemies];
+        for (const ship of allShips) {
+            if (!ship.alive) continue;
+            const screenPos = this.worldToScreen(ship.x, ship.y);
+            if (!screenPos) continue;
+
+            const L = ship.cfg.length;
+            const barW = L * 0.5;
+            const barH = 5;
+            const bx = screenPos.x - barW / 2;
+            const by = screenPos.y - 40;
+            const hpRatio = ship.hp / ship.maxHp;
+
+            // 血条背景
+            ctx.fillStyle = 'rgba(0,0,0,0.6)';
+            ctx.fillRect(bx - 1, by - 1, barW + 2, barH + 2);
+
+            // 血条
+            let hpColor;
+            if (ship.team === 'player') {
+                hpColor = hpRatio > 0.5 ? '#2ecc40' : hpRatio > 0.25 ? '#ffaa00' : '#ff3333';
+            } else {
+                hpColor = hpRatio > 0.5 ? '#ff6666' : hpRatio > 0.25 ? '#ff8844' : '#ff1111';
+            }
+            ctx.fillStyle = hpColor;
+            ctx.fillRect(bx, by, barW * hpRatio, barH);
+
+            // 名称
+            ctx.fillStyle = ship.team === 'player' ? 'rgba(100, 200, 255, 0.9)' : 'rgba(255, 150, 150, 0.9)';
+            ctx.font = 'bold 11px sans-serif';
+            ctx.textAlign = 'center';
+            let label;
+            if (ship.team === 'player') {
+                const idx = this.allies.indexOf(ship);
+                const isSpecWatching = this.spectatorMode && idx === this.spectatorTarget;
+                label = (ship.isPlayer ? '▶我' : isSpecWatching ? '▶观战' : '友军') + ' ' + ship.cfg.name;
+                if (idx >= 0) label = `[${idx + 1}] ` + label;
+            } else {
+                label = '敌军 ' + ship.cfg.name;
+            }
+            ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+            ctx.lineWidth = 2;
+            ctx.strokeText(label, screenPos.x, by - 4);
+            ctx.fillText(label, screenPos.x, by - 4);
         }
 
         // 小地图
         this.drawMinimap();
 
-        // 玩家受伤红框
-        if (rangePlayer && rangePlayer.damageFlash > 0) {
-            ctx.fillStyle = `rgba(255, 0, 0, ${rangePlayer.damageFlash * 0.5})`;
+        // HUD更新
+        this.updateHUD();
+
+        // 观战模式提示
+        if (this.spectatorMode) {
+            const specShip = this.allies[this.spectatorTarget];
+            const specName = specShip ? `[${this.spectatorTarget + 1}] ${specShip.cfg.name}` : '';
+            ctx.font = 'bold 20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+            ctx.lineWidth = 3;
+            ctx.fillStyle = 'rgba(255, 220, 100, 0.9)';
+            const specText = `观战模式 - ${specName}`;
+            ctx.strokeText(specText, W / 2, 80);
+            ctx.fillText(specText, W / 2, 80);
+            ctx.font = '14px sans-serif';
+            ctx.fillStyle = 'rgba(200, 200, 200, 0.8)';
+            ctx.fillText('按 1-9 切换目标 | 按 0 退出观战', W / 2, 105);
+        }
+
+        // 受伤红框
+        if (!this.spectatorMode && currentPlayer && currentPlayer.damageFlash > 0) {
+            ctx.fillStyle = `rgba(255, 0, 0, ${currentPlayer.damageFlash * 0.5})`;
             ctx.fillRect(0, 0, W, H);
         }
+    }
+
+    // 鼠标屏幕坐标转世界坐标（射线投射到y=0海平面）
+    updateMouseWorld() {
+        this._ndcVec.set(
+            (this.mouse.x / window.innerWidth) * 2 - 1,
+            -(this.mouse.y / window.innerHeight) * 2 + 1
+        );
+        this._raycaster.setFromCamera(this._ndcVec, this.renderer3D.camera);
+        const result = this._raycaster.ray.intersectPlane(this._seaPlane, this._rayTarget);
+        if (result) {
+            this.mouseWorld.x = this._rayTarget.x;
+            this.mouseWorld.y = this._rayTarget.z;
+        }
+    }
+
+    // 世界坐标转屏幕坐标（通过Three.js相机投影）
+    worldToScreen(wx, wy) {
+        const vec = this._projVec;
+        vec.set(wx, 15, wy);
+        vec.project(this.renderer3D.camera);
+        if (vec.z > 1) return null; // 在相机背后
+        const x = (vec.x * 0.5 + 0.5) * this.canvas.width;
+        const y = (-vec.y * 0.5 + 0.5) * this.canvas.height;
+        if (x < -100 || x > this.canvas.width + 100 || y < -100 || y > this.canvas.height + 100) return null;
+        return { x, y };
     }
 
     drawOcean(ctx) {
@@ -1855,7 +2881,7 @@ class Game {
 
     drawMinimap() {
         const mctx = this.miniCtx;
-        const mw = 180, mh = 180;
+        const mw = 200, mh = 200;
         const worldSize = this.currentMap?.size || 42000;
         const scale = mw / worldSize;
 
