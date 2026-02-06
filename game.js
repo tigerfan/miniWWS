@@ -246,18 +246,20 @@ class Renderer3D {
                 void main() {
                     vUv = uv;
                     vec3 pos = position;
-                    float wave1 = sin(pos.x * 0.008 + uTime * 0.7) * 12.0;
-                    float wave2 = sin(pos.y * 0.006 + uTime * 0.5) * 8.0;
-                    float wave3 = sin((pos.x + pos.y) * 0.004 + uTime * 1.1) * 6.0;
-                    float wave4 = sin(pos.x * 0.02 + pos.y * 0.015 + uTime * 1.5) * 3.0;
+// 海浪幅度降低一半
+                    float wave1 = sin(pos.x * 0.008 + uTime * 0.7) * 6.0;
+                    float wave2 = sin(pos.y * 0.006 + uTime * 0.5) * 4.0;
+                    float wave3 = sin((pos.x + pos.y) * 0.004 + uTime * 1.1) * 3.0;
+                    float wave4 = sin(pos.x * 0.02 + pos.y * 0.015 + uTime * 1.5) * 1.5;
                     pos.z += wave1 + wave2 + wave3 + wave4;
                     vWaveHeight = pos.z;
                     vec4 worldPos = modelMatrix * vec4(pos, 1.0);
                     vWorldPos = worldPos.xyz;
-                    float dx = cos(pos.x * 0.008 + uTime * 0.7) * 0.008 * 12.0
-                             + cos((pos.x + pos.y) * 0.004 + uTime * 1.1) * 0.004 * 6.0;
-                    float dy = cos(pos.y * 0.006 + uTime * 0.5) * 0.006 * 8.0
-                             + cos((pos.x + pos.y) * 0.004 + uTime * 1.1) * 0.004 * 6.0;
+                    // 法线幅度也降低一半
+                    float dx = cos(pos.x * 0.008 + uTime * 0.7) * 0.008 * 6.0
+                             + cos((pos.x + pos.y) * 0.004 + uTime * 1.1) * 0.004 * 3.0;
+                    float dy = cos(pos.y * 0.006 + uTime * 0.5) * 0.006 * 4.0
+                             + cos((pos.x + pos.y) * 0.004 + uTime * 1.1) * 0.004 * 3.0;
                     vNormal = normalize(mat3(modelMatrix) * vec3(-dx, 1.0, -dy));
                     gl_Position = projectionMatrix * viewMatrix * worldPos;
                 }
@@ -276,7 +278,8 @@ class Renderer3D {
                 varying float vWaveHeight;
                 void main() {
                     vec3 baseColor = mix(uColor1, uColor2, vUv.y * 0.5 + 0.5);
-                    float foam = smoothstep(8.0, 16.0, vWaveHeight);
+                    // 泡沫高度阈值也调整
+                    float foam = smoothstep(4.0, 8.0, vWaveHeight);
                     baseColor = mix(baseColor, uFoamColor, foam * 0.3);
                     float diffuse = max(dot(vNormal, uSunDir), 0.0) * 0.5 + 0.5;
                     vec3 viewDir = normalize(uCamPos - vWorldPos);
@@ -592,8 +595,8 @@ class Renderer3D {
 
     updateCamera(player) {
         if (!player || !player.alive) return;
-        const camDist = 450;
-        const camH = 350;
+        const camDist = 600;
+        const camH = 200;
         const ahead = 200;
 
         // 相机在舰船后方跟随（基于船首方向）
@@ -849,7 +852,7 @@ class Renderer3D {
         for (const mesh of this.projectilePool) {
             const proj = mesh.userData.proj;
             if (!proj) continue;
-            const h = proj.type === 'torpedo' ? 2 : 30 + Math.sin(proj.traveled * 0.01) * 20;
+            const h = proj.type === 'torpedo' ? 2 : 30;
             mesh.position.set(proj.x, h, proj.y);
         }
     }
@@ -1010,12 +1013,14 @@ class Projectile {
 
 // ==================== 岛屿 ====================
 class Island {
-    constructor(x, y, radius, mapType = 'islands') {
+    constructor(x, y, radius, mapType = 'islands', isLarge = false) {
         this.x = x || randRange(300, 42000 - 300);
         this.y = y || randRange(300, 42000 - 300);
         this.radius = radius || randRange(80, 350);
+        this.radius *= Math.pow(2, 1/3); // 体积加倍
         this.points = [];
         this.mapType = mapType;
+        this.isLarge = isLarge;
         const n = Math.floor(randRange(8, 16));
         for (let i = 0; i < n; i++) {
             const a = (i / n) * Math.PI * 2;
