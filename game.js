@@ -455,7 +455,7 @@ class Ship {
             }
 
             if (this.aiState === 'approach') {
-                this.throttle = 0.8;
+                this.throttle = 0.16;
                 const diff = normalizeAngle(aToTarget - this.angle);
                 this.rudder = clamp(diff * 3, -1, 1);
                 this.turretAngle = lerp(this.turretAngle, aToTarget, 0.05);
@@ -464,7 +464,7 @@ class Ship {
                 const desiredAngle = aToTarget + Math.PI * 0.4;
                 const diff = normalizeAngle(desiredAngle - this.angle);
                 this.rudder = clamp(diff * 2, -1, 1);
-                this.throttle = 0.6;
+                this.throttle = 0.12;
                 this.turretAngle = lerp(this.turretAngle, aToTarget, 0.08);
 
                 // 开火
@@ -482,7 +482,7 @@ class Ship {
             }
         } else {
             // 巡逻
-            this.throttle = 0.5;
+            this.throttle = 0.1;
             const d = dist(this, this.aiPatrolTarget);
             if (d < 100) {
                 this.aiPatrolTarget = { x: randRange(200, WORLD_SIZE - 200), y: randRange(200, WORLD_SIZE - 200) };
