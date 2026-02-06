@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>海战模拟 - WWS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <canvas id="gameCanvas"></canvas>
+        <!-- HUD -->
+        <div id="hud">
+            <div id="hp-bar-container">
+                <div id="hp-bar"></div>
+                <span id="hp-text">100 / 100</span>
+            </div>
+            <div id="weapon-info">
+                <span id="weapon-name">主炮</span>
+                <span id="reload-status">就绪</span>
+            </div>
+            <div id="speed-info">速度: <span id="speed-val">0</span> 节</div>
+            <div id="score-info">击沉: <span id="score-val">0</span></div>
+        </div>
+        <div id="minimap-container">
+            <canvas id="minimapCanvas" width="180" height="180"></canvas>
+        </div>
+        <div id="crosshair"></div>
+        <!-- 开始界面 -->
+        <div id="start-screen">
+            <h1>⚓ 海战模拟 WWS</h1>
+            <p>简化版战舰世界</p>
+            <div class="ship-select">
+                <h3>选择舰种</h3>
+                <button class="ship-btn selected" data-type="cruiser">巡洋舰</button>
+                <button class="ship-btn" data-type="battleship">战列舰</button>
+                <button class="ship-btn" data-type="destroyer">驱逐舰</button>
+            </div>
+            <button id="start-btn">开始战斗</button>
+            <div class="controls-hint">
+                <p>WASD - 移动 | 鼠标 - 瞄准 | 左键 - 主炮 | 右键 - 鱼雷</p>
+                <p>空格 - 紧急刹车 | R - 维修</p>
+            </div>
+        </div>
+        <!-- 结束界面 -->
+        <div id="end-screen" class="hidden">
+            <h1 id="end-title">战斗结束</h1>
+            <p id="end-stats"></p>
+            <button id="restart-btn">再来一局</button>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
