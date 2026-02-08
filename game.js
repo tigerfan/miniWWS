@@ -418,109 +418,315 @@ class Renderer3D {
         const W = ship.cfg.width;
         const H = W * 0.35;
         const isAlly = ship.team === 'player';
+        const isBB = ship.type === 'battleship';
+        const isCA = ship.type === 'cruiser';
+        const isDD = ship.type === 'destroyer';
 
-        // 舰体 - 使用Shape挤出
+        // 阵营配色方案
+        const pal = isAlly ? {
+            hull: 0x4a6a80, hullDark: 0x354e5e, deck: 0x6b5b4f,
+            super: 0x6a8595, turret: 0x5a7a8a, accent: 0x4488cc,
+            waterline: 0x8b2020, window: 0xffdd88
+        } : {
+            hull: 0x805050, hullDark: 0x5e3a3a, deck: 0x5a4a40,
+            super: 0x957070, turret: 0x8a6060, accent: 0xcc4444,
+            waterline: 0x8b2020, window: 0xffdd88
+        };
+
+        // ======== 舰体（贝塞尔曲线） ========
         const hullShape = new THREE.Shape();
         hullShape.moveTo(L * 0.5, 0);
-        hullShape.quadraticCurveTo(L * 0.3, W * 0.5, -L * 0.35, W * 0.45);
-        hullShape.lineTo(-L * 0.5, W * 0.25);
-        hullShape.lineTo(-L * 0.5, -W * 0.25);
-        hullShape.lineTo(-L * 0.35, -W * 0.45);
-        hullShape.quadraticCurveTo(L * 0.3, -W * 0.5, L * 0.5, 0);
+        hullShape.bezierCurveTo(L * 0.42, W * 0.22, L * 0.28, W * 0.46, L * 0.08, W * 0.48);
+        hullShape.lineTo(-L * 0.22, W * 0.48);
+        hullShape.bezierCurveTo(-L * 0.36, W * 0.46, -L * 0.46, W * 0.34, -L * 0.5, W * 0.18);
+        hullShape.lineTo(-L * 0.5, -W * 0.18);
+        hullShape.bezierCurveTo(-L * 0.46, -W * 0.34, -L * 0.36, -W * 0.46, -L * 0.22, -W * 0.48);
+        hullShape.lineTo(L * 0.08, -W * 0.48);
+        hullShape.bezierCurveTo(L * 0.28, -W * 0.46, L * 0.42, -W * 0.22, L * 0.5, 0);
 
         const hullGeo = new THREE.ExtrudeGeometry(hullShape, {
-            depth: H, bevelEnabled: true, bevelThickness: 3,
-            bevelSize: 2, bevelSegments: 3
+            depth: H, bevelEnabled: true, bevelThickness: 2,
+            bevelSize: 1.5, bevelSegments: 3
         });
-        const hullColor = isAlly ? 0x3a6a8a : 0x8a3a3a;
-        const hullMat = new THREE.MeshPhongMaterial({
-            color: hullColor, specular: 0x333333, shininess: 40
+        const hullColor = pal.hull;
+        const hullMat = new THREE.MeshStandardMaterial({
+            color: hullColor, roughness: 0.7, metalness: 0.3
         });
-        const hull = new THREE.Mesh(hullGeo, hullMat);
-        hull.rotation.x = -Math.PI / 2;
-        hull.position.y = 2;
-        hull.castShadow = true;
-        hull.receiveShadow = true;
-        group.add(hull);
+        const hullMesh = new THREE.Mesh(hullGeo, hullMat);
+        hullMesh.rotation.x = -Math.PI / 2;
+        hullMesh.position.y = 2;
+        hullMesh.castShadow = true;
+        hullMesh.receiveShadow = true;
+        group.add(hullMesh);
 
-        // 甲板
-        const deckGeo = new THREE.BoxGeometry(L * 0.7, 2, W * 0.6);
-        const deckMat = new THREE.MeshPhongMaterial({
-            color: isAlly ? 0x4a7a9a : 0x7a4a4a, specular: 0x222222
+        // ======== 水线带（红色防污漆） ========
+        const wlShape = new THREE.Shape();
+        wlShape.moveTo(L * 0.48, 0);
+        wlShape.bezierCurveTo(L * 0.4, W * 0.2, L * 0.26, W * 0.44, L * 0.06, W * 0.46);
+        wlShape.lineTo(-L * 0.2, W * 0.46);
+        wlShape.bezierCurveTo(-L * 0.34, W * 0.44, -L * 0.44, W * 0.32, -L * 0.48, W * 0.16);
+        wlShape.lineTo(-L * 0.48, -W * 0.16);
+        wlShape.bezierCurveTo(-L * 0.44, -W * 0.32, -L * 0.34, -W * 0.44, -L * 0.2, -W * 0.46);
+        wlShape.lineTo(L * 0.06, -W * 0.46);
+        wlShape.bezierCurveTo(L * 0.26, -W * 0.44, L * 0.4, -W * 0.2, L * 0.48, 0);
+        const wlGeo = new THREE.ExtrudeGeometry(wlShape, { depth: H * 0.3, bevelEnabled: false });
+        const wlMat = new THREE.MeshStandardMaterial({ color: pal.waterline, roughness: 0.85, metalness: 0.05 });
+        const wlMesh = new THREE.Mesh(wlGeo, wlMat);
+        wlMesh.rotation.x = -Math.PI / 2;
+        wlMesh.position.y = 0.5;
+        group.add(wlMesh);
+
+        // ======== 甲板（随船体轮廓） ========
+        const deckShape = new THREE.Shape();
+        deckShape.moveTo(L * 0.44, 0);
+        deckShape.bezierCurveTo(L * 0.36, W * 0.18, L * 0.24, W * 0.38, L * 0.06, W * 0.42);
+        deckShape.lineTo(-L * 0.2, W * 0.42);
+        deckShape.bezierCurveTo(-L * 0.34, W * 0.4, -L * 0.43, W * 0.3, -L * 0.46, W * 0.14);
+        deckShape.lineTo(-L * 0.46, -W * 0.14);
+        deckShape.bezierCurveTo(-L * 0.43, -W * 0.3, -L * 0.34, -W * 0.4, -L * 0.2, -W * 0.42);
+        deckShape.lineTo(L * 0.06, -W * 0.42);
+        deckShape.bezierCurveTo(L * 0.24, -W * 0.38, L * 0.36, -W * 0.18, L * 0.44, 0);
+        const deckGeo = new THREE.ExtrudeGeometry(deckShape, { depth: 1.5, bevelEnabled: false });
+        const deckMat = new THREE.MeshStandardMaterial({ color: pal.deck, roughness: 0.9, metalness: 0.05 });
+        const deckMesh = new THREE.Mesh(deckGeo, deckMat);
+        deckMesh.rotation.x = -Math.PI / 2;
+        deckMesh.position.y = H + 2.5;
+        deckMesh.receiveShadow = true;
+        group.add(deckMesh);
+
+        // ======== 船首挡浪板 ========
+        const bwGeo = new THREE.BoxGeometry(W * 0.85, H * 0.35, 1.5);
+        const bwMat = new THREE.MeshStandardMaterial({ color: pal.hull, roughness: 0.7, metalness: 0.3 });
+        const bw = new THREE.Mesh(bwGeo, bwMat);
+        bw.position.set(L * 0.26, H + 4, 0);
+        bw.castShadow = true;
+        group.add(bw);
+
+        // ======== 上层建筑（多层） ========
+        const superMat = new THREE.MeshStandardMaterial({ color: pal.super, roughness: 0.6, metalness: 0.2 });
+        const baseH = H * (isBB ? 1.3 : isCA ? 1.0 : 0.8);
+        const baseW = W * 0.36;
+
+        // 基座层
+        const b1 = new THREE.Mesh(new THREE.BoxGeometry(L * 0.22, baseH, baseW), superMat);
+        b1.position.set(-L * 0.02, H + baseH / 2 + 3, 0);
+        b1.castShadow = true;
+        group.add(b1);
+
+        // 舰桥层（收窄）
+        const brH = baseH * 0.65;
+        const br = new THREE.Mesh(new THREE.BoxGeometry(L * 0.15, brH, baseW * 0.78), superMat);
+        br.position.set(-L * 0.01, H + baseH + brH / 2 + 3, 0);
+        br.castShadow = true;
+        group.add(br);
+
+        // 舰桥窗户（发光条带）
+        const winMat = new THREE.MeshStandardMaterial({
+            color: pal.window, emissive: pal.window, emissiveIntensity: 0.35,
+            roughness: 0.2, metalness: 0.7
         });
-        const deck = new THREE.Mesh(deckGeo, deckMat);
-        deck.position.set(0, H + 3, 0);
-        deck.castShadow = true;
-        group.add(deck);
+        const win = new THREE.Mesh(new THREE.BoxGeometry(L * 0.155, brH * 0.22, baseW * 0.8), winMat);
+        win.position.set(-L * 0.01, H + baseH + brH * 0.7 + 3, 0);
+        group.add(win);
 
-        // 上层建筑
-        const superH = H * (ship.type === 'battleship' ? 2.5 : ship.type === 'cruiser' ? 2.0 : 1.5);
-        const superGeo = new THREE.BoxGeometry(L * 0.18, superH, W * 0.35);
-        const superMat = new THREE.MeshPhongMaterial({
-            color: isAlly ? 0x5a8aaa : 0x8a5a5a
-        });
-        const superstructure = new THREE.Mesh(superGeo, superMat);
-        superstructure.position.set(-L * 0.02, H + superH / 2 + 3, 0);
-        superstructure.castShadow = true;
-        group.add(superstructure);
-
-        // 烟囱
-        const stackGeo = new THREE.CylinderGeometry(W * 0.08, W * 0.1, superH * 0.8, 8);
-        const stackMat = new THREE.MeshPhongMaterial({ color: 0x444444 });
-        const stack = new THREE.Mesh(stackGeo, stackMat);
-        stack.position.set(-L * 0.08, H + superH + 3, 0);
-        group.add(stack);
-
-        // 桅杆
-        const mastGeo = new THREE.CylinderGeometry(1, 2, superH * 1.5, 6);
-        const mastMat = new THREE.MeshPhongMaterial({ color: 0x666666 });
-        const mast = new THREE.Mesh(mastGeo, mastMat);
-        mast.position.set(L * 0.05, H + superH * 1.2 + 3, 0);
-        group.add(mast);
-
-        // 前主炮塔
-        const turretGroup = new THREE.Group();
-        const turretBaseGeo = new THREE.CylinderGeometry(W * 0.25, W * 0.28, H * 0.5, 10);
-        const turretMat = new THREE.MeshPhongMaterial({
-            color: isAlly ? 0x6a9abb : 0xaa6655
-        });
-        const turretBase = new THREE.Mesh(turretBaseGeo, turretMat);
-        turretGroup.add(turretBase);
-
-        const barrelCount = ship.type === 'battleship' ? 3 : ship.type === 'cruiser' ? 2 : 1;
-        for (let i = 0; i < barrelCount; i++) {
-            const barrelGeo = new THREE.CylinderGeometry(1.8, 2.2, L * 0.25, 6);
-            const barrelMat = new THREE.MeshPhongMaterial({ color: 0x555555 });
-            const barrel = new THREE.Mesh(barrelGeo, barrelMat);
-            barrel.rotation.z = Math.PI / 2;
-            barrel.position.set(L * 0.125, H * 0.15, (i - (barrelCount - 1) / 2) * 4);
-            turretGroup.add(barrel);
+        // 雷达平台（BB/CA）
+        if (!isDD) {
+            const rpH = brH * 0.35;
+            const rp = new THREE.Mesh(new THREE.BoxGeometry(L * 0.08, rpH, baseW * 0.5), superMat);
+            rp.position.set(-L * 0.01, H + baseH + brH + rpH / 2 + 3, 0);
+            rp.castShadow = true;
+            group.add(rp);
         }
+
+        // ======== 烟囱 ========
+        const funnelCount = isBB ? 2 : 1;
+        for (let fi = 0; fi < funnelCount; fi++) {
+            const fH = H * (isBB ? 2.0 : isCA ? 1.8 : 1.4);
+            const fR = W * (isBB ? 0.1 : 0.08);
+            const fX = -L * (0.08 + fi * 0.1);
+
+            // 烟囱主体
+            const fMat = new THREE.MeshStandardMaterial({ color: pal.hullDark, roughness: 0.8, metalness: 0.15 });
+            const f = new THREE.Mesh(new THREE.CylinderGeometry(fR * 0.82, fR, fH, 10), fMat);
+            f.position.set(fX, H + fH / 2 + baseH + 3, 0);
+            f.castShadow = true;
+            group.add(f);
+
+            // 烟囱帽
+            const cap = new THREE.Mesh(
+                new THREE.CylinderGeometry(fR * 1.1, fR * 0.82, fH * 0.12, 10),
+                new THREE.MeshStandardMaterial({ color: 0x222222, roughness: 0.9 })
+            );
+            cap.position.set(fX, H + fH + baseH + 3, 0);
+            group.add(cap);
+
+            // 阵营色条纹
+            const bandMat = new THREE.MeshStandardMaterial({
+                color: pal.accent, emissive: pal.accent, emissiveIntensity: 0.15, roughness: 0.5
+            });
+            const band = new THREE.Mesh(new THREE.CylinderGeometry(fR * 0.86, fR * 0.9, fH * 0.15, 10), bandMat);
+            band.position.set(fX, H + fH * 0.55 + baseH + 3, 0);
+            group.add(band);
+        }
+
+        // ======== 桅杆 ========
+        const mH = H * (isBB ? 3.5 : isCA ? 3.0 : 2.2);
+        const mastMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.7, metalness: 0.4 });
+        const mastBaseY = H + baseH + brH + 3;
+
+        // 主桅
+        const mastMesh = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 1.4, mH, 6), mastMat);
+        mastMesh.position.set(L * 0.05, mastBaseY + mH / 2, 0);
+        group.add(mastMesh);
+
+        // 横桁
+        const ya = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, W * 0.65, 4), mastMat);
+        ya.rotation.x = Math.PI / 2;
+        ya.position.set(L * 0.05, mastBaseY + mH * 0.65, 0);
+        group.add(ya);
+
+        // 雷达天线
+        const rd = new THREE.Mesh(
+            new THREE.BoxGeometry(W * 0.35, W * 0.08, 1),
+            new THREE.MeshStandardMaterial({ color: 0x999999, roughness: 0.4, metalness: 0.5 })
+        );
+        rd.position.set(L * 0.05, mastBaseY + mH * 0.85, 0);
+        group.add(rd);
+
+        // ======== 前主炮塔 ========
+        const turretGroup = this._buildTurret(ship, pal, L, W, H, false);
         turretGroup.position.set(L * 0.22, H + 5, 0);
         group.add(turretGroup);
 
-        // 后炮塔（更小）
-        const rearTurretGroup = new THREE.Group();
-        const rearBaseGeo = new THREE.CylinderGeometry(W * 0.18, W * 0.21, H * 0.4, 10);
-        const rearTurretBase = new THREE.Mesh(rearBaseGeo, turretMat.clone());
-        rearTurretGroup.add(rearTurretBase);
-        const rearBarrelCount = Math.max(1, barrelCount - 1);
-        for (let i = 0; i < rearBarrelCount; i++) {
-            const rBarrelGeo = new THREE.CylinderGeometry(1.3, 1.7, L * 0.18, 6);
-            const rBarrelMat = new THREE.MeshPhongMaterial({ color: 0x555555 });
-            const barrel = new THREE.Mesh(rBarrelGeo, rBarrelMat);
-            barrel.rotation.z = Math.PI / 2;
-            barrel.position.set(-L * 0.09, H * 0.12, (i - (rearBarrelCount - 1) / 2) * 3.5);
-            rearTurretGroup.add(barrel);
-        }
+        // ======== 后炮塔 ========
+        const rearTurretGroup = this._buildTurret(ship, pal, L, W, H, true);
         rearTurretGroup.position.set(-L * 0.25, H + 4, 0);
         group.add(rearTurretGroup);
+
+        // ======== 副炮（BB/CA两侧） ========
+        if (!isDD) {
+            const secCount = isBB ? 3 : 2;
+            const secMat = new THREE.MeshStandardMaterial({ color: 0x556666, roughness: 0.5, metalness: 0.4 });
+            for (let si = 0; si < secCount; si++) {
+                const sx = L * (0.08 - si * 0.1);
+                for (const side of [-1, 1]) {
+                    const sBase = new THREE.Mesh(
+                        new THREE.CylinderGeometry(W * 0.035, W * 0.045, H * 0.25, 6), secMat
+                    );
+                    sBase.position.set(sx, H + 4, side * W * 0.38);
+                    group.add(sBase);
+                    const sBrl = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.4, 0.5, L * 0.028, 4), secMat
+                    );
+                    sBrl.rotation.z = Math.PI / 2;
+                    sBrl.position.set(sx + L * 0.015, H + 4.5, side * W * 0.38);
+                    group.add(sBrl);
+                }
+            }
+        }
+
+        // ======== 防空炮位（BB/CA） ========
+        if (!isDD) {
+            const aaMat = new THREE.MeshStandardMaterial({ color: 0x666666, roughness: 0.5, metalness: 0.5 });
+            const aaPos = isBB ? [
+                { x: -L * 0.15, z: W * 0.28 }, { x: -L * 0.15, z: -W * 0.28 },
+                { x: L * 0.1, z: W * 0.32 }, { x: L * 0.1, z: -W * 0.32 }
+            ] : [
+                { x: -L * 0.12, z: W * 0.24 }, { x: -L * 0.12, z: -W * 0.24 }
+            ];
+            for (const p of aaPos) {
+                const aa = new THREE.Mesh(
+                    new THREE.CylinderGeometry(W * 0.02, W * 0.028, H * 0.2, 6), aaMat
+                );
+                aa.position.set(p.x, H + baseH + 4, p.z);
+                group.add(aa);
+            }
+        }
+
+        // ======== 舷窗（发光） ========
+        const phCount = isBB ? 7 : isCA ? 5 : 3;
+        const phMat = new THREE.MeshStandardMaterial({
+            color: 0xffeeaa, emissive: 0xffeeaa, emissiveIntensity: 0.3, roughness: 0.3
+        });
+        for (let pi = 0; pi < phCount; pi++) {
+            const px = L * (-0.28 + pi * 0.08);
+            for (const s of [-1, 1]) {
+                const ph = new THREE.Mesh(new THREE.CircleGeometry(0.8, 6), phMat);
+                ph.position.set(px, H * 0.6 + 3, s * W * 0.49);
+                ph.rotation.y = s > 0 ? Math.PI / 2 : -Math.PI / 2;
+                group.add(ph);
+            }
+        }
+
+        // ======== 锚 ========
+        const aMat = new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 0.8, metalness: 0.3 });
+        for (const s of [-1, 1]) {
+            const anchor = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2.5, 0.8), aMat);
+            anchor.position.set(L * 0.38, H * 0.5 + 3, s * W * 0.36);
+            group.add(anchor);
+        }
 
         group.userData = { turretGroup, rearTurretGroup, ship, hullMat, originalColor: hullColor };
 
         this.scene.add(group);
         this.shipMeshes.set(ship, group);
         return group;
+    }
+
+    _buildTurret(ship, pal, L, W, H, isRear) {
+        const g = new THREE.Group();
+        const isBB = ship.type === 'battleship';
+        const isCA = ship.type === 'cruiser';
+        const sc = isRear ? 0.72 : 1.0;
+        const barrels = isRear
+            ? Math.max(1, (isBB ? 3 : isCA ? 2 : 1) - 1)
+            : (isBB ? 3 : isCA ? 2 : 1);
+
+        const tR = W * 0.25 * sc;
+        const tH = H * 0.5 * sc;
+
+        // 盾形炮塔（圆弧前脸 + 平后壁）
+        const ts = new THREE.Shape();
+        ts.moveTo(tR * 0.8, tR * 0.9);
+        ts.quadraticCurveTo(tR * 1.4, 0, tR * 0.8, -tR * 0.9);
+        ts.lineTo(-tR * 0.7, -tR * 0.8);
+        ts.lineTo(-tR * 0.7, tR * 0.8);
+        ts.closePath();
+
+        const tGeo = new THREE.ExtrudeGeometry(ts, {
+            depth: tH, bevelEnabled: true, bevelThickness: 0.8,
+            bevelSize: 0.5, bevelSegments: 2
+        });
+        const tMat = new THREE.MeshStandardMaterial({ color: pal.turret, roughness: 0.5, metalness: 0.4 });
+        const turretShield = new THREE.Mesh(tGeo, tMat);
+        turretShield.rotation.x = -Math.PI / 2;
+        turretShield.position.y = -tH * 0.3;
+        turretShield.castShadow = true;
+        g.add(turretShield);
+
+        // 炮管
+        const bLen = L * 0.25 * sc;
+        const bR = 1.8 * sc;
+        const bMat = new THREE.MeshStandardMaterial({ color: 0x444444, roughness: 0.35, metalness: 0.65 });
+        for (let i = 0; i < barrels; i++) {
+            const brl = new THREE.Mesh(
+                new THREE.CylinderGeometry(bR * 0.75, bR, bLen, 8), bMat
+            );
+            brl.rotation.z = Math.PI / 2;
+            brl.position.set(bLen * 0.5, H * 0.15 * sc, (i - (barrels - 1) / 2) * (4 * sc));
+            brl.castShadow = true;
+            g.add(brl);
+
+            // 炮口制退器
+            const mz = new THREE.Mesh(
+                new THREE.TorusGeometry(bR * 1.0, bR * 0.2, 4, 8), bMat
+            );
+            mz.rotation.y = Math.PI / 2;
+            mz.position.set(bLen * 0.98, H * 0.15 * sc, (i - (barrels - 1) / 2) * (4 * sc));
+            g.add(mz);
+        }
+
+        return g;
     }
 
     createIslandMesh(island, mapConfig) {
@@ -673,34 +879,138 @@ class Renderer3D {
         return group;
     }
 
-    // 创建炮弹3D对象
+    // 创建炮弹/鱼雷3D对象（含飞行拖尾效果）
     createProjectileMesh(proj) {
         let mesh;
+        const maxTrailPts = 40;
+
         if (proj.type === 'torpedo') {
-            const geo = new THREE.SphereGeometry(5, 6, 6);
-            const mat = new THREE.MeshBasicMaterial({ color: 0x80ffb0 });
-            mesh = new THREE.Mesh(geo, mat);
-            // 尾迹
-            const trailGeo = new THREE.BufferGeometry();
-            const trailPositions = new Float32Array(30 * 3);
-            trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
-            const trailMat = new THREE.LineBasicMaterial({
-                color: 0x60dd90, transparent: true, opacity: 0.4
+            // 鱼雷本体（拉长圆柱+半球头）
+            const bodyGeo = new THREE.CylinderGeometry(2.5, 3, 14, 6);
+            const bodyMat = new THREE.MeshStandardMaterial({
+                color: 0x556655, roughness: 0.6, metalness: 0.4
             });
-            const trail = new THREE.Line(trailGeo, trailMat);
-            mesh.userData.trail = trail;
-            this.scene.add(trail);
-        } else {
-            const geo = new THREE.SphereGeometry(3, 6, 6);
-            const mat = new THREE.MeshBasicMaterial({ color: 0xffcc44 });
-            mesh = new THREE.Mesh(geo, mat);
-            // 光晕
-            const glowGeo = new THREE.SphereGeometry(6, 6, 6);
+            mesh = new THREE.Mesh(bodyGeo, bodyMat);
+            mesh.rotation.z = Math.PI / 2;
+
+            // 发光光晕
+            const glowGeo = new THREE.SphereGeometry(6, 8, 8);
             const glowMat = new THREE.MeshBasicMaterial({
-                color: 0xffaa22, transparent: true, opacity: 0.3
+                color: 0x60ffaa, transparent: true, opacity: 0.25
             });
             const glow = new THREE.Mesh(glowGeo, glowMat);
             mesh.add(glow);
+
+            // 气泡尾迹线（alpha渐变shader）
+            const trailGeo = new THREE.BufferGeometry();
+            const trailPos = new Float32Array(maxTrailPts * 3);
+            const trailAlpha = new Float32Array(maxTrailPts);
+            trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+            trailGeo.setAttribute('alpha', new THREE.BufferAttribute(trailAlpha, 1));
+            const trailMat = new THREE.ShaderMaterial({
+                transparent: true, depthWrite: false,
+                vertexShader: `
+                    attribute float alpha;
+                    varying float vAlpha;
+                    void main() {
+                        vAlpha = alpha;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    varying float vAlpha;
+                    void main() {
+                        gl_FragColor = vec4(0.7, 1.0, 0.85, vAlpha * 0.6);
+                    }
+                `
+            });
+            const trail = new THREE.Line(trailGeo, trailMat);
+            trail.frustumCulled = false;
+            mesh.userData.trail = trail;
+            mesh.userData.trailHistory = [];
+            mesh.userData.maxTrailPts = maxTrailPts;
+            this.scene.add(trail);
+
+            // 水面V型浪花线（两条短线）
+            for (let vi = 0; vi < 2; vi++) {
+                const vGeo = new THREE.BufferGeometry();
+                const vPos = new Float32Array(12 * 3);
+                const vAlpha = new Float32Array(12);
+                vGeo.setAttribute('position', new THREE.BufferAttribute(vPos, 3));
+                vGeo.setAttribute('alpha', new THREE.BufferAttribute(vAlpha, 1));
+                const vMat = new THREE.ShaderMaterial({
+                    transparent: true, depthWrite: false,
+                    vertexShader: `
+                        attribute float alpha;
+                        varying float vAlpha;
+                        void main() {
+                            vAlpha = alpha;
+                            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                        }
+                    `,
+                    fragmentShader: `
+                        varying float vAlpha;
+                        void main() {
+                            gl_FragColor = vec4(0.9, 1.0, 0.95, vAlpha * 0.4);
+                        }
+                    `
+                });
+                const vLine = new THREE.Line(vGeo, vMat);
+                vLine.frustumCulled = false;
+                mesh.userData['vWake' + vi] = vLine;
+                this.scene.add(vLine);
+            }
+        } else {
+            // 炮弹本体（拉长发光体）
+            const bodyGeo = new THREE.CylinderGeometry(1.2, 1.8, 10, 6);
+            const bodyMat = new THREE.MeshBasicMaterial({ color: 0xffdd55 });
+            mesh = new THREE.Mesh(bodyGeo, bodyMat);
+            mesh.rotation.z = Math.PI / 2;
+
+            // 发光核心
+            const coreGeo = new THREE.SphereGeometry(4, 8, 8);
+            const coreMat = new THREE.MeshBasicMaterial({
+                color: 0xffaa22, transparent: true, opacity: 0.5
+            });
+            mesh.add(new THREE.Mesh(coreGeo, coreMat));
+
+            // 外层光晕（更大更淡）
+            const haloGeo = new THREE.SphereGeometry(8, 6, 6);
+            const haloMat = new THREE.MeshBasicMaterial({
+                color: 0xff6600, transparent: true, opacity: 0.15
+            });
+            mesh.add(new THREE.Mesh(haloGeo, haloMat));
+
+            // 火焰拖尾线（orange→red渐变）
+            const trailGeo = new THREE.BufferGeometry();
+            const trailPos = new Float32Array(maxTrailPts * 3);
+            const trailAlpha = new Float32Array(maxTrailPts);
+            trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPos, 3));
+            trailGeo.setAttribute('alpha', new THREE.BufferAttribute(trailAlpha, 1));
+            const trailMat = new THREE.ShaderMaterial({
+                transparent: true, depthWrite: false,
+                vertexShader: `
+                    attribute float alpha;
+                    varying float vAlpha;
+                    void main() {
+                        vAlpha = alpha;
+                        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    }
+                `,
+                fragmentShader: `
+                    varying float vAlpha;
+                    void main() {
+                        vec3 col = mix(vec3(1.0, 0.2, 0.0), vec3(1.0, 0.8, 0.3), vAlpha);
+                        gl_FragColor = vec4(col, vAlpha * 0.7);
+                    }
+                `
+            });
+            const trail = new THREE.Line(trailGeo, trailMat);
+            trail.frustumCulled = false;
+            mesh.userData.trail = trail;
+            mesh.userData.trailHistory = [];
+            mesh.userData.maxTrailPts = maxTrailPts;
+            this.scene.add(trail);
         }
         mesh.userData.proj = proj;
         this.scene.add(mesh);
@@ -960,18 +1270,20 @@ class Renderer3D {
     }
 
     updateProjectiles(projectiles) {
-        // 清理旧的
+        // 清理已消亡的
         for (let i = this.projectilePool.length - 1; i >= 0; i--) {
             const mesh = this.projectilePool[i];
             const proj = mesh.userData.proj;
             if (!proj || !proj.alive) {
                 this.scene.remove(mesh);
                 if (mesh.userData.trail) this.scene.remove(mesh.userData.trail);
+                if (mesh.userData.vWake0) this.scene.remove(mesh.userData.vWake0);
+                if (mesh.userData.vWake1) this.scene.remove(mesh.userData.vWake1);
                 this.projectilePool.splice(i, 1);
             }
         }
 
-        // 添加新的
+        // 添加新弹药
         const existingProjs = new Set(this.projectilePool.map(m => m.userData.proj));
         for (const proj of projectiles) {
             if (!proj.alive) continue;
@@ -980,12 +1292,68 @@ class Renderer3D {
             }
         }
 
-        // 更新位置
+        // 更新位置、朝向、拖尾
         for (const mesh of this.projectilePool) {
             const proj = mesh.userData.proj;
             if (!proj) continue;
+
             const h = proj.z !== undefined ? proj.z : (proj.type === 'torpedo' ? 2 : 30);
             mesh.position.set(proj.x, h, proj.y);
+
+            // 弹体朝向飞行方向
+            mesh.rotation.y = -proj.angle;
+
+            // === 拖尾轨迹更新 ===
+            const trail = mesh.userData.trail;
+            const history = mesh.userData.trailHistory;
+            const maxPts = mesh.userData.maxTrailPts;
+            if (trail && history && maxPts) {
+                // 记录当前位置
+                history.unshift({ x: proj.x, y: h, z: proj.y });
+                if (history.length > maxPts) history.length = maxPts;
+
+                const posArr = trail.geometry.attributes.position.array;
+                const alphaArr = trail.geometry.attributes.alpha.array;
+                for (let ti = 0; ti < maxPts; ti++) {
+                    if (ti < history.length) {
+                        const pt = history[ti];
+                        posArr[ti * 3] = pt.x;
+                        posArr[ti * 3 + 1] = pt.y;
+                        posArr[ti * 3 + 2] = pt.z;
+                        alphaArr[ti] = 1.0 - ti / history.length;
+                    } else {
+                        alphaArr[ti] = 0;
+                    }
+                }
+                trail.geometry.attributes.position.needsUpdate = true;
+                trail.geometry.attributes.alpha.needsUpdate = true;
+                trail.geometry.setDrawRange(0, history.length);
+            }
+
+            // === 鱼雷V型水面浪花 ===
+            if (proj.type === 'torpedo' && mesh.userData.vWake0) {
+                const vLen = 12;
+                const spreadAngle = 0.18;
+                for (let vi = 0; vi < 2; vi++) {
+                    const vLine = mesh.userData['vWake' + vi];
+                    const vPos = vLine.geometry.attributes.position.array;
+                    const vAlpha = vLine.geometry.attributes.alpha.array;
+                    const sign = vi === 0 ? 1 : -1;
+                    const backAngle = proj.angle + Math.PI + sign * spreadAngle;
+                    const cx = Math.cos(backAngle);
+                    const cz = Math.sin(backAngle);
+                    for (let pi = 0; pi < vLen; pi++) {
+                        const t = pi * 6;
+                        vPos[pi * 3] = proj.x + cx * t;
+                        vPos[pi * 3 + 1] = 3;
+                        vPos[pi * 3 + 2] = proj.y + cz * t;
+                        vAlpha[pi] = 1.0 - pi / vLen;
+                    }
+                    vLine.geometry.attributes.position.needsUpdate = true;
+                    vLine.geometry.attributes.alpha.needsUpdate = true;
+                    vLine.geometry.setDrawRange(0, vLen);
+                }
+            }
         }
     }
 
@@ -1044,6 +1412,8 @@ class Renderer3D {
         for (const mesh of this.projectilePool) {
             this.scene.remove(mesh);
             if (mesh.userData.trail) this.scene.remove(mesh.userData.trail);
+            if (mesh.userData.vWake0) this.scene.remove(mesh.userData.vWake0);
+            if (mesh.userData.vWake1) this.scene.remove(mesh.userData.vWake1);
         }
         this.projectilePool = [];
     }
