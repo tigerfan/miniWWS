@@ -1736,7 +1736,7 @@ class Particle {
 
 // ==================== 弹药类 ====================
 class Projectile {
-    constructor(x, y, angle, speed, range, damage, type, owner, targetDist) {
+    constructor(x, y, angle, speed, range, damage, type, owner, targetDist, initialZ) {
         this.x = x; this.y = y; this.angle = angle;
         this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed;
         this.speed = speed; this.range = range; this.damage = damage;
@@ -1747,7 +1747,7 @@ class Projectile {
 
         // 抛物线弹道（炮弹）
         if (type === 'shell' && targetDist > 0) {
-            this.z = 15; // 甲板高度
+            this.z = initialZ !== undefined ? initialZ : 15; // 甲板高度
             const hSpeed = speed * 60; // 水平速度 units/sec
             const effectiveDist = Math.min(targetDist, range);
             const flightTime = effectiveDist / hSpeed;
@@ -1755,8 +1755,16 @@ class Projectile {
             this.gravity = 8 * peakHeight / (flightTime * flightTime);
             this.vz = 4 * peakHeight / flightTime;
             this.flightTime = flightTime;
+        } else if (type === 'bomb') {
+            this.z = initialZ !== undefined ? initialZ : 80;
+            const hSpeed = speed * 60;
+            const effectiveDist = targetDist || 80;
+            this.flightTime = effectiveDist / hSpeed;
+            // 自由落体: 0 = z0 + vz*t - 0.5*g*t^2. 设vz=0
+            this.vz = 0;
+            this.gravity = (2 * this.z) / (this.flightTime * this.flightTime);
         } else {
-            this.z = type === 'torpedo' ? 2 : 15;
+            this.z = type === 'torpedo' ? 2 : (type === 'rocket' ? 25 : 15);
             this.vz = 0;
             this.gravity = 0;
         }
@@ -1767,7 +1775,7 @@ class Projectile {
         this.traveled += Math.hypot(dx, dy);
 
         // 抛物线弹道更新
-        if (this.type === 'shell' && this.gravity > 0) {
+        if ((this.type === 'shell' || this.type === 'bomb') && this.gravity > 0) {
             this.vz -= this.gravity * dt;
             this.z += this.vz * dt;
             // 落地判定（下降阶段z<=0）
@@ -1799,6 +1807,9 @@ class Projectile {
         if (this.type === 'torpedo') {
             ctx.strokeStyle = 'rgba(150, 255, 200, 0.3)';
             ctx.lineWidth = 3;
+        } else if (this.type === 'rocket') {
+            ctx.strokeStyle = 'rgba(255, 200, 100, 0.6)';
+            ctx.lineWidth = 2;
         } else {
             ctx.strokeStyle = 'rgba(255, 200, 100, 0.4)';
             ctx.lineWidth = 2;
@@ -1819,6 +1830,13 @@ class Projectile {
             ctx.fillStyle = 'rgba(128, 255, 176, 0.3)';
             ctx.beginPath();
             ctx.arc(sx, sy, 7, 0, Math.PI * 2);
+            ctx.fill();
+        } else if (this.type === 'rocket') {
+            ctx.fillStyle = '#ffaa44';
+            ctx.beginPath();
+            ctx.moveTo(sx + Math.cos(this.angle)*6, sy + Math.sin(this.angle)*6);
+            ctx.lineTo(sx - Math.cos(this.angle)*4 + Math.sin(this.angle)*2, sy - Math.sin(this.angle)*4 + Math.cos(this.angle)*2);
+            ctx.lineTo(sx - Math.cos(this.angle)*4 - Math.sin(this.angle)*2, sy - Math.sin(this.angle)*4 - Math.cos(this.angle)*2);
             ctx.fill();
         } else {
             ctx.fillStyle = '#ffcc44';
@@ -1957,8 +1975,9 @@ class Squadron {
             for (let i = 0; i < count; i++) {
                 const spread = (Math.random() - 0.5) * this.cfg.spread * aimSpread;
                 const a = this.angle + spread;
+                // 轰炸机：使用 bomb 类型，并传递当前高度
                 game.projectiles.push(new Projectile(
-                    this.x, this.y, a, 0.5, 600, this.cfg.damage, 'shell', this.owner, 80
+                    this.x, this.y, a, 0.5, 600, this.cfg.damage, 'bomb', this.owner, 80, this.z
                 ));
             }
         } else if (this.type === 'rocket') {
@@ -1966,9 +1985,11 @@ class Squadron {
             for (let i = 0; i < count; i++) {
                 const spread = (Math.random() - 0.5) * this.cfg.spread * aimSpread;
                 const a = this.angle + spread;
+                // 火箭弹改为直射（type='rocket', targetDist=0）
+                // 速度提高，射程适中
                 game.projectiles.push(new Projectile(
-                    this.x, this.y, a, this.cfg.rocketSpeed * 0.15,
-                    this.cfg.rocketRange, this.cfg.damage, 'shell', this.owner, 250
+                    this.x, this.y, a, this.cfg.rocketSpeed * 0.4,
+                    this.cfg.rocketRange, this.cfg.damage, 'rocket', this.owner, 0
                 ));
             }
         }
@@ -3265,6 +3286,32 @@ class Game {
             
             if (this.running) {
                 const player = this.getPlayer();
+
+                // === 公共控制 ===
+                // 0键：切换观战模式
+                if (e.key === '0') {
+                    this.toggleSpectator();
+                    return;
+                }
+
+                // === 观战模式控制 ===
+                if (this.spectatorMode) {
+                    // 1-9键：直接切换观察目标
+                    if (e.key >= '1' && e.key <= '9') {
+                        const idx = parseInt(e.key) - 1;
+                        if (idx < this.allies.length) this.spectatorTarget = idx;
+                    }
+                    // [ / ] 键：循环切换观察目标
+                    if (e.key === '[' || e.key === ']') {
+                        let newIndex = this.spectatorTarget + (e.key === ']' ? 1 : -1);
+                        if (newIndex < 0) newIndex = this.allies.length - 1;
+                        if (newIndex >= this.allies.length) newIndex = 0;
+                        this.spectatorTarget = newIndex;
+                    }
+                    return; // 观战模式下屏蔽其他控制
+                }
+
+                // === 玩家控制 ===
                 
                 // 1键：主炮模式 / CV鱼雷机
                 if (e.key === '1') {
@@ -3316,31 +3363,23 @@ class Game {
                     }
                 }
 
-                // [ / ] 键：切换舰只
+                // [ / ] 键：切换控制舰只
                 if (e.key === '[' || e.key === ']') {
-                    if (!this.spectatorMode) {
-                        let newIndex = this.playerIndex + (e.key === ']' ? 1 : -1);
+                    let newIndex = this.playerIndex + (e.key === ']' ? 1 : -1);
+                    if (newIndex < 0) newIndex = this.allies.length - 1;
+                    if (newIndex >= this.allies.length) newIndex = 0;
+                    
+                    // 寻找下一个存活的
+                    let count = 0;
+                    while ((!this.allies[newIndex] || !this.allies[newIndex].alive) && count < this.allies.length) {
+                        newIndex += (e.key === ']' ? 1 : -1);
                         if (newIndex < 0) newIndex = this.allies.length - 1;
                         if (newIndex >= this.allies.length) newIndex = 0;
-                        
-                        // 寻找下一个存活的
-                        let count = 0;
-                        while ((!this.allies[newIndex] || !this.allies[newIndex].alive) && count < this.allies.length) {
-                            newIndex += (e.key === ']' ? 1 : -1);
-                            if (newIndex < 0) newIndex = this.allies.length - 1;
-                            if (newIndex >= this.allies.length) newIndex = 0;
-                            count++;
-                        }
-                        
-                        if (count < this.allies.length) {
-                            this.switchToShip(newIndex);
-                        }
-                    } else {
-                        // 观战模式切换目标
-                        let newIndex = this.spectatorTarget + (e.key === ']' ? 1 : -1);
-                        if (newIndex < 0) newIndex = this.allies.length - 1;
-                        if (newIndex >= this.allies.length) newIndex = 0;
-                        this.spectatorTarget = newIndex;
+                        count++;
+                    }
+                    
+                    if (count < this.allies.length) {
+                        this.switchToShip(newIndex);
                     }
                 }
 
@@ -3428,8 +3467,10 @@ class Game {
     }
 
     startGame() {
+        const isSpectator = document.getElementById('spectator-check').checked;
+
         document.getElementById('start-screen').classList.add('hidden');
-        document.getElementById('crosshair').style.display = 'block';
+        document.getElementById('crosshair').style.display = isSpectator ? 'none' : 'block';
         document.getElementById('game-container').classList.add('playing');
         document.getElementById('scoreboard').style.display = 'flex';
         document.getElementById('ally-panel').style.display = 'flex';
@@ -3486,13 +3527,13 @@ class Game {
         // 玩家出生点
         const playerSpawn = mapConfig.spawns.allies[0];
         const playerShip = new Ship(playerSpawn.x, playerSpawn.y, this.selectedType, 'player');
-        playerShip.isPlayer = true;
+        playerShip.isPlayer = !isSpectator; // 观战模式下不由玩家控制
         playerShip.angle = Math.PI / 2;
 
         // 生成友军（包含玩家共12艘）
         this.allies = [playerShip];
         this.playerIndex = 0;
-        this.spectatorMode = false;
+        this.spectatorMode = isSpectator;
         this.spectatorTarget = 0;
         const allyCount = mapConfig.teamSize.allies - 1; // 剩余11艘
         const allyTypes = ['destroyer', 'cruiser', 'destroyer', 'cruiser', 'battleship', 'destroyer', 'cruiser', 'battleship', 'destroyer', 'cruiser', 'carrier'];
@@ -3701,7 +3742,7 @@ class Game {
             }
 
             // 炮弹落地 → 溅射伤害判定
-            if (proj.type === 'shell' && proj.landed) {
+            if ((proj.type === 'shell' || proj.type === 'bomb') && proj.landed) {
                 const splashRadius = proj.owner?.cfg?.mainGun?.splashRadius || 80;
                 // 落水水柱特效
                 for (let i = 0; i < 15; i++) {
@@ -3764,7 +3805,7 @@ class Game {
             if (!proj.alive) continue;
 
             // 抛物线炮弹飞行中 → 飞越目标上方，不做碰撞
-            if (proj.type === 'shell' && proj.gravity > 0) continue;
+            if ((proj.type === 'shell' || proj.type === 'bomb') && proj.gravity > 0) continue;
 
             // 鱼雷及其他直射弹药 → 直接命中判定
             for (const t of targets) {
@@ -3786,11 +3827,6 @@ class Game {
                             randRange(0.3, 0.6), randRange(3, 7),
                             proj.type === 'torpedo' ? '#80ffb0' : '#ffaa44'
                         ));
-                    }
-                    for (const cp of this.capturePoints) {
-                        if (dist(proj, cp) < cp.radius && t.team !== proj.owner.team) {
-                            cp.onAttacked();
-                        }
                     }
                     // 检查击杀并计分
                     if (!t.alive) {
@@ -3990,7 +4026,8 @@ class Game {
             const ally = this.allies[index];
             if (!ally) return;
 
-            item.classList.toggle('active', ally.isPlayer);
+            const isActive = this.spectatorMode ? (this.spectatorTarget === index) : ally.isPlayer;
+            item.classList.toggle('active', isActive);
             item.classList.toggle('destroyed', !ally.alive);
 
             // 伤害值
@@ -4174,7 +4211,8 @@ class Game {
                 const idx = this.allies.indexOf(ship);
                 const isSpecWatching = this.spectatorMode && idx === this.spectatorTarget;
                 label = (ship.isPlayer ? '▶我' : isSpecWatching ? '▶观战' : '友军') + ' ' + ship.cfg.name;
-                if (idx >= 0) label = `[${idx + 1}] ` + label;
+                // 仅在观战模式下显示数字索引，避免与武器键混淆
+                if (idx >= 0 && this.spectatorMode) label = `[${idx + 1}] ` + label;
             } else {
                 label = '敌军 ' + ship.cfg.name;
             }
