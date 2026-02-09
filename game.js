@@ -4,15 +4,14 @@ const MAPS = {
         name: '海岛',
         size: 36000,
         description: '岛屿密布的热带海域，适合伏击和近战',
-        teamSize: { allies: 9, enemies: 9 },
+        teamSize: { allies: 12, enemies: 12 },
         islands: 18,
         spawns: {
-            allies: [{ x: 3000, y: 18000 }, { x: 5000, y: 15000 }, { x: 5000, y: 21000 }],
-            enemies: [{ x: 33000, y: 18000 }, { x: 31000, y: 15000 }, { x: 31000, y: 21000 }]
+            allies: [{ x: 3000, y: 18000 }, { x: 5000, y: 15000 }, { x: 5000, y: 21000 }, { x: 3500, y: 12000 }, { x: 3500, y: 24000 }],
+            enemies: [{ x: 33000, y: 18000 }, { x: 31000, y: 15000 }, { x: 31000, y: 21000 }, { x: 32500, y: 12000 }, { x: 32500, y: 24000 }]
         },
         capturePoints: [
-            { x: 12000, y: 18000 },  // 西侧控制点
-            { x: 24000, y: 18000 }   // 东侧控制点
+            { x: 18000, y: 18000 }
         ],
         colors: { water: '#0c1e3a', deepWater: '#0a1628', island: '#4a6a2e' }
     },
@@ -20,15 +19,14 @@ const MAPS = {
         name: '北极光',
         size: 42000,
         description: '冰川环绕的寒冷海域，长距离交战',
-        teamSize: { allies: 9, enemies: 9 },
+        teamSize: { allies: 12, enemies: 12 },
         islands: 12,
         spawns: {
-            allies: [{ x: 4000, y: 21000 }, { x: 6000, y: 18000 }, { x: 6000, y: 24000 }],
-            enemies: [{ x: 38000, y: 21000 }, { x: 36000, y: 18000 }, { x: 36000, y: 24000 }]
+            allies: [{ x: 4000, y: 21000 }, { x: 6000, y: 18000 }, { x: 6000, y: 24000 }, { x: 4500, y: 14000 }, { x: 4500, y: 28000 }],
+            enemies: [{ x: 38000, y: 21000 }, { x: 36000, y: 18000 }, { x: 36000, y: 24000 }, { x: 37500, y: 14000 }, { x: 37500, y: 28000 }]
         },
         capturePoints: [
-            { x: 14000, y: 21000 },  // 西侧控制点
-            { x: 28000, y: 21000 }   // 东侧控制点
+            { x: 21000, y: 21000 }
         ],
         colors: { water: '#1a2d4a', deepWater: '#0f1a30', island: '#8aa3b8' },
         iceMode: true
@@ -37,15 +35,14 @@ const MAPS = {
         name: '沉睡的巨人',
         size: 39000,
         description: '火山岛屿群，控制中央水道是关键',
-        teamSize: { allies: 9, enemies: 9 },
+        teamSize: { allies: 12, enemies: 12 },
         islands: 15,
         spawns: {
-            allies: [{ x: 3500, y: 19500 }, { x: 5500, y: 16500 }, { x: 5500, y: 22500 }],
-            enemies: [{ x: 35500, y: 19500 }, { x: 33500, y: 16500 }, { x: 33500, y: 22500 }]
+            allies: [{ x: 3500, y: 19500 }, { x: 5500, y: 16500 }, { x: 5500, y: 22500 }, { x: 4000, y: 13000 }, { x: 4000, y: 26000 }],
+            enemies: [{ x: 35500, y: 19500 }, { x: 33500, y: 16500 }, { x: 33500, y: 22500 }, { x: 35000, y: 13000 }, { x: 35000, y: 26000 }]
         },
         capturePoints: [
-            { x: 13000, y: 19500 },  // 西侧控制点
-            { x: 26000, y: 19500 }   // 东侧控制点
+            { x: 19500, y: 19500 }
         ],
         colors: { water: '#0d2847', deepWater: '#0a1f3a', island: '#5a4a3a' }
     },
@@ -53,15 +50,14 @@ const MAPS = {
         name: '火焰群岛',
         size: 36000,
         description: '活跃的火山群岛，地形复杂多变',
-        teamSize: { allies: 9, enemies: 9 },
+        teamSize: { allies: 12, enemies: 12 },
         islands: 20,
         spawns: {
-            allies: [{ x: 3000, y: 18000 }, { x: 5000, y: 15000 }, { x: 5000, y: 21000 }],
-            enemies: [{ x: 33000, y: 18000 }, { x: 31000, y: 15000 }, { x: 31000, y: 21000 }]
+            allies: [{ x: 3000, y: 18000 }, { x: 5000, y: 15000 }, { x: 5000, y: 21000 }, { x: 3500, y: 12000 }, { x: 3500, y: 24000 }],
+            enemies: [{ x: 33000, y: 18000 }, { x: 31000, y: 15000 }, { x: 31000, y: 21000 }, { x: 32500, y: 12000 }, { x: 32500, y: 24000 }]
         },
         capturePoints: [
-            { x: 12000, y: 18000 },  // 西侧控制点
-            { x: 24000, y: 18000 }   // 东侧控制点
+            { x: 18000, y: 18000 }
         ],
         colors: { water: '#1e0a0a', deepWater: '#0f0505', island: '#8b4513' },
         volcanic: true
@@ -70,15 +66,14 @@ const MAPS = {
         name: '荒漠之泪',
         size: 37500,
         description: '沙漠中的绿洲海域，视野开阔',
-        teamSize: { allies: 9, enemies: 9 },
+        teamSize: { allies: 12, enemies: 12 },
         islands: 8,
         spawns: {
-            allies: [{ x: 3500, y: 18750 }, { x: 5500, y: 15750 }, { x: 5500, y: 21750 }],
-            enemies: [{ x: 34000, y: 18750 }, { x: 32000, y: 15750 }, { x: 32000, y: 21750 }]
+            allies: [{ x: 3500, y: 18750 }, { x: 5500, y: 15750 }, { x: 5500, y: 21750 }, { x: 4000, y: 12000 }, { x: 4000, y: 25500 }],
+            enemies: [{ x: 34000, y: 18750 }, { x: 32000, y: 15750 }, { x: 32000, y: 21750 }, { x: 33500, y: 12000 }, { x: 33500, y: 25500 }]
         },
         capturePoints: [
-            { x: 12500, y: 18750 },  // 西侧控制点
-            { x: 25000, y: 18750 }   // 东侧控制点
+            { x: 18750, y: 18750 }
         ],
         colors: { water: '#1a3a4a', deepWater: '#0f2835', island: '#c4a35a' }
     }
@@ -115,6 +110,32 @@ const SHIP_TYPES = {
                    traverse: 0.08, arc: [-2.6, 2.6] },
         torpedo: { damage: 5500, reload: 30, range: 4500, count: 4, speed: 4.5, spread: 0.05 },
         concealment: 1.0, detectability: 12000
+    },
+    carrier: {
+        name: '航空母舰', hp: 52000, maxSpeed: 28, acceleration: 0.008, turnSpeed: 0.006,
+        length: 280, width: 40, color: '#336699', gunColor: '#5588aa',
+        mainGun: null,
+        rearGun: { damage: 600, reload: 1.5, range: 6000, shells: 2, spread: 0.06, shellSpeed: 11, splashRadius: 35,
+                   traverse: 0.4, arc: [-2.8, 2.8] },
+        torpedo: null,
+        concealment: 1.2, detectability: 14000,
+        squadrons: {
+            torpedo: {
+                name: '鱼雷机', planes: 4, damage: 4800, speed: 10,
+                reload: 30, torpCount: 2, torpSpeed: 5, torpRange: 2500, spread: 0.12,
+                hp: 1800
+            },
+            dive: {
+                name: '轰炸机', planes: 4, damage: 6000, speed: 11,
+                reload: 25, bombCount: 2, spread: 0.04,
+                hp: 2000
+            },
+            rocket: {
+                name: '攻击机', planes: 6, damage: 2200, speed: 12,
+                reload: 18, rocketCount: 4, rocketSpeed: 15, rocketRange: 1200, spread: 0.10,
+                hp: 1400
+            }
+        }
     }
 };
 
@@ -156,6 +177,7 @@ class Renderer3D {
         this.projectilePool = [];
         this.particlePool = [];
         this.wakeLines = new Map();
+        this.squadronMeshes = new Map();
         this.time = 0;
         this.camTarget = new THREE.Vector3();
         this.camLook = new THREE.Vector3();
@@ -432,6 +454,11 @@ class Renderer3D {
             super: 0x957070, turret: 0x8a6060, accent: 0xcc4444,
             waterline: 0x8b2020, window: 0xffdd88
         };
+
+        // ======== CV航母专用模型 ========
+        if (ship.type === 'carrier') {
+            return this._createCarrierMesh(ship, group, L, W, H, pal, isAlly);
+        }
 
         // ======== 舰体（贝塞尔曲线） ========
         const hullShape = new THREE.Shape();
@@ -727,6 +754,258 @@ class Renderer3D {
         }
 
         return g;
+    }
+
+    _createCarrierMesh(ship, group, L, W, H, pal, isAlly) {
+        // ======== 舰体 ========
+        const hullShape = new THREE.Shape();
+        hullShape.moveTo(L * 0.48, 0);
+        hullShape.bezierCurveTo(L * 0.44, W * 0.18, L * 0.3, W * 0.44, L * 0.1, W * 0.48);
+        hullShape.lineTo(-L * 0.3, W * 0.48);
+        hullShape.bezierCurveTo(-L * 0.42, W * 0.46, -L * 0.48, W * 0.3, -L * 0.5, W * 0.15);
+        hullShape.lineTo(-L * 0.5, -W * 0.15);
+        hullShape.bezierCurveTo(-L * 0.48, -W * 0.3, -L * 0.42, -W * 0.46, -L * 0.3, -W * 0.48);
+        hullShape.lineTo(L * 0.1, -W * 0.48);
+        hullShape.bezierCurveTo(L * 0.3, -W * 0.44, L * 0.44, -W * 0.18, L * 0.48, 0);
+        const hullGeo = new THREE.ExtrudeGeometry(hullShape, {
+            depth: H, bevelEnabled: true, bevelThickness: 2, bevelSize: 1.5, bevelSegments: 3
+        });
+        const hullColor = pal.hull;
+        const hullMat = new THREE.MeshStandardMaterial({ color: hullColor, roughness: 0.7, metalness: 0.3 });
+        const hullMesh = new THREE.Mesh(hullGeo, hullMat);
+        hullMesh.rotation.x = -Math.PI / 2;
+        hullMesh.position.y = 2;
+        hullMesh.castShadow = true;
+        hullMesh.receiveShadow = true;
+        group.add(hullMesh);
+
+        // ======== 水线带 ========
+        const wlShape = new THREE.Shape();
+        wlShape.moveTo(L * 0.46, 0);
+        wlShape.bezierCurveTo(L * 0.42, W * 0.16, L * 0.28, W * 0.42, L * 0.08, W * 0.46);
+        wlShape.lineTo(-L * 0.28, W * 0.46);
+        wlShape.bezierCurveTo(-L * 0.4, W * 0.44, -L * 0.46, W * 0.28, -L * 0.48, W * 0.13);
+        wlShape.lineTo(-L * 0.48, -W * 0.13);
+        wlShape.bezierCurveTo(-L * 0.46, -W * 0.28, -L * 0.4, -W * 0.44, -L * 0.28, -W * 0.46);
+        wlShape.lineTo(L * 0.08, -W * 0.46);
+        wlShape.bezierCurveTo(L * 0.28, -W * 0.42, L * 0.42, -W * 0.16, L * 0.46, 0);
+        const wlGeo = new THREE.ExtrudeGeometry(wlShape, { depth: H * 0.3, bevelEnabled: false });
+        const wlMat = new THREE.MeshStandardMaterial({ color: pal.waterline, roughness: 0.85, metalness: 0.05 });
+        const wlMesh = new THREE.Mesh(wlGeo, wlMat);
+        wlMesh.rotation.x = -Math.PI / 2;
+        wlMesh.position.y = 0.5;
+        group.add(wlMesh);
+
+        // ======== 飞行甲板（大型平板） ========
+        const deckW = W * 0.95;
+        const deckL = L * 0.92;
+        const deckGeo = new THREE.BoxGeometry(deckL, 2, deckW);
+        const deckMat = new THREE.MeshStandardMaterial({ color: pal.deck, roughness: 0.9, metalness: 0.05 });
+        const deckMesh = new THREE.Mesh(deckGeo, deckMat);
+        deckMesh.position.set(0, H + 3, 0);
+        deckMesh.receiveShadow = true;
+        deckMesh.castShadow = true;
+        group.add(deckMesh);
+
+        // ======== 甲板标线 ========
+        const lineMat = new THREE.MeshBasicMaterial({ color: 0xcccccc });
+        // 中线
+        const cl = new THREE.Mesh(new THREE.BoxGeometry(deckL * 0.8, 0.2, 0.8), lineMat);
+        cl.position.set(0, H + 4.2, 0);
+        group.add(cl);
+        // 着舰区斜线
+        for (let i = 0; i < 4; i++) {
+            const sl = new THREE.Mesh(new THREE.BoxGeometry(deckL * 0.12, 0.2, 0.5), lineMat);
+            sl.position.set(-L * 0.1 - i * L * 0.06, H + 4.2, W * 0.15 - i * W * 0.06);
+            sl.rotation.y = -0.3;
+            group.add(sl);
+        }
+
+        // ======== 舰岛（右舷偏置上层建筑） ========
+        const superMat = new THREE.MeshStandardMaterial({ color: pal.super, roughness: 0.6, metalness: 0.2 });
+        const islandW = W * 0.18;
+        const islandH = H * 2.5;
+        const islandL = L * 0.18;
+        const island = new THREE.Mesh(new THREE.BoxGeometry(islandL, islandH, islandW), superMat);
+        island.position.set(L * 0.05, H + islandH / 2 + 4, -W * 0.38);
+        island.castShadow = true;
+        group.add(island);
+
+        // 舰桥层
+        const brH = islandH * 0.5;
+        const br = new THREE.Mesh(new THREE.BoxGeometry(islandL * 0.7, brH, islandW * 0.85), superMat);
+        br.position.set(L * 0.05, H + islandH + brH / 2 + 4, -W * 0.38);
+        br.castShadow = true;
+        group.add(br);
+
+        // 舰桥窗户
+        const winMat = new THREE.MeshStandardMaterial({
+            color: pal.window, emissive: pal.window, emissiveIntensity: 0.35, roughness: 0.2, metalness: 0.7
+        });
+        const win = new THREE.Mesh(new THREE.BoxGeometry(islandL * 0.75, brH * 0.25, islandW * 0.9), winMat);
+        win.position.set(L * 0.05, H + islandH + brH * 0.65 + 4, -W * 0.38);
+        group.add(win);
+
+        // 烟囱
+        const fH = H * 1.8;
+        const fR = W * 0.06;
+        const fMat = new THREE.MeshStandardMaterial({ color: pal.hullDark, roughness: 0.8, metalness: 0.15 });
+        const funnel = new THREE.Mesh(new THREE.CylinderGeometry(fR * 0.8, fR, fH, 8), fMat);
+        funnel.position.set(L * 0.02, H + islandH + fH / 2 + 4, -W * 0.38);
+        funnel.castShadow = true;
+        group.add(funnel);
+
+        // 桅杆+雷达
+        const mH = H * 3;
+        const mastMat = new THREE.MeshStandardMaterial({ color: 0x555555, roughness: 0.7, metalness: 0.4 });
+        const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 1.2, mH, 6), mastMat);
+        mast.position.set(L * 0.06, H + islandH + brH + mH / 2 + 4, -W * 0.38);
+        group.add(mast);
+        const rd = new THREE.Mesh(
+            new THREE.BoxGeometry(W * 0.2, W * 0.05, 1),
+            new THREE.MeshStandardMaterial({ color: 0x999999, roughness: 0.4, metalness: 0.5 })
+        );
+        rd.position.set(L * 0.06, H + islandH + brH + mH * 0.8 + 4, -W * 0.38);
+        group.add(rd);
+
+        // ======== 防空炮 ========
+        const aaMat = new THREE.MeshStandardMaterial({ color: 0x666666, roughness: 0.5, metalness: 0.5 });
+        const aaPositions = [
+            { x: L * 0.3, z: -W * 0.35 }, { x: -L * 0.2, z: -W * 0.35 },
+            { x: L * 0.3, z: W * 0.35 }, { x: -L * 0.2, z: W * 0.35 },
+            { x: L * 0.15, z: -W * 0.35 }, { x: -L * 0.35, z: -W * 0.35 }
+        ];
+        for (const p of aaPositions) {
+            const aa = new THREE.Mesh(new THREE.CylinderGeometry(W * 0.02, W * 0.025, H * 0.2, 6), aaMat);
+            aa.position.set(p.x, H + 5, p.z);
+            group.add(aa);
+        }
+
+        // ======== 阵营标志条纹 ========
+        const bandMat = new THREE.MeshStandardMaterial({
+            color: pal.accent, emissive: pal.accent, emissiveIntensity: 0.15, roughness: 0.5
+        });
+        const band = new THREE.Mesh(new THREE.BoxGeometry(deckL * 0.06, 0.3, deckW * 0.6), bandMat);
+        band.position.set(L * 0.35, H + 4.3, 0);
+        group.add(band);
+
+        group.userData = { turretGroup: null, rearTurretGroup: null, ship, hullMat, originalColor: hullColor };
+        this.scene.add(group);
+        this.shipMeshes.set(ship, group);
+        return group;
+    }
+
+    createSquadronMesh(sq) {
+        const group = new THREE.Group();
+        const isAlly = sq.owner.team === 'player';
+        const bodyColor = isAlly ? 0x4a7090 : 0x905060;
+        const wingColor = isAlly ? 0x5a8aaa : 0xaa6070;
+
+        for (let i = 0; i < sq.planes; i++) {
+            const plane = new THREE.Group();
+            // 机身
+            const bodyGeo = new THREE.BoxGeometry(14, 2.5, 3.5);
+            const bodyMat = new THREE.MeshStandardMaterial({ color: bodyColor, roughness: 0.5, metalness: 0.3 });
+            plane.add(new THREE.Mesh(bodyGeo, bodyMat));
+            // 机翼
+            const wingGeo = new THREE.BoxGeometry(4, 0.6, 22);
+            const wingMat = new THREE.MeshStandardMaterial({ color: wingColor, roughness: 0.5, metalness: 0.3 });
+            const wing = new THREE.Mesh(wingGeo, wingMat);
+            wing.position.set(-1, 0.8, 0);
+            plane.add(wing);
+            // 尾翼
+            const tailGeo = new THREE.BoxGeometry(2, 5, 1);
+            const tail = new THREE.Mesh(tailGeo, bodyMat);
+            tail.position.set(-6, 2.5, 0);
+            plane.add(tail);
+            // 螺旋桨位
+            const propGeo = new THREE.CylinderGeometry(0.5, 0.5, 2, 4);
+            const prop = new THREE.Mesh(propGeo, new THREE.MeshBasicMaterial({ color: 0x333333 }));
+            prop.rotation.z = Math.PI / 2;
+            prop.position.set(8, 0, 0);
+            plane.add(prop);
+
+            // V字编队位置
+            const row = Math.floor(i / 2);
+            const side = i % 2 === 0 ? -1 : 1;
+            if (i === 0) {
+                plane.userData.offset = { x: 0, z: 0 };
+            } else {
+                plane.userData.offset = { x: -row * 18, z: side * (row) * 14 };
+            }
+            group.add(plane);
+        }
+        this.scene.add(group);
+        this.squadronMeshes.set(sq, group);
+        return group;
+    }
+
+    updateSquadron(sq) {
+        let mesh = this.squadronMeshes.get(sq);
+        if (!mesh && sq.alive) {
+            mesh = this.createSquadronMesh(sq);
+        }
+        if (!mesh) return;
+
+        if (!sq.alive) {
+            this.scene.remove(mesh);
+            this.squadronMeshes.delete(sq);
+            return;
+        }
+
+        mesh.position.set(sq.x, sq.z, sq.y);
+        mesh.rotation.y = -sq.angle;
+
+        // 编队中各机的微动
+        const children = mesh.children;
+        for (let i = 0; i < children.length; i++) {
+            const plane = children[i];
+            if (!plane.userData.offset) continue;
+            const off = plane.userData.offset;
+            plane.position.set(off.x, Math.sin(this.time * 2 + i) * 1.5, off.z);
+            plane.rotation.z = Math.sin(this.time * 1.5 + i * 0.5) * 0.05;
+        }
+
+        // 攻击状态倾斜
+        if (sq.state === 'attacking') {
+            mesh.rotation.x = 0.15;
+        } else if (sq.state === 'launching') {
+            mesh.rotation.x = -0.1 * (1 - sq.launchTimer / 1.5);
+        } else {
+            mesh.rotation.x = 0;
+        }
+    }
+
+    updateSquadronCamera(sq) {
+        if (!sq || !sq.alive) return;
+        const camDist = 250;
+        const camH = 120;
+        const ahead = 300;
+
+        if (this._smoothCamAngle === undefined) this._smoothCamAngle = sq.angle;
+        let angleDiff = normalizeAngle(sq.angle - this._smoothCamAngle);
+        this._smoothCamAngle = normalizeAngle(this._smoothCamAngle + angleDiff * 0.04);
+
+        const behindX = sq.x - Math.cos(this._smoothCamAngle) * camDist;
+        const behindZ = sq.y - Math.sin(this._smoothCamAngle) * camDist;
+        this.camTarget.set(behindX, sq.z + camH, behindZ);
+        this.camera.position.lerp(this.camTarget, 0.05);
+
+        const lx = sq.x + Math.cos(this._smoothCamAngle) * ahead;
+        const lz = sq.y + Math.sin(this._smoothCamAngle) * ahead;
+        if (!this._smoothLook) this._smoothLook = new THREE.Vector3(lx, sq.z, lz);
+        this._smoothLook.x = lerp(this._smoothLook.x, lx, 0.06);
+        this._smoothLook.y = lerp(this._smoothLook.y, sq.z, 0.06);
+        this._smoothLook.z = lerp(this._smoothLook.z, lz, 0.06);
+        this.camera.lookAt(this._smoothLook);
+
+        this.camera.fov = lerp(this.camera.fov, 60, 0.06);
+        this.camera.updateProjectionMatrix();
+
+        this.sunLight.position.set(sq.x + 3000, 4000, sq.y + 2000);
+        this.sunLight.target.position.set(sq.x, 0, sq.y);
+        this.sunLight.target.updateMatrixWorld();
+        this.sky.position.set(sq.x, 0, sq.y);
     }
 
     createIslandMesh(island, mapConfig) {
@@ -1398,6 +1677,11 @@ class Renderer3D {
             this.scene.remove(mesh);
         }
         this.shipMeshes.clear();
+        // 清理中队
+        for (const [, mesh] of this.squadronMeshes) {
+            this.scene.remove(mesh);
+        }
+        this.squadronMeshes.clear();
         // 清理航迹
         for (const [, wake] of this.wakeLines) {
             this.scene.remove(wake.left);
@@ -1546,6 +1830,183 @@ class Projectile {
             ctx.arc(sx, sy, 5, 0, Math.PI * 2);
             ctx.fill();
         }
+    }
+}
+
+// ==================== 飞行中队 ====================
+class Squadron {
+    constructor(owner, type, config) {
+        this.owner = owner;
+        this.type = type; // 'torpedo', 'dive', 'rocket'
+        this.cfg = config;
+        this.x = owner.x + Math.cos(owner.angle) * owner.cfg.length * 0.3;
+        this.y = owner.y + Math.sin(owner.angle) * owner.cfg.length * 0.3;
+        this.z = 20;
+        this.angle = owner.angle;
+        this.speed = config.speed * 0.15;
+        this.baseSpeed = this.speed;
+        this.planes = config.planes;
+        this.maxPlanes = config.planes;
+        this.alive = true;
+        this.state = 'launching'; // launching, flying, attacking, returning
+        this.launchTimer = 0;
+        this.attackTimer = 0;
+        this._dropped = false;
+        this.team = owner.team;
+        this.hp = config.hp * config.planes;
+        this.maxHp = this.hp;
+        this.rudder = 0;
+        this.boosting = false;
+        this.braking = false; // 减速状态
+        this.boostFuel = 5; // 5秒加速燃料
+        this.maxBoostFuel = 5;
+        this.turnSpeed = 0.025;
+        // 攻击预瞄
+        this.aimProgress = 0; // 0-1 瞄准收束进度
+    }
+
+    update(dt, game) {
+        if (!this.alive) return;
+
+        // 加速消耗
+        if (this.boosting && this.boostFuel > 0) {
+            this.boostFuel -= dt;
+            this.speed = this.baseSpeed * 1.5;
+        } else if (this.braking) {
+            this.speed = this.baseSpeed * 0.5; // 减速50%
+            this.boosting = false;
+            if (this.boostFuel < this.maxBoostFuel) this.boostFuel += dt * 0.3;
+        } else {
+            this.boosting = false;
+            this.speed = this.baseSpeed;
+            if (this.boostFuel < this.maxBoostFuel) this.boostFuel += dt * 0.3;
+        }
+
+        if (this.state === 'launching') {
+            this.launchTimer += dt;
+            this.z = lerp(20, 80, Math.min(this.launchTimer / 1.5, 1));
+            this.x += Math.cos(this.angle) * this.speed * 0.5;
+            this.y += Math.sin(this.angle) * this.speed * 0.5;
+            if (this.launchTimer > 1.5) this.state = 'flying';
+        }
+        else if (this.state === 'flying') {
+            // 转向
+            this.angle += this.rudder * this.turnSpeed;
+            this.angle = normalizeAngle(this.angle);
+            this.x += Math.cos(this.angle) * this.speed;
+            this.y += Math.sin(this.angle) * this.speed;
+            // 瞄准收束（不转向时逐渐收束）
+            if (Math.abs(this.rudder) < 0.1) {
+                this.aimProgress = Math.min(1, this.aimProgress + dt * 0.4);
+            } else {
+                this.aimProgress = Math.max(0, this.aimProgress - dt * 0.8);
+            }
+        }
+        else if (this.state === 'attacking') {
+            // 攻击跑 - 直线飞行
+            this.x += Math.cos(this.angle) * this.speed * 1.2;
+            this.y += Math.sin(this.angle) * this.speed * 1.2;
+            this.attackTimer += dt;
+            if (this.attackTimer > 0.6 && !this._dropped) {
+                this._dropped = true;
+                this.dropOrdnance(game);
+            }
+            if (this.attackTimer > 2.0) {
+                this.state = 'returning';
+            }
+        }
+        else if (this.state === 'returning') {
+            const toOwner = angleTo(this, this.owner);
+            let diff = normalizeAngle(toOwner - this.angle);
+            this.angle += clamp(diff * 2, -0.04, 0.04);
+            this.angle = normalizeAngle(this.angle);
+            this.x += Math.cos(this.angle) * this.speed * 1.3;
+            this.y += Math.sin(this.angle) * this.speed * 1.3;
+            // 接近母舰时降低高度
+            const d = dist(this, this.owner);
+            if (d < 500) this.z = lerp(this.z, 20, 0.02);
+            if (d < 150) {
+                this.alive = false;
+                this.owner.returnSquadronPlanes(this.type, this.planes);
+            }
+        }
+
+        // 边界
+        const worldSize = game?.currentMap?.size || 42000;
+        if (this.x < 100 || this.x > worldSize - 100 || this.y < 100 || this.y > worldSize - 100) {
+            this.state = 'returning';
+        }
+        this.x = clamp(this.x, 50, worldSize - 50);
+        this.y = clamp(this.y, 50, worldSize - 50);
+    }
+
+    dropOrdnance(game) {
+        const aimSpread = lerp(1.8, 0.4, this.aimProgress);
+        if (this.type === 'torpedo') {
+            const count = this.cfg.torpCount;
+            for (let i = 0; i < count; i++) {
+                const spreadOff = (i - (count - 1) / 2) * this.cfg.spread * aimSpread;
+                const a = this.angle + spreadOff;
+                game.projectiles.push(new Projectile(
+                    this.x, this.y, a, this.cfg.torpSpeed,
+                    this.cfg.torpRange, this.cfg.damage, 'torpedo', this.owner
+                ));
+            }
+        } else if (this.type === 'dive') {
+            const count = this.cfg.bombCount;
+            for (let i = 0; i < count; i++) {
+                const spread = (Math.random() - 0.5) * this.cfg.spread * aimSpread;
+                const a = this.angle + spread;
+                game.projectiles.push(new Projectile(
+                    this.x, this.y, a, 0.5, 600, this.cfg.damage, 'shell', this.owner, 80
+                ));
+            }
+        } else if (this.type === 'rocket') {
+            const count = this.cfg.rocketCount;
+            for (let i = 0; i < count; i++) {
+                const spread = (Math.random() - 0.5) * this.cfg.spread * aimSpread;
+                const a = this.angle + spread;
+                game.projectiles.push(new Projectile(
+                    this.x, this.y, a, this.cfg.rocketSpeed * 0.15,
+                    this.cfg.rocketRange, this.cfg.damage, 'shell', this.owner, 250
+                ));
+            }
+        }
+        // 投弹特效
+        for (let i = 0; i < 6; i++) {
+            const ea = Math.random() * Math.PI * 2;
+            const espd = randRange(0.5, 2);
+            game.particles.push(new Particle(
+                this.x, this.y,
+                Math.cos(ea) * espd, Math.sin(ea) * espd,
+                randRange(0.3, 0.6), randRange(3, 6), '#ffdd44'
+            ));
+        }
+    }
+
+    startAttack() {
+        if (this.state !== 'flying') return false;
+        this.state = 'attacking';
+        this.attackTimer = 0;
+        this._dropped = false;
+        return true;
+    }
+
+    recall() {
+        if (this.state === 'returning' || !this.alive) return;
+        this.state = 'returning';
+    }
+
+    takeDamage(dmg) {
+        if (!this.alive) return;
+        this.hp -= dmg;
+        if (this.hp <= 0) {
+            this.hp = 0;
+            this.alive = false;
+            this.planes = 0;
+            return;
+        }
+        this.planes = Math.max(1, Math.ceil(this.maxPlanes * (this.hp / this.maxHp)));
     }
 }
 
@@ -1935,6 +2396,7 @@ class Ship {
         this.sinkTimer = 0;
         this.damageFlash = 0;
         this.wakeParticles = [];
+        this.damageDealt = 0; // 该舰造成的总伤害
         this.turretOnTarget = false; // 主炮是否对准目标
         this.turretDiffAbs = Math.PI; // 炮塔与目标的角度差（绝对值）
         // AI
@@ -1944,6 +2406,16 @@ class Ship {
         this.aiFireDelay = randRange(1, 3);
         this.aiTorpDelay = randRange(5, 15);
         this.aiFormationOffset = { x: randRange(-300, 300), y: randRange(-300, 300) };
+        // CV航母特有
+        if (this.type === 'carrier') {
+            this.squadronDecks = {
+                torpedo: { planes: this.cfg.squadrons.torpedo.planes, maxPlanes: this.cfg.squadrons.torpedo.planes, regenTimer: 0 },
+                dive: { planes: this.cfg.squadrons.dive.planes, maxPlanes: this.cfg.squadrons.dive.planes, regenTimer: 0 },
+                rocket: { planes: this.cfg.squadrons.rocket.planes, maxPlanes: this.cfg.squadrons.rocket.planes, regenTimer: 0 }
+            };
+            this.squadronCooldowns = { torpedo: 0, dive: 0, rocket: 0 };
+            this.aiSquadronDelay = randRange(8, 15);
+        }
     }
 
     update(dt, game) {
@@ -1992,13 +2464,28 @@ class Ship {
                 randRange(0.8, 1.5), randRange(2, 5), 'rgba(180, 220, 255, 0.4)'
             ));
         }
-        // 主炮塔旋转（固定旋转速度 + 射界限制）
-        if (this.isPlayer) {
+        // 主炮塔旋转（固定旋转速度 + 射界限制）- CV没有主炮
+        if (this.isPlayer && this.cfg.mainGun) {
             const targetAng = angleTo(this, game.mouseWorld);
             const result = this.traverseTurret(this.turretAngle, targetAng, this.cfg.mainGun, dt, false);
             this.turretAngle = result.angle;
             this.turretOnTarget = result.onTarget;
             this.turretDiffAbs = result.diffAbs;
+        }
+        // CV甲板飞机再生
+        if (this.type === 'carrier' && this.squadronDecks) {
+            for (const sqType of ['torpedo', 'dive', 'rocket']) {
+                const deck = this.squadronDecks[sqType];
+                if (this.squadronCooldowns[sqType] > 0) this.squadronCooldowns[sqType] -= dt;
+                if (deck.planes < deck.maxPlanes) {
+                    deck.regenTimer += dt;
+                    const regenTime = this.cfg.squadrons[sqType].reload * 0.6;
+                    if (deck.regenTimer >= regenTime) {
+                        deck.regenTimer = 0;
+                        deck.planes = Math.min(deck.maxPlanes, deck.planes + 1);
+                    }
+                }
+            }
         }
 
         // 尾炮自动瞄准射程内最近敌舰
@@ -2061,7 +2548,7 @@ class Ship {
     }
 
     fireMainGun(targetAngle, game, targetDist) {
-        if (this.mainGunTimer > 0 || !this.alive) return false;
+        if (!this.cfg.mainGun || this.mainGunTimer > 0 || !this.alive) return false;
         this.mainGunTimer = this.cfg.mainGun.reload;
         const gun = this.cfg.mainGun;
         const baseDist = targetDist || gun.range * 0.5;
@@ -2116,7 +2603,7 @@ class Ship {
     }
 
     fireTorpedo(targetAngle, game) {
-        if (this.torpedoTimer > 0 || !this.alive) return false;
+        if (!this.cfg.torpedo || this.torpedoTimer > 0 || !this.alive) return false;
         this.torpedoTimer = this.cfg.torpedo.reload;
         const torp = this.cfg.torpedo;
         const baseAngle = targetAngle;
@@ -2134,6 +2621,28 @@ class Ship {
         if (this.repairCooldown > 0 || !this.alive) return;
         this.repairCooldown = 30;
         this.hp = Math.min(this.maxHp, this.hp + this.maxHp * 0.15);
+    }
+
+    // CV: 发射中队
+    launchSquadron(type, game) {
+        if (this.type !== 'carrier' || !this.alive) return null;
+        const deck = this.squadronDecks[type];
+        if (!deck || deck.planes <= 0 || this.squadronCooldowns[type] > 0) return null;
+        const cfg = this.cfg.squadrons[type];
+        const planeCount = Math.min(deck.planes, cfg.planes);
+        deck.planes -= planeCount;
+        this.squadronCooldowns[type] = cfg.reload;
+        const sqCfg = { ...cfg, planes: planeCount };
+        const sq = new Squadron(this, type, sqCfg);
+        game.squadrons.push(sq);
+        return sq;
+    }
+
+    // CV: 飞机返回甲板
+    returnSquadronPlanes(type, count) {
+        if (!this.squadronDecks || !this.squadronDecks[type]) return;
+        const deck = this.squadronDecks[type];
+        deck.planes = Math.min(deck.maxPlanes, deck.planes + count);
     }
 
     takeDamage(dmg, game) {
@@ -2290,6 +2799,12 @@ class Ship {
     // AI - 好战强化版 + 避障寻路
     updateAI(dt, game) {
         if (!this.alive || this.isPlayer) return;
+
+        // CV航母AI：远离战场，发射中队
+        if (this.type === 'carrier') {
+            this.updateAI_CV(dt, game);
+            return;
+        }
 
         this.aiFireDelay -= dt;
         this.aiTorpDelay -= dt;
@@ -2512,6 +3027,85 @@ class Ship {
         }
     }
 
+    // CV航母AI
+    updateAI_CV(dt, game) {
+        if (!this.squadronDecks) return;
+        this.aiSquadronDelay -= dt;
+
+        const enemyTeam = this.team === 'player' ? game.enemies : game.allies;
+        const worldSize = game.currentMap?.size || 36000;
+
+        // CV远离战场 - 保持在后方
+        const spawnX = this.team === 'player' ? worldSize * 0.1 : worldSize * 0.9;
+        const spawnY = worldSize * 0.5;
+        const toDist = dist(this, { x: spawnX, y: spawnY });
+        if (toDist > 3000) {
+            const toAngle = angleTo(this, { x: spawnX, y: spawnY });
+            const diff = normalizeAngle(toAngle - this.angle);
+            this.rudder = clamp(diff * 2, -1, 1);
+            this.throttle = 0.5;
+        } else {
+            this.throttle = 0.2;
+            this.rudder *= 0.95;
+        }
+
+        // 发射中队
+        if (this.aiSquadronDelay <= 0) {
+            // 找目标
+            let bestTarget = null;
+            let bestScore = -1;
+            for (const e of enemyTeam) {
+                if (!e.alive) continue;
+                const d = dist(this, e);
+                let score = 1;
+                if (e.type === 'battleship') score = 3;
+                else if (e.type === 'cruiser') score = 2;
+                else if (e.type === 'destroyer') score = 1.5;
+                score /= (d / 10000 + 0.5);
+                if (score > bestScore) { bestScore = score; bestTarget = e; }
+            }
+
+            if (bestTarget) {
+                // 选择中队类型
+                const types = ['torpedo', 'dive', 'rocket'];
+                const available = types.filter(t => this.squadronDecks[t].planes >= 2 && this.squadronCooldowns[t] <= 0);
+                if (available.length > 0) {
+                    // 优先鱼雷机打BB，攻击机打DD
+                    let pick = available[0];
+                    if (bestTarget.type === 'battleship' && available.includes('torpedo')) pick = 'torpedo';
+                    else if (bestTarget.type === 'destroyer' && available.includes('rocket')) pick = 'rocket';
+                    else if (available.includes('dive')) pick = 'dive';
+
+                    const sq = this.launchSquadron(pick, game);
+                    if (sq) {
+                        sq._aiTarget = bestTarget;
+                        sq._aiState = 'approach';
+                    }
+                }
+            }
+            this.aiSquadronDelay = randRange(10, 20);
+        }
+
+        // 更新AI控制的中队
+        for (const sq of game.squadrons) {
+            if (sq.owner !== this || !sq.alive) continue;
+            if (sq.state === 'flying' && sq._aiTarget) {
+                const t = sq._aiTarget;
+                if (!t.alive) {
+                    sq.recall();
+                    continue;
+                }
+                const toTarget = angleTo(sq, t);
+                const diff = normalizeAngle(toTarget - sq.angle);
+                sq.rudder = clamp(diff * 3, -1, 1);
+                const d = dist(sq, t);
+                if (d < 800 && Math.abs(diff) < 0.4) {
+                    sq.startAttack();
+                }
+            }
+        }
+    }
+
     predictLead(target, projSpeed) {
         const d = dist(this, target);
         const t = d / (projSpeed * 60); // 预判时间
@@ -2544,8 +3138,16 @@ class Game {
         this.floatingTexts = [];
         this.islands = [];
         this.capturePoints = []; // 占领点
-        this.kills = 0;
-        this.allyKills = 0;
+        this.squadrons = []; // 飞行中队
+        this.squadronControlMode = false; // 是否正在控制中队
+        this.activeSquadron = null;
+        this.selectedSquadronType = 'torpedo';
+        
+        // 武器模式 'main' | 'torpedo'
+        this.weaponMode = 'main';
+
+        this.squadrons = [];
+        this.particles = [];
         this.enemyKills = 0;
         this.totalDamage = 0;
         this.gameTime = 0;
@@ -2662,21 +3264,91 @@ class Game {
             if (e.key === ' ') e.preventDefault();
             
             if (this.running) {
-                // 0键：进入/退出观战模式
-                if (e.key === '0') {
-                    this.toggleSpectator();
-                }
-                // 1-9键：切换舰只
-                if (e.key >= '1' && e.key <= '9') {
-                    const index = parseInt(e.key) - 1;
-                    if (this.spectatorMode) {
-                        // 观战模式下切换跟随目标
-                        if (index < this.allies.length && this.allies[index] && this.allies[index].alive) {
-                            this.spectatorTarget = index;
+                const player = this.getPlayer();
+                
+                // 1键：主炮模式 / CV鱼雷机
+                if (e.key === '1') {
+                    if (player && player.type === 'carrier' && !this.squadronControlMode) {
+                        this.selectedSquadronType = 'torpedo';
+                        const sq = player.launchSquadron('torpedo', this);
+                        if (sq) {
+                            this.squadronControlMode = true;
+                            this.activeSquadron = sq;
                         }
                     } else {
-                        this.switchToShip(index);
+                        this.weaponMode = 'main';
+                        const hud = document.getElementById('weapon-info');
+                        if (hud) {
+                            hud.querySelector('#weapon-name').textContent = '主炮';
+                            hud.style.color = '#fff';
+                        }
                     }
+                }
+                // 2键：鱼雷模式 / CV轰炸机
+                if (e.key === '2') {
+                    if (player && player.type === 'carrier' && !this.squadronControlMode) {
+                        this.selectedSquadronType = 'dive';
+                        const sq = player.launchSquadron('dive', this);
+                        if (sq) {
+                            this.squadronControlMode = true;
+                            this.activeSquadron = sq;
+                        }
+                    } else {
+                        if (player && player.cfg.torpedo) {
+                            this.weaponMode = 'torpedo';
+                            const hud = document.getElementById('weapon-info');
+                            if (hud) {
+                                hud.querySelector('#weapon-name').textContent = '鱼雷';
+                                hud.style.color = '#80ffb0';
+                            }
+                        }
+                    }
+                }
+                // 3键：CV攻击机
+                if (e.key === '3') {
+                    if (player && player.type === 'carrier' && !this.squadronControlMode) {
+                        this.selectedSquadronType = 'rocket';
+                        const sq = player.launchSquadron('rocket', this);
+                        if (sq) {
+                            this.squadronControlMode = true;
+                            this.activeSquadron = sq;
+                        }
+                    }
+                }
+
+                // [ / ] 键：切换舰只
+                if (e.key === '[' || e.key === ']') {
+                    if (!this.spectatorMode) {
+                        let newIndex = this.playerIndex + (e.key === ']' ? 1 : -1);
+                        if (newIndex < 0) newIndex = this.allies.length - 1;
+                        if (newIndex >= this.allies.length) newIndex = 0;
+                        
+                        // 寻找下一个存活的
+                        let count = 0;
+                        while ((!this.allies[newIndex] || !this.allies[newIndex].alive) && count < this.allies.length) {
+                            newIndex += (e.key === ']' ? 1 : -1);
+                            if (newIndex < 0) newIndex = this.allies.length - 1;
+                            if (newIndex >= this.allies.length) newIndex = 0;
+                            count++;
+                        }
+                        
+                        if (count < this.allies.length) {
+                            this.switchToShip(newIndex);
+                        }
+                    } else {
+                        // 观战模式切换目标
+                        let newIndex = this.spectatorTarget + (e.key === ']' ? 1 : -1);
+                        if (newIndex < 0) newIndex = this.allies.length - 1;
+                        if (newIndex >= this.allies.length) newIndex = 0;
+                        this.spectatorTarget = newIndex;
+                    }
+                }
+
+                // F键：召回中队
+                if (e.key.toLowerCase() === 'f' && this.squadronControlMode && this.activeSquadron) {
+                    this.activeSquadron.recall();
+                    this.squadronControlMode = false;
+                    this.activeSquadron = null;
                 }
             }
         });
@@ -2689,22 +3361,35 @@ class Game {
             this.mouseWorld.x = e.clientX + this.cam.x;
             this.mouseWorld.y = e.clientY + this.cam.y;
             const ch = document.getElementById('crosshair');
-            ch.style.left = e.clientX + 'px';
-            ch.style.top = e.clientY + 'px';
+            if (ch) {
+                ch.style.left = e.clientX + 'px';
+                ch.style.top = e.clientY + 'px';
+            }
         });
         const clickTarget = document.getElementById('three-container');
         clickTarget.addEventListener('mousedown', e => {
             const player = this.getPlayer();
             if (!this.running || !player || !player.alive || this.spectatorMode) return;
             e.preventDefault();
+            
+            // 左键点击
             if (e.button === 0) {
-                if (player.turretOnTarget) {
-                    const targetDist = dist(player, this.mouseWorld);
-                    player.fireMainGun(player.turretAngle, this, targetDist);
+                // CV中队攻击
+                if (this.squadronControlMode && this.activeSquadron) {
+                    this.activeSquadron.startAttack();
+                    this.squadronControlMode = false; // 攻击后交还控制权
+                    this.activeSquadron = null;
+                } 
+                // 船只开火
+                else if (player.turretOnTarget) {
+                    if (this.weaponMode === 'torpedo') {
+                        player.fireTorpedo(player.turretAngle, this);
+                    } else {
+                        const targetDist = dist(player, this.mouseWorld);
+                        player.fireMainGun(player.turretAngle, this, targetDist);
+                    }
                 }
-            } else if (e.button === 2) {
-                player.fireTorpedo(player.turretAngle, this);
-            }
+            } 
         });
         clickTarget.addEventListener('contextmenu', e => e.preventDefault());
     }
@@ -2754,6 +3439,9 @@ class Game {
         this.projectiles = [];
         this.particles = [];
         this.floatingTexts = [];
+        this.squadrons = [];
+        this.squadronControlMode = false;
+        this.activeSquadron = null;
         this.kills = 0;
         this.allyKills = 0;
         this.enemyKills = 0;
@@ -2801,13 +3489,13 @@ class Game {
         playerShip.isPlayer = true;
         playerShip.angle = Math.PI / 2;
 
-        // 生成友军（包含玩家共9艘）
+        // 生成友军（包含玩家共12艘）
         this.allies = [playerShip];
         this.playerIndex = 0;
         this.spectatorMode = false;
         this.spectatorTarget = 0;
-        const allyCount = mapConfig.teamSize.allies - 1; // 剩余8艘
-        const allyTypes = ['destroyer', 'cruiser', 'destroyer', 'cruiser', 'battleship', 'destroyer', 'cruiser', 'battleship'];
+        const allyCount = mapConfig.teamSize.allies - 1; // 剩余11艘
+        const allyTypes = ['destroyer', 'cruiser', 'destroyer', 'cruiser', 'battleship', 'destroyer', 'cruiser', 'battleship', 'destroyer', 'cruiser', 'carrier'];
         for (let i = 0; i < allyCount; i++) {
             const spawn = mapConfig.spawns.allies[(i + 1) % mapConfig.spawns.allies.length];
             const offsetX = randRange(-800, 800);
@@ -2821,7 +3509,7 @@ class Game {
         // 生成敌军
         this.enemies = [];
         const enemyCount = mapConfig.teamSize.enemies;
-        const enemyTypes = ['destroyer', 'cruiser', 'destroyer', 'cruiser', 'cruiser', 'battleship', 'destroyer'];
+        const enemyTypes = ['destroyer', 'cruiser', 'destroyer', 'cruiser', 'cruiser', 'battleship', 'destroyer', 'battleship', 'destroyer', 'cruiser', 'cruiser', 'carrier'];
         for (let i = 0; i < enemyCount; i++) {
             const spawn = mapConfig.spawns.enemies[i % mapConfig.spawns.enemies.length];
             const offsetX = randRange(-1000, 1000);
@@ -2909,22 +3597,43 @@ class Game {
             const currentPlayer = this.getPlayer();
             if (currentPlayer && currentPlayer.alive) {
                 const p = currentPlayer;
-                // 油门
-                if (this.keys['w']) p.throttle = Math.min(p.throttle + dt * 1.5, 1);
-                else if (this.keys['s']) p.throttle = Math.max(p.throttle - dt * 1.5, -0.4);
-                else p.throttle *= 0.995;
-                // 方向
-                if (this.keys['a']) p.rudder = -1;
-                else if (this.keys['d']) p.rudder = 1;
-                else p.rudder *= 0.85;
-                // 急刹
-                if (this.keys[' ']) p.throttle *= 0.95;
-                // 维修
-                if (this.keys['r']) p.repair();
-                // Shift瞄准镜
-                this.zoomMode = !!this.keys['shift'];
 
-                p.update(dt, this);
+                // CV中队控制模式
+                if (this.squadronControlMode && this.activeSquadron && this.activeSquadron.alive) {
+                    const sq = this.activeSquadron;
+                    // 中队转向
+                    if (this.keys['a']) sq.rudder = -1;
+                    else if (this.keys['d']) sq.rudder = 1;
+                    else sq.rudder *= 0.8;
+                    // 加速
+                    sq.boosting = !!this.keys['w'];
+                    // 减速
+                    sq.braking = !!this.keys['s'];
+                    // CV本体自动巡航
+                    p.update(dt, this);
+                } else {
+                    // 检查中队是否已失效
+                    if (this.squadronControlMode) {
+                        this.squadronControlMode = false;
+                        this.activeSquadron = null;
+                    }
+                    // 油门
+                    if (this.keys['w']) p.throttle = Math.min(p.throttle + dt * 1.5, 1);
+                    else if (this.keys['s']) p.throttle = Math.max(p.throttle - dt * 1.5, -0.4);
+                    else p.throttle *= 0.995;
+                    // 方向
+                    if (this.keys['a']) p.rudder = -1;
+                    else if (this.keys['d']) p.rudder = 1;
+                    else p.rudder *= 0.85;
+                    // 急刹
+                    if (this.keys[' ']) p.throttle *= 0.95;
+                    // 维修
+                    if (this.keys['r']) p.repair();
+                    // Shift瞄准镜
+                    this.zoomMode = !!this.keys['shift'];
+
+                    p.update(dt, this);
+                }
 
                 // 相机跟随
                 const targetCx = p.x - this.cam.w / 2;
@@ -2951,6 +3660,32 @@ class Game {
         for (const e of this.enemies) {
             e.update(dt, this);
             e.updateAI(dt, this);
+        }
+
+        // 飞行中队更新
+        for (const sq of this.squadrons) {
+            if (!sq.alive) continue;
+            sq.update(dt, this);
+            // AA防空伤害
+            const enemyShips = sq.team === 'player' ? this.enemies : this.allies;
+            for (const ship of enemyShips) {
+                if (!ship.alive) continue;
+                const d = dist(sq, ship);
+                const aaRange = 4000;
+                if (d < aaRange) {
+                    const aaDps = ship.type === 'cruiser' ? 800 : ship.type === 'battleship' ? 600 : 400;
+                    const falloff = 1 - d / aaRange;
+                    sq.takeDamage(aaDps * falloff * dt);
+                }
+            }
+        }
+        // 清理死亡中队（先移除mesh，再过滤数组）
+        for (let i = this.squadrons.length - 1; i >= 0; i--) {
+            const sq = this.squadrons[i];
+            if (!sq.alive) {
+                this.renderer3D.updateSquadron(sq); // 移除mesh
+                this.squadrons.splice(i, 1);
+            }
         }
 
         // 弹药
@@ -2986,6 +3721,7 @@ class Game {
                         const falloff = 1 - Math.max(0, d - t.cfg.width * 0.5) / splashRadius;
                         const dmg = proj.damage * clamp(falloff, 0.15, 1);
                         t.takeDamage(dmg, this);
+                        if (proj.owner) proj.owner.damageDealt += dmg;
                         if (proj.owner.team === 'player' && proj.owner.isPlayer) {
                             this.totalDamage += dmg;
                         }
@@ -3001,7 +3737,7 @@ class Game {
                         }
                         // 检查击杀并计分
                         if (!t.alive) {
-                            const shipPoints = { destroyer: 40, cruiser: 60, battleship: 80 };
+                            const shipPoints = { destroyer: 40, cruiser: 60, battleship: 80, carrier: 100 };
                             const points = shipPoints[t.type] || 40;
                             if (t.team === 'enemy') {
                                 this.kills++;
@@ -3035,6 +3771,7 @@ class Game {
                 if (!t || !t.alive) continue;
                 if (dist(proj, t) < t.cfg.width + 8) {
                     t.takeDamage(proj.damage, this);
+                    if (proj.owner) proj.owner.damageDealt += proj.damage;
                     if (proj.owner.team === 'player' && proj.owner.isPlayer) {
                         this.totalDamage += proj.damage;
                     }
@@ -3057,7 +3794,7 @@ class Game {
                     }
                     // 检查击杀并计分
                     if (!t.alive) {
-                        const shipPoints = { destroyer: 40, cruiser: 60, battleship: 80 };
+                        const shipPoints = { destroyer: 40, cruiser: 60, battleship: 80, carrier: 100 };
                         const points = shipPoints[t.type] || 40;
                         if (t.team === 'enemy') {
                             this.kills++;
@@ -3105,9 +3842,7 @@ class Game {
         });
         this.floatingTexts = this.floatingTexts.filter(ft => ft.life > 0);
 
-        // 清理已沉没的舰船
-        this.allies = this.allies.filter(a => a.alive || a.sinkTimer < 3);
-        this.enemies = this.enemies.filter(e => e.alive || e.sinkTimer < 3);
+        // 沉没舰船保留在数组中（面板置灰显示）不再移除
 
         // 更新占领点并计算占领分数
         const playerCaps = this.capturePoints.filter(cp => cp.owner === 'player').length;
@@ -3182,13 +3917,36 @@ class Game {
         else hpBar.style.background = 'linear-gradient(90deg, #ff3333, #ff6644)';
         document.getElementById('hp-text').textContent = Math.round(p.hp) + ' / ' + p.maxHp;
 
-        const gunReload = p.mainGunTimer > 0 ? p.mainGunTimer.toFixed(1) + 's' : '就绪';
-        const rearReload = p.rearGunTimer > 0 ? p.rearGunTimer.toFixed(1) + 's' : '自动';
-        const torpReload = p.torpedoTimer > 0 ? p.torpedoTimer.toFixed(1) + 's' : '就绪';
-        document.getElementById('weapon-name').textContent = '主炮 | 尾炮 | 鱼雷';
-        document.getElementById('reload-status').textContent = gunReload + ' | ' + rearReload + ' | ' + torpReload;
-        const reloadEl = document.getElementById('reload-status');
-        reloadEl.style.color = (p.mainGunTimer <= 0) ? '#4cff72' : '#ffaa44';
+        if (p.type === 'carrier' && p.squadronDecks) {
+            const torp = p.squadronDecks.torpedo;
+            const dive = p.squadronDecks.dive;
+            const rocket = p.squadronDecks.rocket;
+            const tc = p.squadronCooldowns.torpedo > 0 ? p.squadronCooldowns.torpedo.toFixed(0) + 's' : torp.planes + '✈';
+            const dc = p.squadronCooldowns.dive > 0 ? p.squadronCooldowns.dive.toFixed(0) + 's' : dive.planes + '✈';
+            const rc = p.squadronCooldowns.rocket > 0 ? p.squadronCooldowns.rocket.toFixed(0) + 's' : rocket.planes + '✈';
+            document.getElementById('weapon-name').textContent = '[1]鱼雷机 | [2]轰炸机 | [3]攻击机';
+            document.getElementById('reload-status').textContent = tc + ' | ' + dc + ' | ' + rc;
+            const reloadEl = document.getElementById('reload-status');
+            reloadEl.style.color = '#88ccff';
+        } else {
+            const gunReload = p.mainGunTimer > 0 ? p.mainGunTimer.toFixed(1) + 's' : '就绪';
+            const rearReload = p.rearGunTimer > 0 ? p.rearGunTimer.toFixed(1) + 's' : '自动';
+            const torpReload = p.cfg.torpedo ? (p.torpedoTimer > 0 ? p.torpedoTimer.toFixed(1) + 's' : '就绪') : '无';
+            
+            const wName = document.getElementById('weapon-name');
+            const wStatus = document.getElementById('reload-status');
+            
+            if (this.weaponMode === 'torpedo' && p.cfg.torpedo) {
+                wName.innerHTML = '<span style="color:#888">主炮</span> | <span style="color:#80ffb0; font-weight:bold">[2] 鱼雷</span>';
+                wStatus.textContent = gunReload + ' | ' + torpReload;
+                wStatus.style.color = p.torpedoTimer > 0 ? '#ffaa44' : '#80ffb0';
+            } else {
+                const torpText = p.cfg.torpedo ? '鱼雷' : '无';
+                wName.innerHTML = '<span style="color:#fff; font-weight:bold">[1] 主炮</span> | <span style="color:#888">' + torpText + '</span>';
+                wStatus.textContent = gunReload + ' | ' + torpReload;
+                wStatus.style.color = p.mainGunTimer > 0 ? '#ffaa44' : '#4cff72';
+            }
+        }
 
         document.getElementById('speed-val').textContent = Math.abs(Math.round(p.speed / (p.cfg.maxSpeed * 0.15) * p.cfg.maxSpeed));
         document.getElementById('score-val').textContent = this.kills;
@@ -3216,8 +3974,8 @@ class Game {
                     <div class="ship-icon">${this.getShipIcon(ally.type)}</div>
                     <div class="ship-info">
                         <div class="ship-name">${ally.cfg.name}</div>
-                        <div class="ship-status">${ally.alive ? '正常' : '已沉没'}</div>
-                        <div class="ship-hp-bar"><div class="ship-hp-fill" style="width: ${(ally.hp / ally.maxHp * 100)}%"></div></div>
+                        <div class="ship-dmg">0</div>
+                        <div class="ship-hp-bar"><div class="ship-hp-fill" style="width: 100%"></div></div>
                     </div>
                 `;
                 item.addEventListener('click', () => {
@@ -3232,29 +3990,23 @@ class Game {
             const ally = this.allies[index];
             if (!ally) return;
 
-            // 更新激活状态
             item.classList.toggle('active', ally.isPlayer);
             item.classList.toggle('destroyed', !ally.alive);
 
-            // 更新状态文字
-            const statusEl = item.querySelector('.ship-status');
-            if (statusEl) {
-                if (!ally.alive) {
-                    statusEl.textContent = '已沉没';
-                } else if (ally.isPlayer) {
-                    statusEl.textContent = '控制中';
-                } else {
-                    statusEl.textContent = 'AI控制';
-                }
+            // 伤害值
+            const dmgEl = item.querySelector('.ship-dmg');
+            if (dmgEl) {
+                dmgEl.textContent = this._formatDmg(ally.damageDealt);
             }
 
-            // 更新血条
+            // 血条
             const hpFill = item.querySelector('.ship-hp-fill');
             if (hpFill) {
-                const hpPercent = ally.hp / ally.maxHp * 100;
+                const hpPercent = ally.alive ? (ally.hp / ally.maxHp * 100) : 0;
                 hpFill.style.width = hpPercent + '%';
                 hpFill.classList.remove('low', 'critical');
-                if (hpPercent < 25) hpFill.classList.add('critical');
+                if (!ally.alive) hpFill.classList.add('critical');
+                else if (hpPercent < 25) hpFill.classList.add('critical');
                 else if (hpPercent < 50) hpFill.classList.add('low');
             }
         });
@@ -3275,8 +4027,8 @@ class Game {
                     <div class="ship-icon">${this.getShipIcon(enemy.type)}</div>
                     <div class="ship-info">
                         <div class="ship-name">${enemy.cfg.name}</div>
-                        <div class="ship-status">${enemy.alive ? '正常' : '已沉没'}</div>
-                        <div class="ship-hp-bar"><div class="ship-hp-fill" style="width: ${(enemy.hp / enemy.maxHp * 100)}%"></div></div>
+                        <div class="ship-dmg">0</div>
+                        <div class="ship-hp-bar"><div class="ship-hp-fill" style="width: 100%"></div></div>
                     </div>
                 `;
                 panel.appendChild(item);
@@ -3290,23 +4042,30 @@ class Game {
 
             item.classList.toggle('destroyed', !enemy.alive);
 
-            // 更新状态文字
-            const statusEl = item.querySelector('.ship-status');
-            if (statusEl) {
-                statusEl.textContent = enemy.alive ? '正常' : '已沉没';
+            // 伤害值
+            const dmgEl = item.querySelector('.ship-dmg');
+            if (dmgEl) {
+                dmgEl.textContent = this._formatDmg(enemy.damageDealt);
             }
 
-            // 更新血条
+            // 血条
             const hpFill = item.querySelector('.ship-hp-fill');
             if (hpFill) {
-                hpFill.style.width = (enemy.hp / enemy.maxHp * 100) + '%';
+                const hpPercent = enemy.alive ? (enemy.hp / enemy.maxHp * 100) : 0;
+                hpFill.style.width = hpPercent + '%';
             }
         });
     }
 
+    // 格式化伤害数字
+    _formatDmg(dmg) {
+        if (dmg >= 10000) return (dmg / 1000).toFixed(1) + 'k';
+        return Math.round(dmg).toString();
+    }
+
     // 获取舰船图标
     getShipIcon(type) {
-        const icons = { destroyer: 'DD', cruiser: 'CA', battleship: 'BB' };
+        const icons = { destroyer: 'DD', cruiser: 'CA', battleship: 'BB', carrier: 'CV' };
         return icons[type] || '?';
     }
 
@@ -3330,6 +4089,11 @@ class Game {
         for (const ally of this.allies) this.renderer3D.updateShip(ally);
         for (const e of this.enemies) this.renderer3D.updateShip(e);
 
+        // 更新3D中队
+        for (const sq of this.squadrons) {
+            this.renderer3D.updateSquadron(sq);
+        }
+
         // 更新3D弹药
         this.renderer3D.updateProjectiles(this.projectiles);
 
@@ -3338,10 +4102,14 @@ class Game {
             const specTarget = this.allies[this.spectatorTarget];
             this.renderer3D.updateCamera(specTarget, 0);
             this.renderer3D.aimMarker.visible = false;
+        } else if (this.squadronControlMode && this.activeSquadron && this.activeSquadron.alive) {
+            // 中队控制模式 - 相机跟随中队
+            this.renderer3D.updateSquadronCamera(this.activeSquadron);
+            this.renderer3D.aimMarker.visible = false;
         } else {
             this.renderer3D.updateCamera(currentPlayer, this.zoomLevel);
-            // 更新3D落点标记
-            if (currentPlayer && currentPlayer.alive) {
+            // 更新3D落点标记 - CV没有主炮
+            if (currentPlayer && currentPlayer.alive && currentPlayer.cfg.mainGun) {
                 const targetDist = dist(currentPlayer, this.mouseWorld);
                 const inRange = targetDist <= currentPlayer.cfg.mainGun.range;
                 this.renderer3D.updateAimMarker(currentPlayer, this.mouseWorld, currentPlayer.turretOnTarget, inRange);
@@ -3422,9 +4190,13 @@ class Game {
         // HUD更新
         this.updateHUD();
 
-        // === WoWS风格动态准心 ===
+        // === WoWS风格动态准心 / CV中队HUD ===
         if (!this.spectatorMode && currentPlayer && currentPlayer.alive) {
-            this.drawWoWSCrosshair(ctx, currentPlayer, W, H);
+            if (currentPlayer.type === 'carrier') {
+                this.drawCarrierHUD(ctx, currentPlayer, W, H);
+            } else {
+                this.drawWoWSCrosshair(ctx, currentPlayer, W, H);
+            }
         }
 
         // 观战模式提示
@@ -3465,11 +4237,214 @@ class Game {
         }
     }
 
+    // CV航母HUD绘制
+    drawCarrierHUD(ctx, player, W, H) {
+        ctx.save();
+        const sq = this.activeSquadron;
+
+        if (this.squadronControlMode && sq && sq.alive) {
+            // === 中队控制模式HUD ===
+            const cx = W / 2;
+            const cy = H / 2;
+
+            // 攻击方向锥形
+            const coneLen = 120;
+            const aimSpread = lerp(0.5, 0.12, sq.aimProgress);
+            ctx.strokeStyle = sq.aimProgress > 0.7 ? 'rgba(80, 255, 120, 0.7)' : 'rgba(255, 220, 80, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + Math.cos(-aimSpread) * coneLen, cy + Math.sin(-aimSpread) * coneLen * 0.3 - coneLen * 0.8);
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + Math.cos(aimSpread) * coneLen, cy + Math.sin(aimSpread) * coneLen * 0.3 - coneLen * 0.8);
+            ctx.stroke();
+
+            // 中心十字
+            ctx.strokeStyle = sq.aimProgress > 0.7 ? 'rgba(80, 255, 120, 0.8)' : 'rgba(255, 220, 80, 0.7)';
+            ctx.lineWidth = 1.5;
+            const crossS = 15;
+            ctx.beginPath();
+            ctx.moveTo(cx - crossS, cy); ctx.lineTo(cx + crossS, cy);
+            ctx.moveTo(cx, cy - crossS); ctx.lineTo(cx, cy + crossS);
+            ctx.stroke();
+
+            // 中队信息
+            const sqNames = { torpedo: '鱼雷机', dive: '轰炸机', rocket: '攻击机' };
+            ctx.font = 'bold 16px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'rgba(100, 220, 255, 0.9)';
+            ctx.strokeStyle = 'rgba(0,0,0,0.7)';
+            ctx.lineWidth = 2;
+            const sqText = `${sqNames[sq.type]} ×${sq.planes}`;
+            ctx.strokeText(sqText, cx, H - 120);
+            ctx.fillText(sqText, cx, H - 120);
+
+            // 瞄准进度条
+            const barW = 200;
+            const barH = 4;
+            const bx = cx - barW / 2;
+            const by = H - 100;
+            ctx.fillStyle = 'rgba(0,0,0,0.5)';
+            ctx.fillRect(bx, by, barW, barH);
+            ctx.fillStyle = sq.aimProgress > 0.7 ? 'rgba(80, 255, 120, 0.8)' : 'rgba(255, 220, 80, 0.7)';
+            ctx.fillRect(bx, by, barW * sq.aimProgress, barH);
+
+            // 加速燃料
+            const fuelW = 100;
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.fillRect(cx - fuelW / 2, by + 10, fuelW, 3);
+            ctx.fillStyle = 'rgba(255, 180, 80, 0.8)';
+            ctx.fillRect(cx - fuelW / 2, by + 10, fuelW * (sq.boostFuel / sq.maxBoostFuel), 3);
+
+            // 操作提示
+            ctx.font = '12px sans-serif';
+            ctx.fillStyle = 'rgba(200, 200, 200, 0.7)';
+            ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+            ctx.lineWidth = 1;
+            ctx.strokeText('A/D转向 | W加速 | S减速 | 左键攻击 | F召回', cx, H - 70);
+            ctx.fillText('A/D转向 | W加速 | S减速 | 左键攻击 | F召回', cx, H - 70);
+        } else {
+            // === 舰船模式HUD（CV甲板视角）===
+            ctx.font = 'bold 14px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'rgba(100, 200, 255, 0.85)';
+            ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+            ctx.lineWidth = 2;
+
+            const sqTypes = ['torpedo', 'dive', 'rocket'];
+            const sqNames = { torpedo: '鱼雷机', dive: '轰炸机', rocket: '攻击机' };
+            const sqKeys = { torpedo: '1', dive: '2', rocket: '3' };
+
+            const panelX = W / 2;
+            const panelY = H - 130;
+
+            for (let i = 0; i < 3; i++) {
+                const type = sqTypes[i];
+                const deck = player.squadronDecks[type];
+                const cd = player.squadronCooldowns[type];
+                const x = panelX + (i - 1) * 140;
+                const y = panelY;
+
+                // 背景
+                ctx.fillStyle = 'rgba(0, 30, 60, 0.6)';
+                ctx.fillRect(x - 55, y - 18, 110, 50);
+                ctx.strokeStyle = cd > 0 ? 'rgba(255, 120, 60, 0.5)' : 'rgba(80, 200, 255, 0.5)';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(x - 55, y - 18, 110, 50);
+
+                // 标题
+                ctx.font = 'bold 13px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = cd > 0 ? 'rgba(255, 150, 80, 0.9)' : 'rgba(100, 220, 255, 0.9)';
+                ctx.fillText(`[${sqKeys[type]}] ${sqNames[type]}`, x, y);
+
+                // 飞机数量
+                ctx.font = '12px sans-serif';
+                ctx.fillStyle = deck.planes > 0 ? 'rgba(200, 255, 200, 0.9)' : 'rgba(255, 120, 120, 0.9)';
+                ctx.fillText(`✈ ${deck.planes}/${deck.maxPlanes}`, x, y + 16);
+
+                // 冷却
+                if (cd > 0) {
+                    ctx.fillStyle = 'rgba(255, 150, 80, 0.8)';
+                    ctx.fillText(cd.toFixed(0) + 's', x, y + 28);
+                }
+            }
+        }
+        ctx.restore();
+    }
+
     // WoWS风格动态准心绘制
     drawWoWSCrosshair(ctx, player, W, H) {
         const mx = this.mouse.x;
         const my = this.mouse.y;
+        
+        // === 鱼雷模式 ===
+        if (this.weaponMode === 'torpedo') {
+            const torp = player.cfg.torpedo;
+            if (!torp) return;
+
+            // 绘制鼠标光标
+            ctx.strokeStyle = 'rgba(128, 255, 176, 0.9)';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(mx, my, 15, 0, Math.PI * 2);
+            ctx.moveTo(mx - 20, my); ctx.lineTo(mx - 10, my);
+            ctx.moveTo(mx + 20, my); ctx.lineTo(mx + 10, my);
+            ctx.moveTo(mx, my - 20); ctx.lineTo(mx, my - 10);
+            ctx.moveTo(mx, my + 20); ctx.lineTo(mx, my + 10);
+            ctx.stroke();
+
+            // 绘制鱼雷预测线
+            const range = torp.range;
+            const count = torp.count;
+            const spread = torp.spread;
+            const angle = player.turretAngle; // 鱼雷发射角度跟随炮塔/鼠标指向
+
+            // 计算屏幕上的发射源点（近似为船身位置）
+            const shipScreen = this.worldToScreen(player.x, player.y);
+            if (!shipScreen) return;
+
+            ctx.save();
+            // 预测线颜色
+            const isReloading = player.torpedoTimer > 0;
+            ctx.strokeStyle = isReloading ? 'rgba(255, 160, 0, 0.4)' : 'rgba(128, 255, 176, 0.6)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([10, 5]);
+
+            // 绘制每一条鱼雷的路径
+            for (let i = 0; i < count; i++) {
+                const spreadOff = (i - (count - 1) / 2) * spread;
+                const a = angle + spreadOff;
+                
+                // 计算终点世界坐标
+                const endX = player.x + Math.cos(a) * range;
+                const endY = player.y + Math.sin(a) * range;
+                
+                // 转屏幕坐标
+                const endScreen = this.worldToScreen(endX, endY);
+                if (endScreen) {
+                    ctx.beginPath();
+                    ctx.moveTo(shipScreen.x, shipScreen.y);
+                    ctx.lineTo(endScreen.x, endScreen.y);
+                    ctx.stroke();
+                }
+            }
+            
+            // 绘制扇面覆盖区域
+            ctx.fillStyle = isReloading ? 'rgba(255, 160, 0, 0.1)' : 'rgba(128, 255, 176, 0.15)';
+            const startA = angle + (0 - (count - 1) / 2) * spread;
+            const endA = angle + ((count - 1) - (count - 1) / 2) * spread;
+            
+            // 简单的三角形填充（在屏幕空间近似）
+            // 准确做法是构建扇形mesh，这里用近似多边形
+            const p1 = this.worldToScreen(player.x + Math.cos(startA) * range, player.y + Math.sin(startA) * range);
+            const p2 = this.worldToScreen(player.x + Math.cos(endA) * range, player.y + Math.sin(endA) * range);
+            
+            if (p1 && p2) {
+                ctx.beginPath();
+                ctx.moveTo(shipScreen.x, shipScreen.y);
+                ctx.lineTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // 装填倒计时
+            if (isReloading) {
+                ctx.font = 'bold 16px sans-serif';
+                ctx.fillStyle = '#ffa000';
+                ctx.textAlign = 'center';
+                ctx.fillText(player.torpedoTimer.toFixed(1) + 's', mx, my + 40);
+            }
+
+            ctx.restore();
+            return;
+        }
+
+        // === 主炮模式 ===
         const gun = player.cfg.mainGun;
+        if (!gun) return;
+
         const zl = this.zoomLevel; // 0=正常, 1=全放大
 
         // 计算目标距离和飞行时间
@@ -3881,6 +4856,20 @@ class Game {
             if (!e.alive) continue;
             mctx.beginPath();
             mctx.arc(e.x * scale, e.y * scale, 2.5, 0, Math.PI * 2);
+            mctx.fill();
+        }
+
+        // 飞行中队
+        for (const sq of this.squadrons) {
+            if (!sq.alive) continue;
+            mctx.fillStyle = sq.team === 'player' ? '#88ddff' : '#ff8888';
+            const sx = sq.x * scale, sy = sq.y * scale;
+            // 小三角形表示飞机
+            mctx.beginPath();
+            mctx.moveTo(sx + Math.cos(sq.angle) * 3, sy + Math.sin(sq.angle) * 3);
+            mctx.lineTo(sx + Math.cos(sq.angle + 2.4) * 2.5, sy + Math.sin(sq.angle + 2.4) * 2.5);
+            mctx.lineTo(sx + Math.cos(sq.angle - 2.4) * 2.5, sy + Math.sin(sq.angle - 2.4) * 2.5);
+            mctx.closePath();
             mctx.fill();
         }
 
