@@ -107,6 +107,16 @@
             <button id="restart-btn">再来一局</button>
         </div>
     </div>
-    <script src="game.js"></script>
+    <!-- 模块化脚本 - 按依赖顺序加载 -->
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/modules/particle.js"></script>
+    <script src="js/modules/projectile.js"></script>
+    <script src="js/modules/squadron.js"></script>
+    <script src="js/modules/island.js"></script>
+    <script src="js/modules/capturePoint.js"></script>
+    <script src="js/modules/ship.js"></script>
+    <script src="js/renderer3d.js"></script>
+    <script src="js/game.js"></script>
 </body>
 </html>
