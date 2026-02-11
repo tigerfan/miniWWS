@@ -18,6 +18,7 @@ class Squadron {
         this.launchTimer = 0;
         this.attackTimer = 0;
         this._dropped = false;
+        this._queuedAttack = false;
         this.team = owner.team;
         this.hp = config.hp * config.planes;
         this.maxHp = this.hp;
@@ -53,7 +54,13 @@ class Squadron {
             this.z = lerp(20, 80, Math.min(this.launchTimer / 1.5, 1));
             this.x += Math.cos(this.angle) * this.speed * 0.5;
             this.y += Math.sin(this.angle) * this.speed * 0.5;
-            if (this.launchTimer > 1.5) this.state = 'flying';
+            if (this.launchTimer > 1.5) {
+                this.state = 'flying';
+                if (this._queuedAttack) {
+                    this._queuedAttack = false;
+                    this.startAttack();
+                }
+            }
         }
         else if (this.state === 'flying') {
             // 转向
@@ -154,6 +161,10 @@ class Squadron {
     }
 
     startAttack() {
+        if (this.state === 'launching') {
+            this._queuedAttack = true;
+            return true;
+        }
         if (this.state !== 'flying') return false;
         this.state = 'attacking';
         this.attackTimer = 0;
