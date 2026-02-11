@@ -33,6 +33,7 @@ class Renderer3D {
         this.time = 0;
         this.camTarget = new THREE.Vector3();
         this.camLook = new THREE.Vector3();
+        this.hitEffects = [];
 
         // 3D落点标记
         this.setupAimMarker();
@@ -542,7 +543,11 @@ class Renderer3D {
             group.add(anchor);
         }
 
-        group.userData = { turretGroup, rearTurretGroup, ship, hullMat, originalColor: hullColor };
+        group.userData = { turretGroup, rearTurretGroup, ship, hullMat, originalColor: hullColor,
+            bobPhase: Math.random() * Math.PI * 2,
+            rollPhase: Math.random() * Math.PI * 2,
+            pitchPhase: Math.random() * Math.PI * 2
+        };
 
         this.scene.add(group);
         this.shipMeshes.set(ship, group);
@@ -738,7 +743,11 @@ class Renderer3D {
         band.position.set(L * 0.35, H + 4.3, 0);
         group.add(band);
 
-        group.userData = { turretGroup: null, rearTurretGroup: null, ship, hullMat, originalColor: hullColor };
+        group.userData = { turretGroup: null, rearTurretGroup: null, ship, hullMat, originalColor: hullColor,
+            bobPhase: Math.random() * Math.PI * 2,
+            rollPhase: Math.random() * Math.PI * 2,
+            pitchPhase: Math.random() * Math.PI * 2
+        };
         this.scene.add(group);
         this.shipMeshes.set(ship, group);
         return group;
@@ -1152,9 +1161,10 @@ class Renderer3D {
         }
 
         mesh.visible = true;
-        const bobY = Math.sin(this.time * 1.2 + ship.x * 0.005) * 3;
-        const roll = Math.sin(this.time * 0.8 + ship.y * 0.003) * 0.02;
-        const pitch = Math.sin(this.time * 0.6 + ship.x * 0.004) * 0.015;
+        const ud2 = mesh.userData;
+        const bobY = Math.sin(this.time * 1.2 + (ud2.bobPhase || 0)) * 3;
+        const roll = Math.sin(this.time * 0.8 + (ud2.rollPhase || 0)) * 0.02;
+        const pitch = Math.sin(this.time * 0.6 + (ud2.pitchPhase || 0)) * 0.015;
 
         mesh.position.set(ship.x, 6 + bobY, ship.y);
         mesh.rotation.y = -ship.angle;
@@ -1411,11 +1421,94 @@ class Renderer3D {
         }
     }
 
+    createHitEffect(x, z, type) {
+        const group = new THREE.Group();
+        group.position.set(x, 2, z);
+
+        if (type === 'torpedo') {
+            // 鱼雷命中：绿色水柱+扩散环
+            const colGeo = new THREE.CylinderGeometry(1.5, 3, 25, 6);
+            const colMat = new THREE.MeshBasicMaterial({ color: 0x80ffb0, transparent: true, opacity: 0.6 });
+            const col = new THREE.Mesh(colGeo, colMat);
+            col.position.y = 12;
+            group.add(col);
+            const ringGeo = new THREE.RingGeometry(2, 5, 12);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x80ffb0, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = -Math.PI / 2;
+            ring.position.y = 2;
+            group.add(ring);
+            this.hitEffects.push({ group, life: 0.9, maxLife: 0.9, type });
+        } else if (type === 'shell_hit') {
+            // 炮弹命中舰船：橙色火球
+            const coreGeo = new THREE.SphereGeometry(4, 6, 6);
+            const coreMat = new THREE.MeshBasicMaterial({ color: 0xff6622, transparent: true, opacity: 0.7 });
+            const core = new THREE.Mesh(coreGeo, coreMat);
+            core.position.y = 8;
+            group.add(core);
+            const outerGeo = new THREE.SphereGeometry(7, 6, 6);
+            const outerMat = new THREE.MeshBasicMaterial({ color: 0xffaa22, transparent: true, opacity: 0.25 });
+            const outer = new THREE.Mesh(outerGeo, outerMat);
+            outer.position.y = 8;
+            group.add(outer);
+            this.hitEffects.push({ group, life: 0.6, maxLife: 0.6, type });
+        } else {
+            // 炮弹落水：白色水柱
+            const colGeo = new THREE.CylinderGeometry(1, 2.5, 20, 6);
+            const colMat = new THREE.MeshBasicMaterial({ color: 0xaaddff, transparent: true, opacity: 0.5 });
+            const col = new THREE.Mesh(colGeo, colMat);
+            col.position.y = 10;
+            group.add(col);
+            const splashGeo = new THREE.RingGeometry(3, 7, 12);
+            const splashMat = new THREE.MeshBasicMaterial({ color: 0xaaddff, transparent: true, opacity: 0.35, side: THREE.DoubleSide });
+            const splash = new THREE.Mesh(splashGeo, splashMat);
+            splash.rotation.x = -Math.PI / 2;
+            splash.position.y = 1.5;
+            group.add(splash);
+            this.hitEffects.push({ group, life: 0.8, maxLife: 0.8, type });
+        }
+        this.scene.add(group);
+    }
+
+    updateHitEffects(dt) {
+        for (let i = this.hitEffects.length - 1; i >= 0; i--) {
+            const eff = this.hitEffects[i];
+            eff.life -= dt;
+            const t = 1 - eff.life / eff.maxLife; // 0→1
+            const g = eff.group;
+
+            if (eff.type === 'torpedo') {
+                // 水柱上升+扩散环扩大
+                const col = g.children[0];
+                const ring = g.children[1];
+                if (col) { col.position.y = 12 + t * 15; col.scale.y = 1 + t * 0.3; col.material.opacity = (1 - t) * 0.6; }
+                if (ring) { ring.scale.set(1 + t * 2.5, 1 + t * 2.5, 1); ring.material.opacity = (1 - t) * 0.4; }
+            } else if (eff.type === 'shell_hit') {
+                // 火球扩大+消散
+                const s = 1 + t * 1.5;
+                g.children.forEach(c => { c.scale.set(s, s, s); c.material.opacity = Math.max(0, (1 - t * t)) * (c === g.children[0] ? 0.7 : 0.25); });
+            } else {
+                // 水柱上升+消散
+                const col = g.children[0];
+                const splash = g.children[1];
+                if (col) { col.position.y = 10 + t * 20; col.scale.set(1 - t * 0.2, 1 + t * 0.5, 1 - t * 0.2); col.material.opacity = (1 - t) * 0.5; }
+                if (splash) { splash.scale.set(1 + t * 2, 1, 1 + t * 2); splash.material.opacity = (1 - t) * 0.35; }
+            }
+
+            if (eff.life <= 0) {
+                g.children.forEach(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); });
+                this.scene.remove(g);
+                this.hitEffects.splice(i, 1);
+            }
+        }
+    }
+
     render(dt) {
         this.time += dt;
         this.ocean.material.uniforms.uTime.value = this.time;
         this.ocean.material.uniforms.uCamPos.value.copy(this.camera.position);
         this.updateCapturePoints();
+        this.updateHitEffects(dt);
         this.renderer.render(this.scene, this.camera);
     }
 
@@ -1443,6 +1536,11 @@ class Renderer3D {
             if (mesh.userData.trail) this.scene.remove(mesh.userData.trail);
         }
         this.projectilePool = [];
+        for (const eff of this.hitEffects) {
+            eff.group.children.forEach(c => { if (c.geometry) c.geometry.dispose(); if (c.material) c.material.dispose(); });
+            this.scene.remove(eff.group);
+        }
+        this.hitEffects = [];
     }
 
     onResize() {

@@ -245,11 +245,9 @@ class Game {
                     }
                 }
 
-                // F键：召回中队
+                // F键：召回中队（返航后自动交还控制权）
                 if (e.key.toLowerCase() === 'f' && this.squadronControlMode && this.activeSquadron) {
                     this.activeSquadron.recall();
-                    this.squadronControlMode = false;
-                    this.activeSquadron = null;
                 }
             }
         });
@@ -275,11 +273,9 @@ class Game {
             
             // 左键点击
             if (e.button === 0) {
-                // CV中队攻击
+                // CV中队攻击（保持视角跟随中队直到返航）
                 if (this.squadronControlMode && this.activeSquadron) {
                     this.activeSquadron.startAttack();
-                    this.squadronControlMode = false; // 攻击后交还控制权
-                    this.activeSquadron = null;
                 } 
                 // 船只开火
                 else if (player.turretOnTarget) {
@@ -489,14 +485,23 @@ class Game {
                 // CV中队控制模式
                 if (this.squadronControlMode && this.activeSquadron && this.activeSquadron.alive) {
                     const sq = this.activeSquadron;
-                    // 中队转向
-                    if (this.keys['a']) sq.rudder = -1;
-                    else if (this.keys['d']) sq.rudder = 1;
-                    else sq.rudder *= 0.8;
-                    // 加速
-                    sq.boosting = !!this.keys['w'];
-                    // 减速
-                    sq.braking = !!this.keys['s'];
+                    // 返航时自动交还控制权
+                    if (sq.state === 'returning') {
+                        this.squadronControlMode = false;
+                        this.activeSquadron = null;
+                    } else if (sq.state === 'attacking') {
+                        // 攻击跑期间锁定操控，但保持相机跟随中队
+                        sq.rudder *= 0.8;
+                        sq.boosting = false;
+                        sq.braking = false;
+                    } else {
+                        // 正常飞行控制
+                        if (this.keys['a']) sq.rudder = -1;
+                        else if (this.keys['d']) sq.rudder = 1;
+                        else sq.rudder *= 0.8;
+                        sq.boosting = !!this.keys['w'];
+                        sq.braking = !!this.keys['s'];
+                    }
                     // CV本体自动巡航
                     p.update(dt, this);
                 } else {
@@ -590,17 +595,18 @@ class Game {
 
             // 炮弹落地 → 溅射伤害判定
             if ((proj.type === 'shell' || proj.type === 'bomb') && proj.landed) {
-                const splashRadius = proj.owner?.cfg?.mainGun?.splashRadius || 80;
-                // 落水水柱特效
-                for (let i = 0; i < 15; i++) {
-                    const a = Math.random() * Math.PI * 2;
-                    const spd = randRange(1, 4);
-                    this.particles.push(new Particle(
-                        proj.x + randRange(-8, 8), proj.y + randRange(-8, 8),
-                        Math.cos(a) * spd, Math.sin(a) * spd,
-                        randRange(0.4, 0.9), randRange(4, 10), '#aaddff'
-                    ));
+                // 检查是否落在岛屿上（不造成伤害）
+                let landedOnIsland = false;
+                for (const isl of this.islands) {
+                    if (dist(proj, isl) < isl.radius) {
+                        landedOnIsland = true;
+                        break;
+                    }
                 }
+                if (landedOnIsland) continue;
+                const splashRadius = proj.type === 'bomb' ? 120 : (proj.owner?.cfg?.mainGun?.splashRadius || 80);
+                // 3D落水水柱特效
+                this.renderer3D.createHitEffect(proj.x, proj.y, 'splash');
                 // 范围内溅射伤害
                 for (const t of targets) {
                     if (!t || !t.alive) continue;
@@ -613,16 +619,8 @@ class Game {
                         if (proj.owner.team === 'player' && proj.owner.isPlayer) {
                             this.totalDamage += dmg;
                         }
-                        // 命中特效
-                        for (let i = 0; i < 8; i++) {
-                            const ea = Math.random() * Math.PI * 2;
-                            const espd = randRange(1, 3);
-                            this.particles.push(new Particle(
-                                t.x, t.y,
-                                Math.cos(ea) * espd, Math.sin(ea) * espd,
-                                randRange(0.3, 0.6), randRange(3, 7), '#ffaa44'
-                            ));
-                        }
+                        // 3D命中特效
+                        this.renderer3D.createHitEffect(t.x, t.y, 'shell_hit');
                         // 检查击杀并计分
                         if (!t.alive) {
                             const shipPoints = { destroyer: 40, cruiser: 60, battleship: 80, carrier: 100 };
@@ -651,8 +649,21 @@ class Game {
 
             if (!proj.alive) continue;
 
-            // 抛物线炮弹飞行中 → 飞越目标上方，不做碰撞
-            if ((proj.type === 'shell' || proj.type === 'bomb') && proj.gravity > 0) continue;
+            // 抛物线炮弹飞行中 → 检查岛屿遮挡（低于岛高时拦截）
+            if ((proj.type === 'shell' || proj.type === 'bomb') && proj.gravity > 0) {
+                let blocked = false;
+                for (const isl of this.islands) {
+                    if (dist(proj, isl) < isl.radius * 0.85) {
+                        const islandHeight = isl.radius * 0.5;
+                        if (proj.z < islandHeight) {
+                            proj.alive = false;
+                            blocked = true;
+                            break;
+                        }
+                    }
+                }
+                if (!blocked) continue;
+            }
 
             // 鱼雷及其他直射弹药 → 直接命中判定
             for (const t of targets) {
@@ -664,17 +675,8 @@ class Game {
                         this.totalDamage += proj.damage;
                     }
                     proj.alive = false;
-                    // 命中特效
-                    for (let i = 0; i < 8; i++) {
-                        const a = Math.random() * Math.PI * 2;
-                        const spd = randRange(1, 3);
-                        this.particles.push(new Particle(
-                            proj.x, proj.y,
-                            Math.cos(a) * spd, Math.sin(a) * spd,
-                            randRange(0.3, 0.6), randRange(3, 7),
-                            proj.type === 'torpedo' ? '#80ffb0' : '#ffaa44'
-                        ));
-                    }
+                    // 3D命中特效
+                    this.renderer3D.createHitEffect(proj.x, proj.y, proj.type === 'torpedo' ? 'torpedo' : 'shell_hit');
                     // 检查击杀并计分
                     if (!t.alive) {
                         const shipPoints = { destroyer: 40, cruiser: 60, battleship: 80, carrier: 100 };

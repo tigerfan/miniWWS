@@ -127,12 +127,26 @@ class Squadron {
             }
         } else if (this.type === 'dive') {
             const count = this.cfg.bombCount;
+            // 动态计算目标距离：找前方最近敌舰
+            const enemyTeam = this.owner.team === 'player' ? game.enemies : game.allies;
+            let bestDist = 300; // 默认落点
+            for (const e of enemyTeam) {
+                if (!e || !e.alive) continue;
+                const d = dist(this, e);
+                if (d > 1500) continue;
+                const aToE = angleTo(this, e);
+                const aDiff = Math.abs(normalizeAngle(aToE - this.angle));
+                if (aDiff < 0.8 && d < bestDist) {
+                    bestDist = d;
+                }
+            }
+            const targetDist = clamp(bestDist, 80, 800);
             for (let i = 0; i < count; i++) {
                 const spread = (Math.random() - 0.5) * this.cfg.spread * aimSpread;
                 const a = this.angle + spread;
-                // 轰炸机：使用 bomb 类型，并传递当前高度
+                // 轰炸机：使用 bomb 类型，targetDist动态计算
                 game.projectiles.push(new Projectile(
-                    this.x, this.y, a, 0.5, 600, this.cfg.damage, 'bomb', this.owner, 80, this.z
+                    this.x, this.y, a, 2.0, 800, this.cfg.damage, 'bomb', this.owner, targetDist, this.z
                 ));
             }
         } else if (this.type === 'rocket') {

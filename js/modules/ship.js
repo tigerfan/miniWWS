@@ -735,7 +735,7 @@ class Ship {
                 const diff = normalizeAngle(toTarget - sq.angle);
                 sq.rudder = clamp(diff * 3, -1, 1);
                 const d = dist(sq, t);
-                if (d < 800 && Math.abs(diff) < 0.4) {
+                if (d < 500 && Math.abs(diff) < 0.3) {
                     sq.startAttack();
                 }
             }
