@@ -16,25 +16,27 @@ class CapturePoint {
 
     update(dt, game) {
         // 获取范围内的所有舰船
-        const shipsInRange = [];
+        this.shipsInRange = [];
         
         // 检查友军（包含玩家）
         for (const ally of game.allies) {
             if (ally.alive && dist(ally, this) < this.radius) {
-                shipsInRange.push(ally);
+                this.shipsInRange.push(ally);
             }
         }
         
         // 检查敌军
         for (const enemy of game.enemies) {
             if (enemy.alive && dist(enemy, this) < this.radius) {
-                shipsInRange.push(enemy);
+                this.shipsInRange.push(enemy);
             }
         }
 
         // 统计各方舰船数量
-        const playerShips = shipsInRange.filter(s => s.team === 'player').length;
-        const enemyShips = shipsInRange.filter(s => s.team === 'enemy').length;
+        this.playerShipsInZone = this.shipsInRange.filter(s => s.team === 'player').length;
+        this.enemyShipsInZone = this.shipsInRange.filter(s => s.team === 'enemy').length;
+        const playerShips = this.playerShipsInZone;
+        const enemyShips = this.enemyShipsInZone;
 
         // 判断争夺状态
         this.contested = playerShips > 0 && enemyShips > 0;
@@ -62,8 +64,8 @@ class CapturePoint {
         // 处理占领逻辑
         if (playerShips > 0 && enemyShips === 0) {
             // 友方占领
+            // 如果已被友方控制（无敌舰），无需继续占领
             if (this.owner === 'player') {
-                // 已被我方占领，无需操作
                 return;
             }
             
@@ -80,6 +82,7 @@ class CapturePoint {
             }
         } else if (enemyShips > 0 && playerShips === 0) {
             // 敌方占领
+            // 如果已被敌方控制（无友舰），无需继续占领
             if (this.owner === 'enemy') {
                 return;
             }
@@ -93,7 +96,7 @@ class CapturePoint {
                 this.progress += (100 / this.captureTime) * captureSpeed(enemyShips) * dt;
             }
         } else {
-            // 无人占领，进度缓慢回退
+            // 无人占领或双方都有人（争夺中），进度缓慢回退
             if (this.progress > 0 && this.capturer !== null) {
                 this.progress -= (100 / this.captureTime) * 0.5 * dt;
             }
@@ -195,6 +198,20 @@ class CapturePoint {
         ctx.closePath();
         ctx.stroke();
 
+        // 绘制舰船数量信息（新机制显示）
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.fillRect(sx - 50, sy - 70, 100, 42);
+        
+        // 友军舰船数
+        ctx.fillStyle = '#44aaff';
+        ctx.font = 'bold 12px sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText('友军: ' + (this.playerShipsInZone || 0) + '艘', sx - 45, sy - 55);
+        
+        // 敌军舰船数
+        ctx.fillStyle = '#ff6666';
+        ctx.fillText('敌军: ' + (this.enemyShipsInZone || 0) + '艘', sx - 45, sy - 38);
+
         // 绘制占领进度文字
         let statusText = '';
         let textColor = '#fff';
@@ -209,7 +226,7 @@ class CapturePoint {
             statusText = Math.round(this.progress) + '%';
             textColor = this.capturer === 'player' ? '#44aaff' : '#ff6666';
         } else if (this.owner) {
-            statusText = this.owner === 'player' ? '友军占领' : '敌军占领';
+            statusText = this.owner === 'player' ? '友军控制' : '敌军控制';
             textColor = this.owner === 'player' ? '#44aaff' : '#ff6666';
         } else {
             statusText = '中立';
@@ -217,19 +234,28 @@ class CapturePoint {
         }
         
         ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-        ctx.fillRect(sx - 35, sy - 50, 70, 22);
+        ctx.fillRect(sx - 40, sy - 22, 80, 20);
         ctx.fillStyle = textColor;
-        ctx.font = 'bold 14px sans-serif';
+        ctx.font = 'bold 13px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(statusText, sx, sy - 39);
+        ctx.fillText(statusText, sx, sy - 12);
 
-        // 已占领标记
+        // 已控制标记 - 显示额外加分
         if (this.owner) {
             ctx.fillStyle = this.owner === 'player' ? '#44aaff' : '#ff6666';
-            ctx.font = 'bold 12px sans-serif';
+            ctx.font = 'bold 11px sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(this.owner === 'player' ? '★ 友军' : '★ 敌军', sx, sy + 40);
+            const bonusText = this.owner === 'player' && this.enemyShipsInZone === 0 ? 
+                '★ +10分/秒' : this.owner === 'enemy' && this.playerShipsInZone === 0 ?
+                '★ +10分/秒' : '★ 被入侵';
+            ctx.fillText(bonusText, sx, sy + 40);
+        } else {
+            // 未占领时显示提示
+            ctx.fillStyle = '#aaa';
+            ctx.font = '10px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('点内每舰+1分/秒', sx, sy + 40);
         }
         
         // 底部进度条（更明显的显示）

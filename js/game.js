@@ -175,8 +175,16 @@ class Game {
 
                 // === 玩家控制 ===
                 
-                // 1键：主炮模式 / CV鱼雷机
-                if (e.key === '1') {
+                // 1-9键：切换控制舰船（1对应索引0，9对应索引8）
+                if (e.key >= '1' && e.key <= '9') {
+                    const idx = parseInt(e.key) - 1;
+                    if (idx < this.allies.length && this.allies[idx] && this.allies[idx].alive) {
+                        this.switchToShip(idx);
+                    }
+                }
+
+                // Q键：主炮模式 / CV鱼雷机
+                if (e.key.toLowerCase() === 'q') {
                     if (player && player.type === 'carrier' && !this.squadronControlMode) {
                         this.selectedSquadronType = 'torpedo';
                         const sq = player.launchSquadron('torpedo', this);
@@ -193,8 +201,8 @@ class Game {
                         }
                     }
                 }
-                // 2键：鱼雷模式 / CV轰炸机
-                if (e.key === '2') {
+                // E键：鱼雷模式 / CV轰炸机
+                if (e.key.toLowerCase() === 'e') {
                     if (player && player.type === 'carrier' && !this.squadronControlMode) {
                         this.selectedSquadronType = 'dive';
                         const sq = player.launchSquadron('dive', this);
@@ -213,8 +221,8 @@ class Game {
                         }
                     }
                 }
-                // 3键：CV攻击机
-                if (e.key === '3') {
+                // R键：CV攻击机 / 维修
+                if (e.key.toLowerCase() === 'r') {
                     if (player && player.type === 'carrier' && !this.squadronControlMode) {
                         this.selectedSquadronType = 'rocket';
                         const sq = player.launchSquadron('rocket', this);
@@ -222,26 +230,8 @@ class Game {
                             this.squadronControlMode = true;
                             this.activeSquadron = sq;
                         }
-                    }
-                }
-
-                // [ / ] 键：切换控制舰只
-                if (e.key === '[' || e.key === ']') {
-                    let newIndex = this.playerIndex + (e.key === ']' ? 1 : -1);
-                    if (newIndex < 0) newIndex = this.allies.length - 1;
-                    if (newIndex >= this.allies.length) newIndex = 0;
-                    
-                    // 寻找下一个存活的
-                    let count = 0;
-                    while ((!this.allies[newIndex] || !this.allies[newIndex].alive) && count < this.allies.length) {
-                        newIndex += (e.key === ']' ? 1 : -1);
-                        if (newIndex < 0) newIndex = this.allies.length - 1;
-                        if (newIndex >= this.allies.length) newIndex = 0;
-                        count++;
-                    }
-                    
-                    if (count < this.allies.length) {
-                        this.switchToShip(newIndex);
+                    } else if (player) {
+                        player.repair();
                     }
                 }
 
@@ -388,13 +378,15 @@ class Game {
         playerShip.isPlayer = !isSpectator; // 观战模式下不由玩家控制
         playerShip.angle = Math.PI / 2;
 
-        // 生成友军（包含玩家共12艘）
+        // 生成友军（包含玩家共9艘）- 每种2艘，驱逐舰+1（共3艘驱逐舰）
+        // 配置：驱逐舰x3、巡洋舰x2、战列舰x2、航母x2 = 9艘
         this.allies = [playerShip];
         this.playerIndex = 0;
         this.spectatorMode = isSpectator;
         this.spectatorTarget = 0;
-        const allyCount = mapConfig.teamSize.allies - 1; // 剩余11艘
-        const allyTypes = ['destroyer', 'cruiser', 'destroyer', 'cruiser', 'battleship', 'destroyer', 'cruiser', 'battleship', 'destroyer', 'cruiser', 'carrier'];
+        const allyCount = mapConfig.teamSize.allies - 1; // 剩余8艘
+        // 索引1-8：驱逐、巡洋、战列、航母、驱逐、巡洋、战列、航母
+        const allyTypes = ['destroyer', 'cruiser', 'battleship', 'carrier', 'destroyer', 'cruiser', 'battleship', 'carrier'];
         for (let i = 0; i < allyCount; i++) {
             const spawn = mapConfig.spawns.allies[(i + 1) % mapConfig.spawns.allies.length];
             const offsetX = randRange(-800, 800);
@@ -405,10 +397,11 @@ class Game {
             this.allies.push(ally);
         }
 
-        // 生成敌军
+        // 生成敌军（9艘）- 每种2艘，驱逐舰+1
         this.enemies = [];
         const enemyCount = mapConfig.teamSize.enemies;
-        const enemyTypes = ['destroyer', 'cruiser', 'destroyer', 'cruiser', 'cruiser', 'battleship', 'destroyer', 'battleship', 'destroyer', 'cruiser', 'cruiser', 'carrier'];
+        // 索引0-8：驱逐、巡洋、战列、航母、驱逐、巡洋、战列、航母、驱逐
+        const enemyTypes = ['destroyer', 'cruiser', 'battleship', 'carrier', 'destroyer', 'cruiser', 'battleship', 'carrier', 'destroyer'];
         for (let i = 0; i < enemyCount; i++) {
             const spawn = mapConfig.spawns.enemies[i % mapConfig.spawns.enemies.length];
             const offsetX = randRange(-1000, 1000);
@@ -495,10 +488,16 @@ class Game {
                         sq.boosting = false;
                         sq.braking = false;
                     } else {
-                        // 正常飞行控制
-                        if (this.keys['a']) sq.rudder = -1;
-                        else if (this.keys['d']) sq.rudder = 1;
-                        else sq.rudder *= 0.8;
+                        // 正常飞行控制 - 默认使用鼠标瞄准
+                        sq.mouseAim = true;
+                        // 键盘控制作为辅助（按住A/D时禁用鼠标瞄准）
+                        if (this.keys['a'] || this.keys['d']) {
+                            sq.mouseAim = false;
+                            if (this.keys['a']) sq.rudder = -1;
+                            else if (this.keys['d']) sq.rudder = 1;
+                        } else {
+                            sq.rudder *= 0.8;
+                        }
                         sq.boosting = !!this.keys['w'];
                         sq.braking = !!this.keys['s'];
                     }
@@ -520,8 +519,6 @@ class Game {
                     else p.rudder *= 0.85;
                     // 急刹
                     if (this.keys[' ']) p.throttle *= 0.95;
-                    // 维修
-                    if (this.keys['r']) p.repair();
                     // Shift瞄准镜
                     this.zoomMode = !!this.keys['shift'];
 
@@ -716,6 +713,88 @@ class Game {
         // 清理弹药
         this.projectiles = this.projectiles.filter(p => p.alive);
 
+        // 舰船碰撞检测 - 敌我双方
+        for (const ally of this.allies) {
+            if (!ally || !ally.alive) continue;
+            for (const enemy of this.enemies) {
+                if (!enemy || !enemy.alive) continue;
+                
+                // 计算碰撞距离（使用舰船尺寸）
+                const collisionDist = (ally.cfg.width + enemy.cfg.width) * 0.8;
+                const d = dist(ally, enemy);
+                
+                if (d < collisionDist) {
+                    // 发生碰撞！双方减去对方血量（必死一个）
+                    const allyHp = ally.hp;
+                    const enemyHp = enemy.hp;
+                    
+                    // 伤害值取对方当前血量
+                    const damageToAlly = enemyHp;
+                    const damageToEnemy = allyHp;
+                    
+                    // 应用伤害
+                    ally.takeDamage(damageToAlly, this);
+                    enemy.takeDamage(damageToEnemy, this);
+                    
+                    // 记录伤害
+                    ally.damageDealt += damageToEnemy;
+                    enemy.damageDealt += damageToAlly;
+                    if (ally.isPlayer) this.totalDamage += damageToEnemy;
+                    
+                    // 碰撞特效
+                    for (let i = 0; i < 20; i++) {
+                        const cx = (ally.x + enemy.x) / 2;
+                        const cy = (ally.y + enemy.y) / 2;
+                        const a = Math.random() * Math.PI * 2;
+                        const spd = randRange(1, 4);
+                        this.particles.push(new Particle(
+                            cx + randRange(-10, 10), cy + randRange(-10, 10),
+                            Math.cos(a) * spd, Math.sin(a) * spd,
+                            randRange(0.3, 0.8), randRange(3, 8),
+                            Math.random() > 0.5 ? '#ff6622' : '#ffaa22'
+                        ));
+                    }
+                    
+                    // 碰撞推开效果
+                    const pushAngle = angleTo(ally, enemy);
+                    const pushDist = collisionDist - d + 10;
+                    ally.x -= Math.cos(pushAngle) * pushDist * 0.5;
+                    ally.y -= Math.sin(pushAngle) * pushDist * 0.5;
+                    enemy.x += Math.cos(pushAngle) * pushDist * 0.5;
+                    enemy.y += Math.sin(pushAngle) * pushDist * 0.5;
+                    
+                    // 减速
+                    ally.speed *= 0.3;
+                    enemy.speed *= 0.3;
+                    
+                    // 计分 - 碰撞击沉
+                    const shipPoints = { destroyer: 40, cruiser: 60, battleship: 80, carrier: 100 };
+                    if (!ally.alive) {
+                        this.enemyKills++;
+                        this.enemyScore += shipPoints[ally.type] || 40;
+                        this.floatingTexts.push({ 
+                            x: ally.x, y: ally.y - 60, 
+                            text: '友军碰撞沉没!', 
+                            color: '#ff6666', 
+                            life: 2.5, vy: -0.8 
+                        });
+                    }
+                    if (!enemy.alive) {
+                        this.kills++;
+                        if (!ally.isPlayer) this.allyKills++;
+                        const points = shipPoints[enemy.type] || 40;
+                        this.playerScore += points;
+                        this.floatingTexts.push({ 
+                            x: enemy.x, y: enemy.y - 60, 
+                            text: '+' + points + '分 碰撞击沉!', 
+                            color: '#ffd700', 
+                            life: 2.5, vy: -0.8 
+                        });
+                    }
+                }
+            }
+        }
+
         // 粒子
         this.particles.forEach(p => p.update(dt));
         this.particles = this.particles.filter(p => p.life > 0);
@@ -727,18 +806,31 @@ class Game {
         });
         this.floatingTexts = this.floatingTexts.filter(ft => ft.life > 0);
 
-        // 更新占领点并计算占领分数
-        const playerCaps = this.capturePoints.filter(cp => cp.owner === 'player').length;
-        const enemyCaps = this.capturePoints.filter(cp => cp.owner === 'enemy').length;
+        // 更新占领点
+        let playerCaps = 0;
+        let enemyCaps = 0;
         
         for (const cp of this.capturePoints) {
             cp.update(dt, this);
+            
+            // 新的占领点计分规则
+            // 1. 每艘在点内的舰船为己方每秒加1分
+            if (cp.playerShipsInZone > 0) {
+                this.playerScore += cp.playerShipsInZone * 1 * dt;
+            }
+            if (cp.enemyShipsInZone > 0) {
+                this.enemyScore += cp.enemyShipsInZone * 1 * dt;
+            }
+            
+            // 2. 已控制的占领方（点内无敌舰）每秒额外加10分
+            if (cp.owner === 'player' && cp.enemyShipsInZone === 0) {
+                this.playerScore += 10 * dt;
+                playerCaps++;
+            } else if (cp.owner === 'enemy' && cp.playerShipsInZone === 0) {
+                this.enemyScore += 10 * dt;
+                enemyCaps++;
+            }
         }
-        
-        // 占领点产出分数：每个占领点每秒1.5分
-        const pointsPerCap = 1.5 * dt;
-        this.playerScore += playerCaps * pointsPerCap;
-        this.enemyScore += enemyCaps * pointsPerCap;
         
         // 更新计分板UI
         document.getElementById('player-score').textContent = Math.floor(this.playerScore);
@@ -806,7 +898,7 @@ class Game {
             const tc = p.squadronCooldowns.torpedo > 0 ? p.squadronCooldowns.torpedo.toFixed(0) + 's' : torp.planes + '✈';
             const dc = p.squadronCooldowns.dive > 0 ? p.squadronCooldowns.dive.toFixed(0) + 's' : dive.planes + '✈';
             const rc = p.squadronCooldowns.rocket > 0 ? p.squadronCooldowns.rocket.toFixed(0) + 's' : rocket.planes + '✈';
-            document.getElementById('weapon-name').textContent = '[1]鱼雷机 | [2]轰炸机 | [3]攻击机';
+            document.getElementById('weapon-name').textContent = '[Q]鱼雷机 | [E]轰炸机 | [R]攻击机';
             document.getElementById('reload-status').textContent = tc + ' | ' + dc + ' | ' + rc;
             const reloadEl = document.getElementById('reload-status');
             reloadEl.style.color = '#88ccff';
@@ -818,12 +910,12 @@ class Game {
             const wStatus = document.getElementById('reload-status');
             
             if (this.weaponMode === 'torpedo' && p.cfg.torpedo) {
-                wName.innerHTML = '<span style="color:#888">主炮</span> | <span style="color:#80ffb0; font-weight:bold">[2] 鱼雷</span>';
+                wName.innerHTML = '<span style="color:#888">主炮</span> | <span style="color:#80ffb0; font-weight:bold">[E] 鱼雷</span>';
                 wStatus.textContent = gunReload + ' | ' + torpReload;
                 wStatus.style.color = p.torpedoTimer > 0 ? '#ffaa44' : '#80ffb0';
             } else {
                 const torpText = p.cfg.torpedo ? '鱼雷' : '无';
-                wName.innerHTML = '<span style="color:#fff; font-weight:bold">[1] 主炮</span> | <span style="color:#888">' + torpText + '</span>';
+                wName.innerHTML = '<span style="color:#fff; font-weight:bold">[Q] 主炮</span> | <span style="color:#888">' + torpText + '</span>';
                 wStatus.textContent = gunReload + ' | ' + torpReload;
                 wStatus.style.color = p.mainGunTimer > 0 ? '#ffaa44' : '#4cff72';
             }
@@ -1297,7 +1389,7 @@ class Game {
 
             const sqTypes = ['torpedo', 'dive', 'rocket'];
             const sqNames = { torpedo: '鱼雷机', dive: '轰炸机', rocket: '攻击机' };
-            const sqKeys = { torpedo: '1', dive: '2', rocket: '3' };
+            const sqKeys = { torpedo: 'Q', dive: 'E', rocket: 'R' };
 
             const panelX = W / 2;
             const panelY = H - 130;

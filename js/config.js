@@ -6,11 +6,11 @@ const MAPS = {
         name: '海岛',
         size: 36000,
         description: '岛屿密布的热带海域，适合伏击和近战',
-        teamSize: { allies: 12, enemies: 12 },
+        teamSize: { allies: 9, enemies: 9 },
         islands: 18,
         spawns: {
-            allies: [{ x: 3000, y: 18000 }, { x: 5000, y: 15000 }, { x: 5000, y: 21000 }, { x: 3500, y: 12000 }, { x: 3500, y: 24000 }],
-            enemies: [{ x: 33000, y: 18000 }, { x: 31000, y: 15000 }, { x: 31000, y: 21000 }, { x: 32500, y: 12000 }, { x: 32500, y: 24000 }]
+            allies: [{ x: 3000, y: 18000 }, { x: 5000, y: 14000 }, { x: 5000, y: 22000 }, { x: 3500, y: 10000 }, { x: 3500, y: 26000 }],
+            enemies: [{ x: 33000, y: 18000 }, { x: 31000, y: 14000 }, { x: 31000, y: 22000 }, { x: 32500, y: 10000 }, { x: 32500, y: 26000 }]
         },
         capturePoints: [
             { x: 18000, y: 18000 }
@@ -21,11 +21,11 @@ const MAPS = {
         name: '北极光',
         size: 42000,
         description: '冰川环绕的寒冷海域，长距离交战',
-        teamSize: { allies: 12, enemies: 12 },
+        teamSize: { allies: 9, enemies: 9 },
         islands: 12,
         spawns: {
-            allies: [{ x: 4000, y: 21000 }, { x: 6000, y: 18000 }, { x: 6000, y: 24000 }, { x: 4500, y: 14000 }, { x: 4500, y: 28000 }],
-            enemies: [{ x: 38000, y: 21000 }, { x: 36000, y: 18000 }, { x: 36000, y: 24000 }, { x: 37500, y: 14000 }, { x: 37500, y: 28000 }]
+            allies: [{ x: 4000, y: 21000 }, { x: 6000, y: 16000 }, { x: 6000, y: 26000 }, { x: 4500, y: 11000 }, { x: 4500, y: 31000 }],
+            enemies: [{ x: 38000, y: 21000 }, { x: 36000, y: 16000 }, { x: 36000, y: 26000 }, { x: 37500, y: 11000 }, { x: 37500, y: 31000 }]
         },
         capturePoints: [
             { x: 21000, y: 21000 }
@@ -37,11 +37,11 @@ const MAPS = {
         name: '沉睡的巨人',
         size: 39000,
         description: '火山岛屿群，控制中央水道是关键',
-        teamSize: { allies: 12, enemies: 12 },
+        teamSize: { allies: 9, enemies: 9 },
         islands: 15,
         spawns: {
-            allies: [{ x: 3500, y: 19500 }, { x: 5500, y: 16500 }, { x: 5500, y: 22500 }, { x: 4000, y: 13000 }, { x: 4000, y: 26000 }],
-            enemies: [{ x: 35500, y: 19500 }, { x: 33500, y: 16500 }, { x: 33500, y: 22500 }, { x: 35000, y: 13000 }, { x: 35000, y: 26000 }]
+            allies: [{ x: 3500, y: 19500 }, { x: 5500, y: 14500 }, { x: 5500, y: 24500 }, { x: 4000, y: 9500 }, { x: 4000, y: 29500 }],
+            enemies: [{ x: 35500, y: 19500 }, { x: 33500, y: 14500 }, { x: 33500, y: 24500 }, { x: 35000, y: 9500 }, { x: 35000, y: 29500 }]
         },
         capturePoints: [
             { x: 19500, y: 19500 }
@@ -52,11 +52,11 @@ const MAPS = {
         name: '火焰群岛',
         size: 36000,
         description: '活跃的火山群岛，地形复杂多变',
-        teamSize: { allies: 12, enemies: 12 },
+        teamSize: { allies: 9, enemies: 9 },
         islands: 20,
         spawns: {
-            allies: [{ x: 3000, y: 18000 }, { x: 5000, y: 15000 }, { x: 5000, y: 21000 }, { x: 3500, y: 12000 }, { x: 3500, y: 24000 }],
-            enemies: [{ x: 33000, y: 18000 }, { x: 31000, y: 15000 }, { x: 31000, y: 21000 }, { x: 32500, y: 12000 }, { x: 32500, y: 24000 }]
+            allies: [{ x: 3000, y: 18000 }, { x: 5000, y: 14000 }, { x: 5000, y: 22000 }, { x: 3500, y: 10000 }, { x: 3500, y: 26000 }],
+            enemies: [{ x: 33000, y: 18000 }, { x: 31000, y: 14000 }, { x: 31000, y: 22000 }, { x: 32500, y: 10000 }, { x: 32500, y: 26000 }]
         },
         capturePoints: [
             { x: 18000, y: 18000 }
@@ -68,11 +68,11 @@ const MAPS = {
         name: '荒漠之泪',
         size: 37500,
         description: '沙漠中的绿洲海域，视野开阔',
-        teamSize: { allies: 12, enemies: 12 },
+        teamSize: { allies: 9, enemies: 9 },
         islands: 8,
         spawns: {
-            allies: [{ x: 3500, y: 18750 }, { x: 5500, y: 15750 }, { x: 5500, y: 21750 }, { x: 4000, y: 12000 }, { x: 4000, y: 25500 }],
-            enemies: [{ x: 34000, y: 18750 }, { x: 32000, y: 15750 }, { x: 32000, y: 21750 }, { x: 33500, y: 12000 }, { x: 33500, y: 25500 }]
+            allies: [{ x: 3500, y: 18750 }, { x: 5500, y: 13750 }, { x: 5500, y: 23750 }, { x: 4000, y: 9000 }, { x: 4000, y: 28500 }],
+            enemies: [{ x: 34000, y: 18750 }, { x: 32000, y: 13750 }, { x: 32000, y: 23750 }, { x: 33500, y: 9000 }, { x: 33500, y: 28500 }]
         },
         capturePoints: [
             { x: 18750, y: 18750 }
@@ -124,7 +124,7 @@ const SHIP_TYPES = {
         squadrons: {
             torpedo: {
                 name: '鱼雷机', planes: 4, damage: 4800, speed: 10,
-                reload: 30, torpCount: 2, torpSpeed: 5, torpRange: 2500, spread: 0.12,
+                reload: 25, torpCount: 2, torpSpeed: 5, torpRange: 2500, spread: 0.12,
                 hp: 1800
             },
             dive: {
@@ -133,7 +133,7 @@ const SHIP_TYPES = {
                 hp: 2000
             },
             rocket: {
-                name: '攻击机', planes: 6, damage: 2200, speed: 12,
+                name: '攻击机', planes: 6, damage: 2800, speed: 12,
                 reload: 18, rocketCount: 4, rocketSpeed: 15, rocketRange: 1200, spread: 0.10,
                 hp: 1400
             }

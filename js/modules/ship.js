@@ -35,6 +35,13 @@ class Ship {
         this.aiTorpDelay = randRange(5, 15);
         this.aiFormationOffset = { x: randRange(-300, 300), y: randRange(-300, 300) };
         
+        // 避障状态
+        this._stuckTimer = 0;
+        this._stuckAngle = 0;
+        this._avoidDirection = 0; // 当前避障方向
+        this._lastAvoidTime = 0; // 上次避障时间
+        this._avoidingIsland = null; // 正在绕行的岛屿
+        
         // CV航母特有
         if (this.type === 'carrier') {
             this.squadronDecks = {
@@ -269,7 +276,7 @@ class Ship {
         deck.planes -= planeCount;
         this.squadronCooldowns[type] = cfg.reload;
         const sqCfg = { ...cfg, planes: planeCount };
-        const sq = new Squadron(this, type, sqCfg);
+        const sq = new Squadron(this, type, sqCfg, game);
         game.squadrons.push(sq);
         return sq;
     }
@@ -587,45 +594,13 @@ class Ship {
             this.turretOnTarget = false;
         }
 
-        // === 执行移动 + 岛屿避障 ===
+        // === 执行移动 + 智能岛屿避障 ===
         if (targetX !== null && targetY !== null) {
-            let steerAngle = angleTo(this, { x: targetX, y: targetY });
-
-            // 岛屿避障：检测前方扇形区域内是否有障碍
-            let avoidAngle = 0;
-            let needAvoid = false;
-            const checkDist = this.cfg.length * 4 + Math.abs(this.speed) * 40;
-            for (const isl of game.islands) {
-                const d = dist(this, isl);
-                const clearance = isl.radius + this.cfg.width * 2;
-                if (d < clearance + checkDist && d > clearance * 0.3) {
-                    const aToIsland = angleTo(this, isl);
-                    const relAngle = normalizeAngle(aToIsland - this.angle);
-                    // 前方±60度内有岛
-                    if (Math.abs(relAngle) < Math.PI * 0.35) {
-                        needAvoid = true;
-                        // 选择绕行方向：偏离岛屿
-                        const avoidDir = relAngle > 0 ? -1 : 1;
-                        const urgency = 1 - (d - clearance) / checkDist;
-                        avoidAngle += avoidDir * Math.PI * 0.5 * Math.max(urgency, 0.3);
-                    }
-                }
-            }
-
-            if (needAvoid) {
-                steerAngle = this.angle + avoidAngle;
-            }
-
-            // 边界回避
-            const margin = 1500;
-            if (this.x < margin) steerAngle = 0;
-            else if (this.x > worldSize - margin) steerAngle = Math.PI;
-            if (this.y < margin) steerAngle = Math.PI * 0.5;
-            else if (this.y > worldSize - margin) steerAngle = -Math.PI * 0.5;
-
-            const diff = normalizeAngle(steerAngle - this.angle);
+            const steerResult = this.calculateAvoidanceSteer(targetX, targetY, game, worldSize);
+            
+            const diff = normalizeAngle(steerResult.steerAngle - this.angle);
             this.rudder = clamp(diff * 3.5, -1, 1);
-            if (targetSpeed !== null) this.throttle = targetSpeed;
+            if (steerResult.targetSpeed !== null) this.throttle = steerResult.targetSpeed;
 
             // 炮塔跟踪（如果有目标）
             if (this.aiTarget && this.aiTarget.alive) {
@@ -636,19 +611,8 @@ class Ship {
             }
         }
 
-        // === 卡死检测与脱困 ===
-        if (Math.abs(this.speed) < 0.15 && Math.abs(this.throttle) > 0.05) {
-            this._stuckTimer += dt;
-            if (this._stuckTimer > 1.5) {
-                // 卡住了，反向+随机转向脱困
-                this.throttle = -0.2;
-                this._stuckAngle = this.angle + (Math.random() > 0.5 ? 1 : -1) * Math.PI * 0.6;
-                this.rudder = normalizeAngle(this._stuckAngle - this.angle) > 0 ? 1 : -1;
-                if (this._stuckTimer > 3) this._stuckTimer = 0; // 重置
-            }
-        } else {
-            this._stuckTimer = 0;
-        }
+        // === 智能卡死检测与脱困 ===
+        this.handleStuckDetection(dt, game);
 
         // === 开火执行（必须炮塔对准） ===
         if (shouldFire && this.aiTarget && this.turretOnTarget) {
@@ -671,18 +635,70 @@ class Ship {
         const enemyTeam = this.team === 'player' ? game.enemies : game.allies;
         const worldSize = game.currentMap?.size || 36000;
 
-        // CV远离战场 - 保持在后方
-        const spawnX = this.team === 'player' ? worldSize * 0.1 : worldSize * 0.9;
-        const spawnY = worldSize * 0.5;
-        const toDist = dist(this, { x: spawnX, y: spawnY });
-        if (toDist > 3000) {
-            const toAngle = angleTo(this, { x: spawnX, y: spawnY });
-            const diff = normalizeAngle(toAngle - this.angle);
-            this.rudder = clamp(diff * 2, -1, 1);
-            this.throttle = 0.5;
+        // 判断比分是否落后
+        const myScore = this.team === 'player' ? game.playerScore : game.enemyScore;
+        const enemyScore = this.team === 'player' ? game.enemyScore : game.playerScore;
+        const scoreBehind = enemyScore - myScore;
+        const isLosing = scoreBehind > 50; // 落后超过50分时前压
+
+        // 寻找最佳占领点（未被我方控制的）
+        let bestCp = null;
+        let bestCpDist = Infinity;
+        for (const cp of game.capturePoints) {
+            // 优先选择未占领的点，其次敌方控制的点
+            if (cp.owner === this.team) continue;
+            const d = dist(this, cp);
+            // 评分：距离近优先，中立点优先
+            let score = d;
+            if (cp.owner === null) score *= 0.7; // 中立点优先
+            if (d < bestCpDist * (cp.owner === null ? 0.8 : 1)) {
+                bestCpDist = d;
+                bestCp = cp;
+            }
+        }
+
+        // 比分落后时前压占点
+        if (isLosing && bestCp) {
+            // 检查占领点内是否有敌方舰船
+            const enemyInCp = this.team === 'player' ? bestCp.enemyShipsInZone : bestCp.playerShipsInZone;
+            const myShipsInCp = this.team === 'player' ? bestCp.playerShipsInZone : bestCp.enemyShipsInZone;
+            
+            // 前压到占领点边缘（保持安全距离）
+            const safeRadius = bestCp.radius * 0.85;
+            const d = dist(this, bestCp);
+            
+            if (d > safeRadius + 500) {
+                // 接近占领点
+                const toAngle = angleTo(this, bestCp);
+                const diff = normalizeAngle(toAngle - this.angle);
+                this.rudder = clamp(diff * 2.5, -1, 1);
+                this.throttle = 0.6; // 快速接近
+            } else if (d > safeRadius * 0.5) {
+                // 已在点边缘，慢速巡航保持位置
+                this.throttle = 0.25;
+                // 绕圈巡航
+                const circleAngle = angleTo(bestCp, this) + Math.PI / 2;
+                const diff = normalizeAngle(circleAngle - this.angle);
+                this.rudder = clamp(diff * 1.5, -0.5, 0.5);
+            } else {
+                // 已在点内，慢速或停止
+                this.throttle = 0.1;
+                this.rudder *= 0.9;
+            }
         } else {
-            this.throttle = 0.2;
-            this.rudder *= 0.95;
+            // 正常状态：CV远离战场 - 保持在后方
+            const spawnX = this.team === 'player' ? worldSize * 0.1 : worldSize * 0.9;
+            const spawnY = worldSize * 0.5;
+            const toDist = dist(this, { x: spawnX, y: spawnY });
+            if (toDist > 3000) {
+                const toAngle = angleTo(this, { x: spawnX, y: spawnY });
+                const diff = normalizeAngle(toAngle - this.angle);
+                this.rudder = clamp(diff * 2, -1, 1);
+                this.throttle = 0.5;
+            } else {
+                this.throttle = 0.2;
+                this.rudder *= 0.95;
+            }
         }
 
         // 发射中队
@@ -727,15 +743,33 @@ class Ship {
             if (sq.owner !== this || !sq.alive) continue;
             if (sq.state === 'flying' && sq._aiTarget) {
                 const t = sq._aiTarget;
-                if (!t.alive) {
-                    sq.recall();
-                    continue;
+                const d = dist(sq, t);
+                
+                // 目标已死亡或距离过远(超过8000)时，尝试切换新目标或返航
+                if (!t.alive || d > 8000) {
+                    let newTarget = null;
+                    let newDist = Infinity;
+                    for (const e of enemyTeam) {
+                        if (!e.alive) continue;
+                        const ed = dist(sq, e);
+                        if (ed < 6000 && ed < newDist) {
+                            newDist = ed;
+                            newTarget = e;
+                        }
+                    }
+                    if (newTarget) {
+                        sq._aiTarget = newTarget;
+                    } else {
+                        sq.recall();
+                        continue;
+                    }
                 }
-                const toTarget = angleTo(sq, t);
+                
+                const toTarget = angleTo(sq, sq._aiTarget);
                 const diff = normalizeAngle(toTarget - sq.angle);
                 sq.rudder = clamp(diff * 3, -1, 1);
-                const d = dist(sq, t);
-                if (d < 500 && Math.abs(diff) < 0.3) {
+                const targetDist = dist(sq, sq._aiTarget);
+                if (targetDist < 500 && Math.abs(diff) < 0.3) {
                     sq.startAttack();
                 }
             }
@@ -748,6 +782,216 @@ class Ship {
         const px = target.x + Math.cos(target.angle) * target.speed * 60 * t;
         const py = target.y + Math.sin(target.angle) * target.speed * 60 * t;
         return angleTo(this, { x: px, y: py });
+    }
+
+    // ==================== 智能避障系统 ====================
+
+    /**
+     * 计算避障转向 - 使用势场法 + 沿墙绕行
+     */
+    calculateAvoidanceSteer(targetX, targetY, game, worldSize) {
+        let steerAngle = angleTo(this, { x: targetX, y: targetY });
+        let targetSpeed = 0.2;
+
+        // 船只尺寸相关的安全距离
+        const shipRadius = this.cfg.width;
+        const checkDist = Math.max(this.cfg.length * 6, 400) + Math.abs(this.speed) * 50;
+
+        // === 1. 岛屿避障 - 使用改进的势场法 ===
+        let repulsionX = 0, repulsionY = 0;
+        let nearestBlockingIsland = null;
+        let nearestBlockingDist = Infinity;
+
+        for (const isl of game.islands) {
+            const d = dist(this, isl);
+            const safeRadius = isl.radius + shipRadius * 2.5;
+            
+            // 检测范围内的岛屿
+            if (d < safeRadius + checkDist) {
+                const aToIsland = angleTo(this, isl);
+                const relAngle = normalizeAngle(aToIsland - this.angle);
+                
+                // 判断岛屿是否在前方路径上（扩展到±90度）
+                if (Math.abs(relAngle) < Math.PI * 0.5) {
+                    // 计算到岛屿切线的距离，判断是否会撞上
+                    const tangentDist = d * Math.sin(Math.abs(relAngle));
+                    const willCollide = tangentDist < safeRadius;
+                    
+                    if (willCollide || d < safeRadius + checkDist * 0.5) {
+                        // 排斥力 - 垂直于到岛屿的方向
+                        const urgency = Math.max(0, 1 - (d - safeRadius) / checkDist);
+                        
+                        // 选择更优的绕行方向：考虑目标位置
+                        const aToTarget = angleTo(this, { x: targetX, y: targetY });
+                        const targetRelToIsland = normalizeAngle(aToTarget - aToIsland);
+                        
+                        // 选择背离目标侧的绕行方向，或者选择更开阔的方向
+                        let avoidDir;
+                        if (this._avoidDirection !== 0 && this._avoidingIsland === isl) {
+                            // 保持之前的绕行方向
+                            avoidDir = this._avoidDirection;
+                        } else {
+                            // 选择更开阔的方向或目标所在侧
+                            avoidDir = targetRelToIsland > 0 ? 1 : -1;
+                            // 记录绕行状态
+                            this._avoidDirection = avoidDir;
+                            this._avoidingIsland = isl;
+                        }
+                        
+                        // 排斥力方向：垂直于到岛屿的连线
+                        const repelAngle = aToIsland + avoidDir * Math.PI * 0.5;
+                        const repelStrength = urgency * urgency * 2; // 平方增强近距离排斥
+                        
+                        repulsionX += Math.cos(repelAngle) * repelStrength;
+                        repulsionY += Math.sin(repelAngle) * repelStrength;
+                        
+                        if (d < nearestBlockingDist) {
+                            nearestBlockingDist = d;
+                            nearestBlockingIsland = isl;
+                        }
+                    }
+                }
+            }
+        }
+
+        // === 2. 应用排斥力调整航向 ===
+        if (repulsionX !== 0 || repulsionY !== 0) {
+            const targetDirX = Math.cos(steerAngle);
+            const targetDirY = Math.sin(steerAngle);
+            
+            // 合成方向 = 目标方向 + 排斥力
+            const combinedX = targetDirX + repulsionX;
+            const combinedY = targetDirY + repulsionY;
+            
+            // 如果合成方向有效，使用它
+            if (Math.abs(combinedX) > 0.01 || Math.abs(combinedY) > 0.01) {
+                steerAngle = Math.atan2(combinedY, combinedX);
+            }
+            
+            // 靠近障碍物时减速
+            const maxRepulsion = Math.sqrt(repulsionX * repulsionX + repulsionY * repulsionY);
+            if (maxRepulsion > 0.5) {
+                targetSpeed *= Math.max(0.3, 1 - maxRepulsion * 0.3);
+            }
+        } else {
+            // 没有避障需求，清除绕行状态
+            if (nearestBlockingIsland === null) {
+                this._avoidDirection = 0;
+                this._avoidingIsland = null;
+            }
+        }
+
+        // === 3. 边界回避 ===
+        const margin = 1200;
+        const borderRepulsion = 0.8;
+        
+        if (this.x < margin) {
+            repulsionX += borderRepulsion * (1 - this.x / margin);
+        } else if (this.x > worldSize - margin) {
+            repulsionX -= borderRepulsion * (1 - (worldSize - this.x) / margin);
+        }
+        
+        if (this.y < margin) {
+            repulsionY += borderRepulsion * (1 - this.y / margin);
+        } else if (this.y > worldSize - margin) {
+            repulsionY -= borderRepulsion * (1 - (worldSize - this.y) / margin);
+        }
+
+        // 如果边界排斥力较大，重新计算航向
+        if (Math.abs(repulsionX) > 0.3 || Math.abs(repulsionY) > 0.3) {
+            const targetDirX = Math.cos(steerAngle);
+            const targetDirY = Math.sin(steerAngle);
+            const combinedX = targetDirX + repulsionX * 0.5;
+            const combinedY = targetDirY + repulsionY * 0.5;
+            steerAngle = Math.atan2(combinedY, combinedX);
+        }
+
+        return { steerAngle, targetSpeed };
+    }
+
+    /**
+     * 智能卡死检测与脱困
+     */
+    handleStuckDetection(dt, game) {
+        // 检测是否卡住：速度很低但油门很高
+        const isStuck = Math.abs(this.speed) < 0.12 && Math.abs(this.throttle) > 0.08;
+        
+        if (isStuck) {
+            this._stuckTimer += dt;
+            
+            // 快速检测卡死（0.8秒）
+            if (this._stuckTimer > 0.8) {
+                // 找到阻挡的岛屿
+                let blockingIsland = null;
+                let minDist = Infinity;
+                
+                for (const isl of game.islands) {
+                    const d = dist(this, isl);
+                    if (d < isl.radius + this.cfg.width * 3 && d < minDist) {
+                        minDist = d;
+                        blockingIsland = isl;
+                    }
+                }
+                
+                if (blockingIsland) {
+                    // 计算脱困方向：垂直于到岛屿的方向
+                    const aToIsland = angleTo(this, blockingIsland);
+                    
+                    // 选择更开阔的脱困方向
+                    const escapeDir1 = aToIsland + Math.PI * 0.6;
+                    const escapeDir2 = aToIsland - Math.PI * 0.6;
+                    
+                    // 选择与当前航向更接近的方向
+                    const diff1 = Math.abs(normalizeAngle(escapeDir1 - this.angle));
+                    const diff2 = Math.abs(normalizeAngle(escapeDir2 - this.angle));
+                    
+                    const escapeAngle = diff1 < diff2 ? escapeDir1 : escapeDir2;
+                    
+                    // 先倒车，再转向
+                    if (this._stuckTimer < 2.0) {
+                        // 倒车阶段
+                        this.throttle = -0.25;
+                        const reverseDiff = normalizeAngle(escapeAngle + Math.PI - this.angle);
+                        this.rudder = clamp(reverseDiff * 2, -1, 1);
+                    } else if (this._stuckTimer < 3.5) {
+                        // 转向阶段
+                        this.throttle = 0.1;
+                        const turnDiff = normalizeAngle(escapeAngle - this.angle);
+                        this.rudder = clamp(turnDiff * 3, -1, 1);
+                    } else {
+                        // 强制脱困：大角度转向
+                        this.throttle = -0.3;
+                        this.rudder = this.rudder > 0 ? 1 : -1;
+                        
+                        // 3秒后重置
+                        if (this._stuckTimer > 5) {
+                            this._stuckTimer = 0;
+                            this._avoidDirection = 0;
+                            this._avoidingIsland = null;
+                        }
+                    }
+                } else {
+                    // 没有岛屿阻挡，可能是边界或其他原因
+                    if (this._stuckTimer > 1.5) {
+                        // 随机转向脱困
+                        this.throttle = -0.2;
+                        const randomTurn = (Math.random() - 0.5) * Math.PI;
+                        const targetAngle = this.angle + Math.PI + randomTurn;
+                        const diff = normalizeAngle(targetAngle - this.angle);
+                        this.rudder = clamp(diff * 2, -1, 1);
+                        
+                        if (this._stuckTimer > 3) {
+                            this._stuckTimer = 0;
+                        }
+                    }
+                }
+            }
+        } else {
+            // 恢复正常，重置卡死计时
+            if (this._stuckTimer > 0) {
+                this._stuckTimer = Math.max(0, this._stuckTimer - dt * 2); // 缓慢恢复
+            }
+        }
     }
 }
 

@@ -1,10 +1,11 @@
 // ==================== 飞行中队 ====================
 
 class Squadron {
-    constructor(owner, type, config) {
+    constructor(owner, type, config, game) {
         this.owner = owner;
         this.type = type; // 'torpedo', 'dive', 'rocket'
         this.cfg = config;
+        this.game = game; // 保存游戏引用以获取鼠标位置
         this.x = owner.x + Math.cos(owner.angle) * owner.cfg.length * 0.3;
         this.y = owner.y + Math.sin(owner.angle) * owner.cfg.length * 0.3;
         this.z = 20;
@@ -27,9 +28,11 @@ class Squadron {
         this.braking = false; // 减速状态
         this.boostFuel = 5; // 5秒加速燃料
         this.maxBoostFuel = 5;
-        this.turnSpeed = 0.025;
+        this.turnSpeed = 0.03; // 提高转向速度
         // 攻击预瞄
         this.aimProgress = 0; // 0-1 瞄准收束进度
+        // 鼠标瞄准模式
+        this.mouseAim = false;
     }
 
     update(dt, game) {
@@ -63,16 +66,33 @@ class Squadron {
             }
         }
         else if (this.state === 'flying') {
-            // 转向
-            this.angle += this.rudder * this.turnSpeed;
-            this.angle = normalizeAngle(this.angle);
+            // 鼠标瞄准模式 - 自动转向鼠标方向
+            if (this.mouseAim && this.game) {
+                const mouseWorld = this.game.mouseWorld;
+                const targetAngle = Math.atan2(mouseWorld.y - this.y, mouseWorld.x - this.x);
+                let diff = normalizeAngle(targetAngle - this.angle);
+                // 平滑转向鼠标方向
+                if (Math.abs(diff) > 0.02) {
+                    this.angle += clamp(diff * 3, -this.turnSpeed * 2, this.turnSpeed * 2) * dt * 60;
+                    this.angle = normalizeAngle(this.angle);
+                }
+            } else {
+                // 键盘控制转向
+                this.angle += this.rudder * this.turnSpeed;
+                this.angle = normalizeAngle(this.angle);
+            }
+            
             this.x += Math.cos(this.angle) * this.speed;
             this.y += Math.sin(this.angle) * this.speed;
+            
             // 瞄准收束（不转向时逐渐收束）
-            if (Math.abs(this.rudder) < 0.1) {
-                this.aimProgress = Math.min(1, this.aimProgress + dt * 0.4);
+            if (Math.abs(this.rudder) < 0.1 && !this.mouseAim) {
+                this.aimProgress = Math.min(1, this.aimProgress + dt * 0.5);
+            } else if (this.mouseAim) {
+                // 鼠标瞄准时收束更快
+                this.aimProgress = Math.min(1, this.aimProgress + dt * 0.6);
             } else {
-                this.aimProgress = Math.max(0, this.aimProgress - dt * 0.8);
+                this.aimProgress = Math.max(0, this.aimProgress - dt * 0.6);
             }
         }
         else if (this.state === 'attacking') {
@@ -133,7 +153,7 @@ class Squadron {
             for (const e of enemyTeam) {
                 if (!e || !e.alive) continue;
                 const d = dist(this, e);
-                if (d > 1500) continue;
+                if (d > 3000) continue; // 扩大目标检测距离以匹配实际投弹距离
                 const aToE = angleTo(this, e);
                 const aDiff = Math.abs(normalizeAngle(aToE - this.angle));
                 if (aDiff < 0.8 && d < bestDist) {
@@ -154,10 +174,9 @@ class Squadron {
             for (let i = 0; i < count; i++) {
                 const spread = (Math.random() - 0.5) * this.cfg.spread * aimSpread;
                 const a = this.angle + spread;
-                // 火箭弹改为直射（type='rocket', targetDist=0）
-                // 速度提高，射程适中
+                // 火箭弹直射，速度提高以改善命中率
                 game.projectiles.push(new Projectile(
-                    this.x, this.y, a, this.cfg.rocketSpeed * 0.4,
+                    this.x, this.y, a, this.cfg.rocketSpeed * 0.8,
                     this.cfg.rocketRange, this.cfg.damage, 'rocket', this.owner, 0
                 ));
             }
